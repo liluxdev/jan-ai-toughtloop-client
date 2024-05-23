@@ -1,0 +1,99 @@
+body {
+    font-family: Arial, sans-serif;
+}
+#messages {
+    height: calc(100vh - 197px);
+    overflow-y: scroll;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+#messageInput {
+    margin-top: 20px;
+    padding: 10px;
+    height: calc(12vh - 22px);
+}
+.chunk {
+    color: orangered;
+}
+.chunk_reprocessed {
+    color: lightcoral;
+}
+.chunk_reprocessed.hidden {
+    display: none;
+}
+.user {
+    color: blue;
+}
+.assistant {
+    color: red;
+}
+.progress-container {
+    position: fixed;
+    bottom: 60px;
+    left: 0;
+    right: 0;
+    background: whitesmoke;
+}
+.avatar {
+    width: 88px;
+    height: auto;
+    /*transition: all 0.5s ease;*/
+}
+.avatar:hover {
+    width: 100%;
+    transform: scale(1.07);
+}
+.avatar.hidden {
+    display: none;
+}
+.card.sending{
+    opacity: 0.5;
+}
+.card.user {
+    text-align: left;
+    float: left;
+    background-color: #d4edda;
+}
+.card.assistant {
+    text-align: right;
+    background-color: #f8f9fa;
+    float: right;
+}
+.card.system {
+    text-align: center;
+    color: #6c757d;
+    opacity: 0.666;
+    float: right;
+}
+.card-time{
+    font-size: 0.666em;
+    color: #6c757d;
+    text-align: right;
+    clear: both;
+}
+.card {
+    margin-bottom: 10px;
+    padding: 10px;
+    clear: both;
+}
+.card .card-body {
+    user-select: all;
+    display: inline-block;
+}
+.toolbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: whitesmoke;
+    padding: 10px;
+}
+.memory-list,
+.prompt-list,
+.debug-list {
+    max-height: 50vh;
+    z-index: 100;
+    background-color: whitesmoke;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+}

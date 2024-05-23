@@ -1,0 +1,28 @@
+{
+    "name": "jan-ai-toughtloop-client",
+    "version": "0.0.1",
+    "description": "JAN.ai API mobile-first client, with an experimental unsolecited message and memory system called toughtloop",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "dependencies": {
+        "axios": "^0.21.1",
+        "eventsource-parser": "^1.1.2",
+        "http": "^0.0.1-security",
+        "https": "^1.0.0",
+        "koa": "^2.15.3",
+        "koa-bodyparser": "^4.4.1",
+        "koa-router": "^12.0.1",
+        "koa-sslify": "^5.0.1",
+        "koa-static": "^5.0.0",
+        "koa-websocket": "^7.0.0",
+        "node-fetch": "^3.3.2",
+        "os": "^0.1.2",
+        "os-utils": "^0.0.14",
+        "sqlite": "^5.1.1",
+        "sqlite3": "^5.1.7"
+    },
+    "type": "module",
+    "author": "Stefano Gargiulo (github liluxdev - https://lilux.dev)"
+}

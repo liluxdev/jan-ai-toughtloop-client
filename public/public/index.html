@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toughtloop AI</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container-fluid d-flex flex-column vh-100">
+        <div id="messages" class="flex-grow-none"></div>
+        <textarea id="messageInput" class="form-control" rows="4" onkeypress="handleKeyPress(event)"></textarea>
+        <div class="d-flex align-items-center mt-2">
+            <i class="fa fa-chip"></i>
+            <div class="progress flex-grow-1 mr-2">
+                <div id="cpuUsage" class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <span id="cpuUsageText">0%</span>
+        </div>
+        <div class="toolbar d-flex justify-content-around mt-2">
+            <button class="btn btn-primary" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+            <button class="btn btn-outline-primary" onclick="toggleVersionList()"><i class="fa fa-solid fa-code-compare"></i></button>
+            <button class="btn btn-outline-primary" onclick="enableNotifications()"><i class="fas fa-bell"></i></button>
+            <button class="btn btn-secondary" onclick="toggleToughtloops()"><i class="fas fa-cog"></i></button>
+            <button class="btn btn-outline-secondary" onclick="location.reload(true)"><i class="fas fa-sync-alt"></i></button>
+            <button class="btn btn-secondary" id="wakeLock" onclick="requestWakeLock()"><i class="fas fa-lock"></i></button>
+            <button class="btn btn-secondary" id="debug" onclick="toggleDebug()"><i class="fas fa-bug"></i></button>
+            <button class="btn btn-outline-secondary" onclick="toggleMemoryList()"><i class="fas fa-memory"></i></button>
+        </div>
+        <div id="toughtloops" class="prompt-list collapse mt-2">
+            <i class="fa fa-times" onclick="toggleToughtloops()"></i>
+            <ul class="list-group">
+                <!-- Prompt items will be appended here -->
+            </ul>
+            <div class="input-group mt-2">
+                <input type="text" class="form-control" id="newPromptInput" placeholder="New prompt...">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" onclick="addPrompt()"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+        </div>
+        <div id="memoryList" class="memory-list collapse mt-2">
+            <i class="fa fa-times" onclick="toggleMemoryList()"></i>
+            <ul class="list-group">
+                <!-- Memory items will be appended here -->
+            </ul>
+            <div class="input-group mt-2">
+                <input type="text" class="form-control" id="newMemoryInput" placeholder="New memory...">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" onclick="addMemory()"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+        </div>
+        <div id="versionList" class="version-list collapse mt-2">
+            <i class="fa fa-times" onclick="toggleVersionList()"></i>
+            <ul class="list-group">
+                <!-- Version items will be appended here -->
+            </ul>
+        </div>
+        <div id="debugView" class="debug-list collapse mt-2">
+            <i class="fa fa-times" onclick="toggleDebug()"></i>
+            <ul class="list-group">
+                <!-- Version items will be appended here -->
+            </ul>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/2.0.2/timeago.min.js" integrity="sha512-sl01o/gVwybF1FNzqO4NDRDNPJDupfN0o2+tMm4K2/nr35FjGlxlvXZ6kK6faa9zhXbnfLIXioHnExuwJdlTMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="scripts.js"></script>
+    <script src="memoryCrud.js"></script>
+    <script src="toughtloopsCrud.js"></script>
+    <script src="versionCrud.js"></script>
+    <script src="debugCrud.js"></script>
+</body>
+</html>

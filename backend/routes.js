@@ -42,7 +42,7 @@ export const setupRoutes = (router) => {
   });
   router.delete("/toughtloop/:id", async (ctx) => {
     const { id } = ctx.params;
-    const db = await dbPromiseMemory;
+    const db = await dbPromisePrompts;
     await db.run("DELETE FROM prompts WHERE id = ?", id);
     ctx.body = { id };
   });

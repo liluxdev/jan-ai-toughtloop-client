@@ -2,7 +2,7 @@
 
 `npm i; npm start` to run it
 
-Open your browser at `http://localhost:3000` to check the mobile first client and start the chatting expirience (you can browse it from your mobile if your PC IP address is available in your network, the software will bind to 0.0.0.0:3000, all IPs, for this purposed) 
+Open your browser at `http://localhost:3000` to check the mobile first client and start the chatting expirience (you can browse it from your mobile if your PC IP address is available in your network, the software will bind to `0.0.0.0:3000`, all IPs, for this purpose) 
 
 ![Demo mobile](/shot.png)
 

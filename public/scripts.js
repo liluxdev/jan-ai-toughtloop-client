@@ -95,8 +95,9 @@ if (window.Worker) {
         );
         console.log({ lastAssistantCard });
 
+        lastMessageText += content;
+
         if (lastAssistantCard) {
-          lastMessageText += content;
           lastAssistantCard.textContent = lastMessageText;
           if (isValidHTML(lastMessageText)) {
             lastAssistantCard.innerHTML = lastMessageText;
@@ -119,7 +120,7 @@ if (window.Worker) {
             avatar.className = "avatar";
             card.prepend(avatar);
           } else {
-            cardBody.textContent = content;
+            cardBody.textContent = lastMessageText;
             card.appendChild(cardBody);
             card.appendChild(cardTime);
             timeagoRender();
@@ -196,7 +197,7 @@ if (window.Worker) {
         navigator.serviceWorker.ready.then((registration) => {
           registration.showNotification("New message", {
             body: data,
-            icon: "avatars/jan_ai_logo.webp",
+            icon: "avatars/avatar_1.png",
             data: { url: location.href },
           });
         });

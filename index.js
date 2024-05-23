@@ -3,12 +3,6 @@ import Router from "koa-router";
 import koaStatic from "koa-static";
 import websockify from "koa-websocket";
 import fs from "fs";
-import http from "http";
-import https from "https";
-import path from "path";
-
-
-
 import { wsRouter } from "./backend/websockets.js";
 import {
   dbPromise,
@@ -19,7 +13,7 @@ import {
   setMessageVersion,
 } from "./backend/db.js";
 import { startCpuWebSocket } from "./backend/cpu.js";
-import { PREFORMANCE_MODE_NO_CONSOLE_LOG, getRandomPrompt } from "./backend/constants.js";
+import { FROGOT_ABOUT_YOU_PROBABILITY, PREFORMANCE_MODE_NO_CONSOLE_LOG, REMEMBER_ABOUT_YOU_PROBABILITY, getRandomPrompt } from "./backend/constants.js";
 import { getApiContextDebug, invokeApi } from "./backend/api.js";
 import bodyParser from "koa-bodyparser";
 import { setupRoutes } from "./backend/routes.js";
@@ -98,7 +92,7 @@ intervalTimer = setInterval(async () => {
   }
   const forgotToWriteMessageChance = Math.random();
   if (etaIntervalSecs > 0) {
-    if (forgotToWriteMessageChance < 0.00017) {
+    if (forgotToWriteMessageChance < FROGOT_ABOUT_YOU_PROBABILITY) {
       console.log("Forgotting to write message");
       etaIntervalSecs = -1;
       clearToughtloopInterval();
@@ -106,7 +100,7 @@ intervalTimer = setInterval(async () => {
   }
   if (etaIntervalSecs < 0) {
     const rememberedToWriteMessageChance = Math.random();
-    if (rememberedToWriteMessageChance < 0.00027) {
+    if (rememberedToWriteMessageChance < REMEMBER_ABOUT_YOU_PROBABILITY) {
       console.log("Remembered to write message");
       clearInterval(intervalTimer);
       setToughtloopInterval();
@@ -124,40 +118,3 @@ export const clearToughtloopInterval = () => {
     console.log("Error clearing interval", e);
   }
 };
-
-/* 
-const serverCallback = app.callback();
-
-try {
-  const config = {
-    domain: "prometheus.bot", // your domain
-    https: {
-      port: 443, // any port that is open and not already used on your server
-      options: {
-        key: fs.readFileSync(path.resolve("/etc/letencrypt/live/prometheus.bot/privkey.pem"), "utf8").toString(),
-        cert: fs.readFileSync(path.resolve("/etc/letencrypt/live/prometheus.bot/fullchain.pem"), "utf8").toString(),
-      },
-    },
-  };
-  const httpsServer = https.createServer(config.https.options, serverCallback);
-
-  httpsServer.listen(config.https.port, function (err) {
-    if (!!err) {
-      console.error("HTTPS server FAIL: ", err, err && err.stack);
-    } else {
-      console.log(`HTTPS server OK: https://${config.domain}:${config.https.port}`);
-    }
-  });
-} catch (ex) {
-  const httpServer = http.createServer(serverCallback);
-  httpServer.listen(80, function (err) { 
-    if (!!err) {
-      console.error("HTTP server FAIL: ", err, err && err.stack);
-    } else {
-      console.log(`HTTP server OK: http://localhost:${80}`);
-    }
-  });
-
-  console.error("Failed to start HTTPS server\n", ex, ex && ex.stack);
-}
- */

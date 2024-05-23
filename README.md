@@ -4,7 +4,7 @@
 
 Open your browser at `http://localhost:3000` to check the mobile first client and start the chatting expirience (you can browse it from your mobile if your PC IP address is available in your network, the software will bind to 0.0.0.0:3000, all IPs, for this purposed) 
 
-![Demo mobile](path/to/image.png)
+![Demo mobile](/shot.png)
 
 Remember to start the JAN.ai API server with its default port on localhost to have this client working
 

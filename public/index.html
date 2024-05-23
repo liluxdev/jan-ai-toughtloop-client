@@ -29,8 +29,15 @@
             <button class="btn btn-secondary" id="debug" onclick="toggleDebug()"><i class="fas fa-bug"></i></button>
             <button class="btn btn-outline-secondary" onclick="toggleMemoryList()"><i class="fas fa-memory"></i></button>
         </div>
-        <div id="toughtloops" class="prompt-list collapse mt-2">
-            <i class="fa fa-times" onclick="toggleToughtloops()"></i>
+        <div id="toughtloops" class="panel prompt-list collapse mt-2">
+            <div class="row">
+                <div class="col-10">
+                    <h4 class="" onclick="toggleToughtloops()">Toughtloop Prompts</h4>
+                </div>
+                <div class="col-2">
+                    <i class="fa fa-times" onclick="toggleToughtloops()"></i>
+                </div>
+            </div>
             <ul class="list-group">
                 <!-- Prompt items will be appended here -->
             </ul>
@@ -41,8 +48,15 @@
                 </div>
             </div>
         </div>
-        <div id="memoryList" class="memory-list collapse mt-2">
-            <i class="fa fa-times" onclick="toggleMemoryList()"></i>
+        <div id="memoryList" class="panel memory-list collapse mt-2">
+            <div class="row">
+                <div class="col-10">
+                    <h4 class="" onclick="toggleMemoryList()">Memory (Instructions and System Memories)</h4>
+                </div>
+                <div class="col-2">
+                    <i class="fa fa-times" onclick="toggleMemoryList()"></i>
+                </div>
+            </div>
             <ul class="list-group">
                 <!-- Memory items will be appended here -->
             </ul>
@@ -53,14 +67,28 @@
                 </div>
             </div>
         </div>
-        <div id="versionList" class="version-list collapse mt-2">
-            <i class="fa fa-times" onclick="toggleVersionList()"></i>
+        <div id="versionList" class="panel version-list collapse mt-2">
+            <div class="row">
+                <div class="col-10">
+                    <h4 class="" onclick="toggleVersionList()">DB Versions (change to start a new thread)</h4>
+                </div>
+                <div class="col-2">
+                    <i class="fa fa-times" onclick="toggleVersionList()"></i>
+                </div>
+            </div>
             <ul class="list-group">
                 <!-- Version items will be appended here -->
             </ul>
         </div>
-        <div id="debugView" class="debug-list collapse mt-2">
-            <i class="fa fa-times" onclick="toggleDebug()"></i>
+        <div id="debugView" class="panel debug-list collapse mt-2">
+            <div class="row">
+                <div class="col-10">
+                    <h4 class="" onclick="toggleDebug()">Debug Context</h4>
+                </div>
+                <div class="col-2">
+                    <i class="fa fa-times" onclick="toggleDebug()"></i>
+                </div>
+            </div>
             <ul class="list-group">
                 <!-- Version items will be appended here -->
             </ul>

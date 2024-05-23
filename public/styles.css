@@ -88,12 +88,28 @@ body {
     background: whitesmoke;
     padding: 10px;
 }
+
+.panel{
+    padding: 18px;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    min-height: 33vh;
+    width: 100vw;
+    z-index: 100;
+    background-color: whitesmoke;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.777);
+}
+
+.version-list,
 .memory-list,
 .prompt-list,
 .debug-list {
     max-height: 50vh;
-    z-index: 100;
-    background-color: whitesmoke;
     overflow-y: auto;
     transition: all 0.3s ease;
+}
+
+.debug-list pre{
+    overflow-x: auto;
 }

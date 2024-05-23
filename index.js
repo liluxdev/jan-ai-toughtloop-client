@@ -3,7 +3,7 @@ import Router from "koa-router";
 import koaStatic from "koa-static";
 import websockify from "koa-websocket";
 import fs from "fs";
-import { wsRouter } from "./backend/websockets.js";
+import { getWebsocketClients, wsRouter } from "./backend/websockets.js";
 import {
   dbPromise,
   dbPromiseMemory,
@@ -69,11 +69,16 @@ export const setToughtloopInterval = (timing = 333) => {
   clearToughtloopInterval();
   console.log("Setting interval", timing);
   interval = setInterval(async () => {
+    if (getWebsocketClients().length === 0) {
+      console.error("No clients connected, skipping toughtloop");
+      return;
+    }
     const toughloopPrompt = await getRandomPrompt();
     if (!toughloopPrompt) {
       console.log("No toughtloop prompt found");
       return;
     }
+    console.error("Sending toughloop prompt...", toughloopPrompt);
     await invokeApi(toughloopPrompt, false);
   }, timing * 1000);
   etaIntervalSecs = timing;

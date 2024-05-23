@@ -8,6 +8,11 @@ import { NUMBER_OF_MESSAGES_IN_BUFFER } from "./constants.js";
 export const OMISSIS_LIMIT = 99999;
 
 let wsClients = [];
+
+export function getWebsocketClients() {
+  return wsClients;
+}
+
 // Funzione per inviare un messaggio a tutti i client connessi
 export const broadcast = (message, clientId = null) => {
   wsClients.forEach((client) => {

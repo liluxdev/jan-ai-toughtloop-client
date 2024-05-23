@@ -63,7 +63,7 @@ if (window.Worker) {
         if (lastUserCard) {
           lastUserCard.classList.remove("sending");
           lastUserCard.classList.add("sent");
-        }else{
+        } else {
           const card = document.createElement("div");
           card.className = "card user sent";
           const cardBody = document.createElement("div");
@@ -95,12 +95,14 @@ if (window.Worker) {
         );
         console.log({ lastAssistantCard });
 
-        lastMessageText += content;
 
         if (lastAssistantCard) {
-          lastAssistantCard.textContent = lastMessageText;
-          if (isValidHTML(lastMessageText)) {
-            lastAssistantCard.innerHTML = lastMessageText;
+          if (role !== "avatar") {
+            lastMessageText += content;
+            lastAssistantCard.textContent = lastMessageText;
+            if (isValidHTML(lastMessageText)) {
+              lastAssistantCard.innerHTML = lastMessageText;
+            }
           }
         } else {
           const card = document.createElement("div");
@@ -120,6 +122,7 @@ if (window.Worker) {
             avatar.className = "avatar";
             card.prepend(avatar);
           } else {
+            lastMessageText += content;
             cardBody.textContent = lastMessageText;
             card.appendChild(cardBody);
             card.appendChild(cardTime);

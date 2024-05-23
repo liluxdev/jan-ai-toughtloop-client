@@ -7,6 +7,8 @@ import http from "http";
 import https from "https";
 import path from "path";
 
+
+
 import { wsRouter } from "./backend/websockets.js";
 import {
   dbPromise,
@@ -17,10 +19,24 @@ import {
   setMessageVersion,
 } from "./backend/db.js";
 import { startCpuWebSocket } from "./backend/cpu.js";
-import { getRandomPrompt } from "./backend/constants.js";
+import { PREFORMANCE_MODE_NO_CONSOLE_LOG, getRandomPrompt } from "./backend/constants.js";
 import { getApiContextDebug, invokeApi } from "./backend/api.js";
 import bodyParser from "koa-bodyparser";
 import { setupRoutes } from "./backend/routes.js";
+
+const silentifyConsole = () => {
+  console.log("Silencing console for better performance...");
+  console.log = () => {};
+  //console.error = () => {};
+  console.warn = () => {};
+  console.info = () => {};
+  console.debug = () => {};
+  console.trace = () => {};
+};
+
+if (PREFORMANCE_MODE_NO_CONSOLE_LOG){
+  setTimeout(()=>silentifyConsole(), 7*1000);
+}
 
 const app = websockify(new Koa());
 const router = new Router();

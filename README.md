@@ -45,5 +45,12 @@ None, it is simply open source, you can do anything with this public domain code
 
 ### TODO
 
-- Add markdown syntax support
+#### Add markdown syntax support
     E.g. using https://github.com/evilstreak/markdown-js
+
+#### UX Improvements
+   -  Button to save a message in memory, with additional prefix
+   -  Button to save a message in toughtloop prompts
+   -  Button to 'quote' a message
+   -  Button to copy a message in the clipboard
+   -  Show a 'running cog' while 'thinking'

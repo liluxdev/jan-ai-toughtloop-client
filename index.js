@@ -95,12 +95,14 @@ intervalTimer = setInterval(async () => {
   etaIntervalSecs--;
   if (etaIntervalSecs < 0) {
     if (await getApiContextDebug().invokingApi){
-      console.log("I'm writing a message...");
+      console.error("I'm writing a message...");
       return;
     }
     console.log("I don't want to write a message", etaIntervalSecs);
   } else {
-    console.log("I want to write a message in", etaIntervalSecs, "seconds");
+    if (etaIntervalSecs % 60 === 0) {
+      console.log("I want to write a message in", etaIntervalSecs / 60, "minutes");
+    }
   }
   const forgotToWriteMessageChance = Math.random();
   console.log("Forgot to write message chance", forgotToWriteMessageChance,FROGOT_ABOUT_YOU_PROBABILITY, FROGOT_ABOUT_YOU_PROBABILITY / currentIntervalLengthSecs * 333 );
@@ -117,7 +119,7 @@ intervalTimer = setInterval(async () => {
     if (rememberedToWriteMessageChance < REMEMBER_ABOUT_YOU_PROBABILITY / currentIntervalLengthSecs * 333) {
       await incrementGenericCounter("remeber_count");
       console.error("Remembered to write message");
-      clearInterval(intervalTimer);
+      //clearInterval(intervalTimer);
       setToughtloopInterval();
     }
   }else{
@@ -125,7 +127,7 @@ intervalTimer = setInterval(async () => {
     if (rescheduleCahnce < RESCHEDULE_PROBABILITY / currentIntervalLengthSecs * 333) {
       await incrementGenericCounter("reschedule_count");
       console.error("Rescheduling");
-      clearInterval(intervalTimer);
+      //clearInterval(intervalTimer);
       setToughtloopInterval();
     }
   }

@@ -139,8 +139,8 @@ const filterThreads = () => {
 document.addEventListener('DOMContentLoaded', loadVersions);
 document.addEventListener('DOMContentLoaded', loadThreads);
 setInterval(loadThreads, 30*1000);
-/* setInterval(() => {
+setInterval(() => {
     const currentThreadTitle = document.getElementById('currentThreadTitle');
     currentThreadTitle.style.left = '0';
-}, 1000); */
+}, 1000); 
 

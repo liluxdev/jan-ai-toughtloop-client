@@ -29,10 +29,30 @@ const apiCallBody = {
   top_p: 0.95,
 };
 
+export const getConfiguration = async () => {
+  const db = await dbVersions;
+  const conf = await db.all("SELECT key,value FROM config");
+  return conf;
+};
+
+
+const incrementSafewordCounter = async () =>{
+  const db = await dbVersions;
+  const conf = await db.all("SELECT value FROM config WHERE key = 'safeword_counter'");
+  let counter = 0;
+  if (conf.length > 0) {
+    counter = parseInt(conf[0].value);
+  }
+  counter++;
+  await db.run("INSERT OR REPLACE INTO config (key, value) VALUES ('safeword_counter', ?)", counter);
+}
+
+
 export const getApiContextDebug = async () => {
   return {
     invokingApi,
     etaIntervalSecs: getEtaIntervalSecs(),
+    configuration: await getConfiguration(),
     systemMessagesCount: apiCallBody.messages.filter(m => m.role === "system").length,
     conversationMessageCount: apiCallBody.messages.filter(m => m.role !== "system" && m.role !== "avatar").length,
     conversationMessageLimit: await getBufferMessagesLimit(),
@@ -59,7 +79,7 @@ export const getBufferMessagesLimit = async () => {
 export const setBufferMessagesLimit = async (limit) => {
   bufferMessaageLimit = limit;
   const db = await dbVersions;
-  await db.run("UPDATE config SET value = ? WHERE key = 'buffer'", limit);
+  await db.run("INSERT OR REPLACE INTO config (key, value) VALUES ('buffer', ?)", limit);
 }
 
 
@@ -276,7 +296,7 @@ export const invokeApi = async (instructions, isInteractive = true) => {
 
       let messageBuffer = "";
 
-      const parser = createParser((event) => {
+      const parser = createParser(async(event) => {
         if (event.type === "event") {
           if (event.data.startsWith("[DONE]")) {
             return;
@@ -290,6 +310,7 @@ export const invokeApi = async (instructions, isInteractive = true) => {
               messageContent.startsWith("safeword:notoughts") ||
               messageBuffer.startsWith("safeword:notoughts")
             ) {
+              await incrementSafewordCounter();
               console.log("Received safeword, stopping the API call");
               source.cancel("Safeword detected, API call cancelled");
               controller.abort();
@@ -331,6 +352,7 @@ export const invokeApi = async (instructions, isInteractive = true) => {
           .join("");
 
         if (!lastMessage.startsWith("safeword:notoughts")) {
+          await incrementSafewordCounter();
           await db.run(
             "INSERT INTO messages (content, role, timestamp) VALUES (?, ?, ?)",
             lastMessage,

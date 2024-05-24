@@ -2,7 +2,7 @@ import { open } from "sqlite";
 import sqlite3 from "sqlite3";
 import fs from "fs";
 
-let VERSION_DB_MGS = "-0.0.0.0";
+let VERSION_DB_MGS = "0.0.0.0";
 const VERSION_DB_PROMPTS = "-0.0.0.0";
 const VERSION_DB_MEMORY = "";
 

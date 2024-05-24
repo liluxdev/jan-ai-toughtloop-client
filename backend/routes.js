@@ -155,7 +155,12 @@ export const setupRoutes = (router) => {
     const { value } = ctx.request.body;
     const db = await dbVersions;
     const key = ctx.params.key;
-    await db.run("UPDATE config SET value = ? WHERE key = ?", value, key);
+    await db.run(
+      "INSERT INTO config (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = ?",
+      key,
+      value,
+      value
+    );
     if (key === 'buffer'){
       setBufferMessagesLimit(value);
     }

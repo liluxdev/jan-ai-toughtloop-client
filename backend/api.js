@@ -36,7 +36,7 @@ export const getConfiguration = async () => {
 };
 
 
-const incrementSafewordCounter = async () =>{
+const incrementSafewordCounter = async (msgMatchingSafeword) =>{
   const db = await dbVersions;
   const conf = await db.all("SELECT value FROM config WHERE key = 'safeword_counter'");
   let counter = 0;
@@ -45,6 +45,11 @@ const incrementSafewordCounter = async () =>{
   }
   counter++;
   await db.run("INSERT OR REPLACE INTO config (key, value) VALUES ('safeword_counter', ?)", counter);
+  const db2 = await dbPromise();
+  const timestamp = new Date().toISOString();
+  await db2.run("INSERT INTO messages (content, role, timestamp) VALUES (?, ?, ?)", msgMatchingSafeword, "assistant_safeword", timestamp);
+  console.log("Saved safeword message:", msgMatchingSafeword);
+
 }
 
 
@@ -213,7 +218,7 @@ export const invokeApi = async (instructions, isInteractive = true) => {
 
     if (Math.random() < RANDOM_MEMORY_PROBABILITY) {
       const convHistoryRandomMemory = await dbConv.all(`
-    SELECT content, role,timestamp FROM messages WHERE role != 'system_memory' AND role != 'avatar' AND role != 'system_session_start' AND role != 'system'
+    SELECT content, role,timestamp FROM messages WHERE role != 'assistant_safeword' AND role != 'system_memory' AND role != 'avatar' AND role != 'system_session_start' AND role != 'system'
     ORDER BY RANDOM() LIMIT 3`);
       console.log(
         "Retrived conversation history messages: " +
@@ -310,8 +315,8 @@ export const invokeApi = async (instructions, isInteractive = true) => {
               messageContent.startsWith("safeword:notoughts") ||
               messageBuffer.startsWith("safeword:notoughts")
             ) {
-              await incrementSafewordCounter();
-              console.log("Received safeword, stopping the API call");
+              await incrementSafewordCounter(messageBuffer);
+              console.error("Received safeword, stopping the API call");
               source.cancel("Safeword detected, API call cancelled");
               controller.abort();
               invokingApi = false;
@@ -352,7 +357,6 @@ export const invokeApi = async (instructions, isInteractive = true) => {
           .join("");
 
         if (!lastMessage.startsWith("safeword:notoughts")) {
-          await incrementSafewordCounter();
           await db.run(
             "INSERT INTO messages (content, role, timestamp) VALUES (?, ?, ?)",
             lastMessage,
@@ -364,6 +368,8 @@ export const invokeApi = async (instructions, isInteractive = true) => {
             role: "assistant",
           });
           sendJsonMessage(HR_SEPARATOR, "system", false, undefined, timestamp);
+        }else{
+          await incrementSafewordCounter(lastMessage);
         }
 
         invokingApi = false;

@@ -36,7 +36,7 @@ export const pushRecentMessages = async (clientId, onlyRam = false) => {
   console.log("Pushing recent messages..");
   const db = await dbPromise();
   const recentMessages = await db.all(`
-  SELECT content, role, timestamp FROM messages WHERE role != 'system_memory' AND role != 'toughtloop'  AND role != 'system_session_start' AND role != 'system'
+  SELECT content, role, timestamp FROM messages WHERE  role != 'assistant_safeword' AND role != 'system_memory' AND role != 'toughtloop'  AND role != 'system_session_start' AND role != 'system'
   ORDER BY timestamp DESC
   LIMIT ${parseInt( await getBufferMessagesLimit())}
 `);

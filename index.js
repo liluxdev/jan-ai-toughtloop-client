@@ -98,7 +98,7 @@ intervalTimer = setInterval(async () => {
       console.error("I'm writing a message...");
       return;
     }
-    console.error("I don't want to write a message", etaIntervalSecs);
+    console.log("I don't want to write a message", etaIntervalSecs);
   } else {
     if (etaIntervalSecs % 60 === 0) {
       console.error("I want to write a message in", etaIntervalSecs / 60, "minutes");

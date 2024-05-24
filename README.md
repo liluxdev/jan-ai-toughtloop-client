@@ -36,3 +36,14 @@ If you don't want the unsolecited messages you can edit the toughtloop prompts c
 ## Brought to you by Lilux.dev
 
 steven@lilux.dev
+
+## License
+
+None, it is simply open source, you can do anything with this public domain code
+
+## Roadmap
+
+### TODO
+
+- Add markdown syntax support
+    E.g. using https://github.com/evilstreak/markdown-js

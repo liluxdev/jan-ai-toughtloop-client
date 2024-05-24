@@ -144,7 +144,7 @@ export const invokeApi = async (instructions, isInteractive = true) => {
 
     clearRecentMessages();
 
-    setRecentMessages("NOTICE: this conversation thread was named by the user: "+getConversationFriendlyName(), "system");
+    setRecentMessages("NOTICE: this conversation thread was named by the user: "+ await getConversationFriendlyName(), "system");
 
     for (const message of memory.reverse()) {
       let content = message.content;

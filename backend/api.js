@@ -1,6 +1,11 @@
 import { createParser } from "eventsource-parser";
 import axios from "axios";
-import { dbPromise, dbPromiseMemory, dbVersions, getConversationFriendlyName } from "./db.js";
+import {
+  dbPromise,
+  dbPromiseMemory,
+  dbVersions,
+  getConversationFriendlyName,
+} from "./db.js";
 import { formatMessage, sendJsonMessage } from "./utils.js";
 import {
   API_ALREADY_INVOKED_MESSAGE,
@@ -10,7 +15,11 @@ import {
   NUMBER_OF_MESSAGES_IN_BUFFER,
   RANDOM_MEMORY_PROBABILITY,
 } from "./constants.js";
-import { clearToughtloopInterval, getEtaIntervalSecs, setToughtloopInterval } from "../index.js";
+import {
+  clearToughtloopInterval,
+  getEtaIntervalSecs,
+  setToughtloopInterval,
+} from "../index.js";
 import fs from "fs";
 import { OMISSIS_LIMIT } from "./websockets.js";
 
@@ -40,24 +49,32 @@ export const getConfiguration = async () => {
   return confMap;
 };
 
-
-const incrementSafewordCounter = async (msgMatchingSafeword) =>{
+const incrementSafewordCounter = async (msgMatchingSafeword) => {
   const db = await dbVersions;
-  const conf = await db.all("SELECT value FROM config WHERE key = 'safeword_counter'");
+  const conf = await db.all(
+    "SELECT value FROM config WHERE key = 'safeword_counter'"
+  );
   let counter = 0;
   if (conf.length > 0) {
     counter = parseInt(conf[0].value);
   }
   counter++;
-  await db.run("INSERT OR REPLACE INTO config (key, value) VALUES ('safeword_counter', ?)", counter);
+  await db.run(
+    "INSERT OR REPLACE INTO config (key, value) VALUES ('safeword_counter', ?)",
+    counter
+  );
   const db2 = await dbPromise();
   const timestamp = new Date().toISOString();
-  await db2.run("INSERT INTO messages (content, role, timestamp) VALUES (?, ?, ?)", msgMatchingSafeword, "assistant_safeword", timestamp);
+  await db2.run(
+    "INSERT INTO messages (content, role, timestamp) VALUES (?, ?, ?)",
+    msgMatchingSafeword,
+    "assistant_safeword",
+    timestamp
+  );
   console.log("Saved safeword message:", msgMatchingSafeword);
+};
 
-}
-
-export const incrementGenericCounter = async (key) =>{
+export const incrementGenericCounter = async (key) => {
   const db = await dbVersions;
   const conf = await db.all("SELECT value FROM config WHERE key = ?", key);
   let counter = 0;
@@ -65,42 +82,68 @@ export const incrementGenericCounter = async (key) =>{
     counter = parseInt(conf[0].value);
   }
   counter++;
-  await db.run("INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)", key, counter);
-}
+  await db.run(
+    "INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)",
+    key,
+    counter
+  );
+};
 
-export const incrementGenericAvg = async (key, currentValue) =>{
+export const incrementGenericAvg = async (key, currentValue) => {
   currentValue = parseFloat(currentValue);
   const db = await dbVersions;
   const conf = await db.all("SELECT value FROM config WHERE key = ?", key);
   let counter = 0;
   if (conf.length > 0) {
     const json = conf[0].value;
-    let {count, avg} = JSON.parse(json);
-    count = parseInt(count);
-    avg = parseFloat(avg);
+    let count, avg;
+    try {
+      let parsed = JSON.parse(json);
+      if (!count || !avg) {
+        count = 0;
+        avg = 0;
+      } else {
+        count = parseInt(count);
+        avg = parseFloat(avg);
+      }
+    } catch (e) {
+      console.error("Error parsing json", e);
+    }
     counter = count + 1;
-    let newAvg = (currentValue + avg * count) / (counter);
-    await db.run("INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)", key, JSON.stringify({count: counter, avg: newAvg}));
-  }else{
+    let newAvg = (currentValue + avg * count) / counter;
+    await db.run(
+      "INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)",
+      key,
+      JSON.stringify({ count: counter, avg: newAvg })
+    );
+  } else {
     let count = 1;
     let avg = currentValue;
-    await db.run("INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)", key, JSON.stringify({count, avg}));
+    await db.run(
+      "INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)",
+      key,
+      JSON.stringify({ count, avg })
+    );
   }
   counter++;
-  await db.run("INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)", key, counter);
-}
-
-
+};
 
 export const getApiContextDebug = async () => {
   return {
     invokingApi,
     etaIntervalSecs: getEtaIntervalSecs(),
     etaIntervalHours: getEtaIntervalSecs() / 60 / 60,
-    maxToughtloopIntervalHours: (parseInt(await getConfiguration().toughtloopIntervalRandomMaxSecs) || 333) / 60 / 60,
+    maxToughtloopIntervalHours:
+      (parseInt(await getConfiguration().toughtloopIntervalRandomMaxSecs) ||
+        333) /
+      60 /
+      60,
     configuration: await getConfiguration(),
-    systemMessagesCount: apiCallBody.messages.filter(m => m.role === "system").length,
-    conversationMessageCount: apiCallBody.messages.filter(m => m.role !== "system" && m.role !== "avatar").length,
+    systemMessagesCount: apiCallBody.messages.filter((m) => m.role === "system")
+      .length,
+    conversationMessageCount: apiCallBody.messages.filter(
+      (m) => m.role !== "system" && m.role !== "avatar"
+    ).length,
     conversationMessageLimit: await getBufferMessagesLimit(),
     queue: messageQueue,
     ...apiCallBody,
@@ -110,13 +153,13 @@ export const getApiContextDebug = async () => {
 let bufferMessaageLimit = NUMBER_OF_MESSAGES_IN_BUFFER;
 
 export const getBufferMessagesLimit = async () => {
-  try{
+  try {
     const db = await dbVersions;
     const conf = await db.all("SELECT value FROM config WHERE key = 'buffer'");
     if (conf.length > 0) {
       bufferMessaageLimit = parseInt(conf[0].value);
     }
-  }catch(e){
+  } catch (e) {
     console.error("Error getting buffer limit", e);
   }
   return bufferMessaageLimit;
@@ -125,9 +168,11 @@ export const getBufferMessagesLimit = async () => {
 export const setBufferMessagesLimit = async (limit) => {
   bufferMessaageLimit = limit;
   const db = await dbVersions;
-  await db.run("INSERT OR REPLACE INTO config (key, value) VALUES ('buffer', ?)", limit);
-}
-
+  await db.run(
+    "INSERT OR REPLACE INTO config (key, value) VALUES ('buffer', ?)",
+    limit
+  );
+};
 
 let pendingChunks = [];
 
@@ -144,7 +189,7 @@ export const setRecentMessages = async (content, role) => {
     (m) => m.role !== "system" && m.role !== "avatar"
   );
   apiCallBody.messages = system_messages.concat(
-    other_messages.slice(- await getBufferMessagesLimit())
+    other_messages.slice(-(await getBufferMessagesLimit()))
   );
 };
 
@@ -223,7 +268,11 @@ export const invokeApi = async (instructions, isInteractive = true) => {
 
     clearRecentMessages();
 
-    await setRecentMessages("NOTICE: this conversation thread was named by the user: "+ await getConversationFriendlyName(), "system");
+    await setRecentMessages(
+      "NOTICE: this conversation thread was named by the user: " +
+        (await getConversationFriendlyName()),
+      "system"
+    );
 
     for (const message of memory.reverse()) {
       let content = message.content;
@@ -345,14 +394,17 @@ export const invokeApi = async (instructions, isInteractive = true) => {
 
       let messageBuffer = "";
 
-      const parser = createParser(async(event) => {
+      const parser = createParser(async (event) => {
         if (event.type === "event") {
-          if (isFirstChunk){
+          if (isFirstChunk) {
             isFirstChunk = false;
             let end = new Date().getTime();
             thinkingTime = end - start;
-            console.error("Thinking time:", thinkingTime/1000/60);
-            incrementGenericAvg("thinking_time_minutes", thinkingTime/1000/60);
+            console.error("Thinking time:", thinkingTime / 1000 / 60);
+            incrementGenericAvg(
+              "thinking_time_minutes",
+              thinkingTime / 1000 / 60
+            );
           }
           if (event.data.startsWith("[DONE]")) {
             return;
@@ -402,9 +454,12 @@ export const invokeApi = async (instructions, isInteractive = true) => {
         console.error("API call ended");
         const end = new Date().getTime();
         completionTime = end - start;
-        console.error("Completion time:", completionTime/1000/60);
-        incrementGenericAvg("completion_time_minutes", completionTime/1000/60);
-        
+        console.error("Completion time:", completionTime / 1000 / 60);
+        incrementGenericAvg(
+          "completion_time_minutes",
+          completionTime / 1000 / 60
+        );
+
         const assistant_chunks = pendingChunks.filter(
           (message) => message.role === "assistant_chunk"
         );
@@ -426,18 +481,20 @@ export const invokeApi = async (instructions, isInteractive = true) => {
             role: "assistant",
           });
           sendJsonMessage(HR_SEPARATOR, "system", false, undefined, timestamp);
-          if (!isInteractive){
-            console.error("Pause toughtloop waiting for further interactions...");
+          if (!isInteractive) {
+            console.error(
+              "Pause toughtloop waiting for further interactions..."
+            );
             clearToughtloopInterval();
           }
-        }else{
+        } else {
           await incrementSafewordCounter(lastMessage);
           setToughtloopInterval();
         }
 
         invokingApi = false;
         dequeueMessage();
-        if(isInteractive){
+        if (isInteractive) {
           setToughtloopInterval();
         }
       });
@@ -451,7 +508,7 @@ export const invokeApi = async (instructions, isInteractive = true) => {
 
       invokingApi = false;
       dequeueMessage();
-      if(isInteractive){
+      if (isInteractive) {
         setToughtloopInterval();
       }
     }

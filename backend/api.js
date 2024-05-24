@@ -319,7 +319,9 @@ export const invokeApi = async (instructions, isInteractive = true) => {
 
         invokingApi = false;
         dequeueMessage();
-        setToughtloopInterval();
+        if(isInteractive){
+          setToughtloopInterval();
+        }
       });
     } catch (error) {
       console.log("Error invoking API:", error);
@@ -331,7 +333,9 @@ export const invokeApi = async (instructions, isInteractive = true) => {
 
       invokingApi = false;
       dequeueMessage();
-      setToughtloopInterval();
+      if(isInteractive){
+        setToughtloopInterval();
+      }
     }
   } catch (e) {
     console.error("Errore", e);

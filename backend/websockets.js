@@ -1,6 +1,6 @@
 import Router from "koa-router";
 import { dbPromise, dbPromiseMemory, dbPromisePrompts } from "./db.js";
-import { invokeApi, setRecentMessages } from "./api.js";
+import { getBufferMessagesLimit, invokeApi, setRecentMessages } from "./api.js";
 import { formatMessage, sendJsonMessage } from "./utils.js";
 import { clearToughtloopInterval, setToughtloopInterval } from "../index.js";
 import { NUMBER_OF_MESSAGES_IN_BUFFER } from "./constants.js";
@@ -38,7 +38,7 @@ export const pushRecentMessages = async (clientId, onlyRam = false) => {
   const recentMessages = await db.all(`
   SELECT content, role, timestamp FROM messages WHERE role != 'system_memory' AND role != 'toughtloop'  AND role != 'system_session_start' AND role != 'system'
   ORDER BY timestamp DESC
-  LIMIT ${parseInt(NUMBER_OF_MESSAGES_IN_BUFFER * 3.27)}
+  LIMIT ${parseInt( await getBufferMessagesLimit())}
 `);
 
   console.log("Retrived recent messages: " + recentMessages.length);

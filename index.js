@@ -13,7 +13,7 @@ import {
   setMessageVersion,
 } from "./backend/db.js";
 import { startCpuWebSocket } from "./backend/cpu.js";
-import { FROGOT_ABOUT_YOU_PROBABILITY, PREFORMANCE_MODE_NO_CONSOLE_LOG, REMEMBER_ABOUT_YOU_PROBABILITY, RESCHEDULE_PROBABILITY, getRandomPrompt } from "./backend/constants.js";
+import { FROGOT_ABOUT_YOU_PROBABILITY, PREFORMANCE_MODE_NO_CONSOLE_LOG, REMEMBER_ABOUT_YOU_PROBABILITY, RESCHEDULE_PROBABILITY, SEND_EMOJI_PROBABILITY, getRandomPrompt } from "./backend/constants.js";
 import { getApiContextDebug, getConfiguration, incrementGenericCounter, invokeApi } from "./backend/api.js";
 import bodyParser from "koa-bodyparser";
 import { setupRoutes } from "./backend/routes.js";
@@ -91,6 +91,10 @@ export const setToughtloopInterval = async (timing = 333) => {
   etaIntervalSecs = timing;
 };
 
+export const getRandomAsciiEmoji = () => {
+  return String.fromCodePoint(Math.floor(Math.random() * (0x1F601 - 0x1F600 + 1)) + 0x1F600);
+}
+
 intervalTimer = setInterval(async () => {
   etaIntervalSecs--;
   if (etaIntervalSecs < 0) {
@@ -123,6 +127,12 @@ intervalTimer = setInterval(async () => {
       setToughtloopInterval();
     }
   }else{
+    const emojiChance = Math.random();
+    if (emojiChance < SEND_EMOJI_PROBABILITY / currentIntervalLengthSecs * 333) {
+      await incrementGenericCounter("emoji_count");
+      console.error("Sending emoji");
+      await invokeApi(getRandomAsciiEmoji() + EMOJII_REQUEST_PROMPT, false);
+    }
     const rescheduleCahnce = Math.random();
     if (rescheduleCahnce < RESCHEDULE_PROBABILITY / currentIntervalLengthSecs * 333) {
       await incrementGenericCounter("reschedule_count");

@@ -227,13 +227,16 @@ export const dequeueMessage = () => {
 };
 let thinkingTime = 0;
 let completionTime = 0;
-export const invokeApi = async (instructions, isInteractive = true) => {
+let isSendingEmoji = false;
+export const invokeApi = async (instructions, isInteractive = true, isEmojiOnly = false) => {
   console.log("invokeApi", invokingApi, instructions);
   try {
     if (invokingApi) {
       console.log("API is already being invoked, request ignored.");
-      if (isInteractive) {
-        sendJsonMessage(API_ALREADY_INVOKED_MESSAGE, "system");
+      if (isInteractive || isSendingEmoji) {
+        if(!isSendingEmoji){
+          sendJsonMessage(API_ALREADY_INVOKED_MESSAGE, "system");
+        }
         enqueueMessage(instructions);
       }
       return;
@@ -243,6 +246,10 @@ export const invokeApi = async (instructions, isInteractive = true) => {
       apiCallBody.temperature = 2;
     } else {
       apiCallBody.temperature = 0.777;
+    }
+
+    if(isEmojiOnly){  
+      sendingEmoji = true;
     }
 
     invokingApi = true;
@@ -419,6 +426,7 @@ export const invokeApi = async (instructions, isInteractive = true) => {
               source.cancel("Safeword detected, API call cancelled");
               controller.abort();
               invokingApi = false;
+              isSendingEmoji = false;
               return;
             }
 
@@ -488,6 +496,7 @@ export const invokeApi = async (instructions, isInteractive = true) => {
         }
 
         invokingApi = false;
+        isSendingEmoji = false;
         dequeueMessage();
         if (isInteractive) {
           setToughtloopInterval();
@@ -502,6 +511,7 @@ export const invokeApi = async (instructions, isInteractive = true) => {
       }
 
       invokingApi = false;
+      isSendingEmoji = false;
       dequeueMessage();
       if (isInteractive) {
         setToughtloopInterval();

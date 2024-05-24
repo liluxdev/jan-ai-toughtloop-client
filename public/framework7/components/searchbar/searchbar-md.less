@@ -1,0 +1,147 @@
+.md {
+  .searchbar-icon,
+  .searchbar-disable-button {
+    position: absolute;
+
+    top: 50%;
+    transition-duration: 300ms;
+  }
+  .searchbar-icon {
+    width: 48px;
+    height: 48px;
+    left: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &:after {
+      width: auto;
+      height: auto;
+      content: 'search_md';
+      line-height: 1.2;
+    }
+    .ltr({
+      left: var(--f7-safe-area-left);
+    });
+    .rtl({
+      right: var(--f7-safe-area-right);
+    });
+  }
+  .searchbar-disable-button {
+    width: 48px;
+    height: 48px;
+    transform: rotate(-90deg) scale(0.5);
+    font-size: 0 !important;
+    display: block;
+    margin-top: -24px;
+    color: var(--f7-searchbar-link-color, var(--f7-bars-link-color, var(--f7-theme-color)));
+    .ltr({
+      left: calc(var(--f7-searchbar-inner-padding-left) + var(--f7-safe-area-left));
+    });
+    .rtl({
+      right: calc(var(--f7-searchbar-inner-padding-right) + var(--f7-safe-area-right));
+    });
+
+    &:after {
+      .core-icons-font();
+      line-height: 48px;
+      .ltr({
+        content: 'arrow_left_md';
+      });
+      .rtl({
+        content: 'arrow_right_md';
+      });
+    }
+  }
+  .searchbar-enabled:not(.searchbar-enabled-no-disable-button) {
+    .searchbar-disable-button {
+      transform: rotate(0deg) scale(1);
+      pointer-events: auto;
+      opacity: 1;
+    }
+    .searchbar-icon {
+      opacity: 0;
+      transform: rotate(90deg) scale(0.5);
+    }
+  }
+  .searchbar {
+    --f7-searchbar-input-extra-padding-left: 34px;
+    .input-clear-button {
+      width: 48px;
+      height: 48px;
+      margin-top: -24px;
+      .ltr({ right: 0; });
+      .rtl({ left: 0; });
+
+      &:after {
+        line-height: 48px;
+        content: 'delete_round_md';
+        opacity: 1;
+      }
+      &:before {
+        display: none;
+      }
+    }
+  }
+  .searchbar-inline {
+    --f7-searchbar-input-extra-padding-left: 32px;
+  }
+
+  .page > .searchbar,
+  .subnavbar .searchbar,
+  .searchbar-expandable {
+    --f7-searchbar-input-extra-padding-left: 34px;
+    .searchbar-disable-button {
+      .ltr({
+        left: calc(var(--f7-searchbar-inner-padding-left) + var(--f7-safe-area-left));
+      });
+      .rtl({
+        right: calc(var(--f7-searchbar-inner-padding-right) + var(--f7-safe-area-right));
+      });
+    }
+    .searchbar-icon {
+      .ltr({
+        left: var(--f7-safe-area-left);
+      });
+      .rtl({
+        right: var(--f7-safe-area-right);
+      });
+    }
+  }
+  .searchbar-expandable {
+    --f7-searchbar-inner-padding-left: 4px;
+    --f7-searchbar-inner-padding-right: 4px;
+    height: var(--f7-searchbar-expandable-size);
+    opacity: 0;
+    bottom: 0;
+    border-radius: calc(var(--f7-searchbar-expandable-size));
+    width: calc(var(--f7-searchbar-expandable-size));
+    margin-top: calc(var(--f7-searchbar-expandable-size) * -1 / 2);
+    transform: translate3d(0px, 0px, 0px);
+    background-color: var(--f7-searchbar-input-bg-color);
+    .ltr({
+      left: 100%;
+      margin-left: calc(var(--f7-searchbar-expandable-size) * -1);
+    });
+    .rtl({
+      right: 100%;
+      margin-right: calc(var(--f7-searchbar-expandable-size) * -1);
+    });
+  }
+
+  .searchbar-expandable.searchbar-enabled {
+    width: 100%;
+    border-radius: 0;
+    opacity: 1;
+    pointer-events: auto;
+    margin-top: 0;
+    .ltr({
+      left: 0;
+      margin-left: 0;
+    });
+    .rtl({
+      right: 0;
+      margin-right: 0;
+    });
+  }
+}

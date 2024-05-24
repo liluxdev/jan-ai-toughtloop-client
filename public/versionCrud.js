@@ -97,4 +97,5 @@ const filterThreads = () => {
 // Load versions when the page is loaded
 document.addEventListener('DOMContentLoaded', loadVersions);
 document.addEventListener('DOMContentLoaded', loadThreads);
+setInterval(loadThreads, 30*1000);
 

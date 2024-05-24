@@ -1,0 +1,30 @@
+.md {
+  .chip-media {
+    .ltr({
+      margin-left: calc(-1 * var(--f7-chip-padding-horizontal) + 4px);
+    });
+    .rtl({
+      margin-right: calc(-1 * var(--f7-chip-padding-horizontal) + 4px);
+    });
+  }
+  .chip-label + .chip-delete {
+    .ltr({
+      margin-left: 4px;
+    });
+    .rtl({
+      margin-right: 4px;
+    });
+  }
+  .chip-delete {
+    &::after {
+      content: 'delete_round_md';
+      font-size: 16px;
+    }
+    .ltr({
+      margin-right: calc(-1 * var(--f7-chip-padding-horizontal) + 4px);
+    });
+    .rtl({
+      margin-left: calc(-1 * var(--f7-chip-padding-horizontal) + 4px);
+    });
+  }
+}

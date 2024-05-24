@@ -1,0 +1,45 @@
+/* === Tabs === */
+.tabs {
+  .tab {
+    display: none;
+  }
+  .tab-active {
+    display: block;
+  }
+}
+.tabs-animated-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  height: 100%;
+  > .tabs {
+    display: flex;
+    height: 100%;
+    transition-duration: 300ms;
+    > .tab {
+      width: 100%;
+      display: block;
+      flex-shrink: 0;
+    }
+  }
+  &.not-animated > .tabs {
+    transition-duration: 0ms;
+  }
+}
+swiper-container.tabs {
+  height: 100%;
+  > .tab {
+    display: block;
+    touch-action: pan-y;
+  }
+}
+.page > .tabs {
+  height: 100%;
+}
+
+.if-ios-theme({
+  @import './tabs-ios.less';
+});
+.if-md-theme({
+  @import './tabs-md.less';
+});

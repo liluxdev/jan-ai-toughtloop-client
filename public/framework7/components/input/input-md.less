@@ -1,0 +1,171 @@
+.md {
+  .item-input-wrap {
+    min-height: var(--f7-input-height);
+  }
+
+  .item-floating-label {
+    transform: scale(var(--f7-floating-label-scale))
+      translateY(calc((var(--f7-input-height) / 2) / var(--f7-floating-label-scale)));
+  }
+
+  .item-input {
+    .item-inner {
+      .hairline-remove(bottom);
+    }
+  }
+  .item-input {
+    .item-content,
+    &.item-content {
+      margin-left: 16px;
+      margin-right: 16px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+  }
+  .input {
+    .hairline(bottom, var(--f7-input-border-color));
+    &::after {
+      transform: scaleY(1) !important;
+      transition-duration: 200ms;
+      bottom: 0px;
+    }
+    &.input-focused::after {
+      transform: scaleY(2) !important;
+      background: var(--f7-input-focused-border-color, var(--f7-theme-color));
+    }
+    &.input-invalid {
+      &::after {
+        transform: scaleY(2) !important;
+        background: var(--f7-input-invalid-border-color, var(--f7-input-error-text-color));
+      }
+    }
+  }
+  .item-input:not(.item-input-outline) {
+    .item-content,
+    &.item-content {
+      .hairline(bottom, var(--f7-input-border-color));
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 8px;
+        bottom: 8px;
+        right: 0;
+        border-radius: var(--f7-input-item-border-radius);
+        background: var(--f7-input-item-bg-color);
+        pointer-events: none;
+      }
+      &::after {
+        transform: scaleY(1) !important;
+        transition-duration: 200ms;
+        bottom: 8px;
+      }
+      &.item-input-focused::after {
+        transform: scaleY(2) !important;
+        background: var(--f7-input-focused-border-color, var(--f7-theme-color));
+      }
+      &.item-input-invalid,
+      &.input-invalid {
+        &::after {
+          transform: scaleY(2) !important;
+          background: var(--f7-input-invalid-border-color, var(--f7-input-error-text-color));
+        }
+      }
+    }
+  }
+
+  .item-input-outline .item-content,
+  .item-input-outline.item-content,
+  .input-outline {
+    .item-inner {
+      padding-top: 16px;
+      padding-bottom: 16px;
+    }
+
+    .item-label,
+    .item-floating-label {
+      --label-height: calc(var(--f7-label-height) + 8px);
+      margin: calc(0px - 16px - var(--label-height) / 2) -4px 4px;
+    }
+
+    .item-floating-label {
+      transform: scale(var(--f7-floating-label-scale))
+        translateY(calc((var(--f7-input-height) / 2) + 8px));
+    }
+  }
+
+  .item-input-with-error-message,
+  .item-input-with-info,
+  .input-with-error-message,
+  .input-with-info {
+    padding-bottom: 24px !important;
+  }
+  .item-input-error-message,
+  .item-input-info,
+  .input-error-message,
+  .input-info {
+    position: absolute;
+    top: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    .ltr({
+      left: 0;
+    });
+    .rtl({
+      right: 0;
+    });
+  }
+
+  .item-input-focused {
+    .item-label,
+    .item-floating-label {
+      color: var(--f7-label-focused-text-color, var(--f7-theme-color));
+    }
+  }
+  .item-input-focused:not(.item-input-outline) .item-input-wrap:after,
+  .input-focused:not(.input-outline):after {
+    background: var(--f7-input-focused-border-color, var(--f7-theme-color));
+  }
+
+  .item-input-invalid:not(.item-input-outline) .item-input-wrap:after,
+  .item-input-focused:not(.item-input-outline) .item-input-wrap:after,
+  .input-invalid:not(.input-outline):after,
+  .input-focused:not(.input-outline):after {
+    transform: scaleY(2) !important;
+  }
+
+  .item-input-invalid:not(.item-input-outline) .item-input-wrap:after,
+  .input-invalid:not(.input-outline):after {
+    background: var(--f7-input-invalid-border-color, var(--f7-input-error-text-color));
+  }
+  .item-input-invalid {
+    .item-label,
+    .item-floating-label {
+      color: var(--f7-label-invalid-text-color, var(--f7-input-error-text-color));
+    }
+  }
+  .item-input-invalid,
+  .input-invalid {
+    input,
+    select,
+    textarea {
+      color: var(--f7-input-invalid-text-color, var(--f7-input-text-color));
+    }
+  }
+
+  .input-clear-button {
+    &:after {
+      font-size: var(--f7-input-clear-button-size);
+      content: 'delete_round_md';
+      line-height: 1;
+    }
+    &:before {
+      width: 48px;
+      height: 48px;
+      margin-left: -24px;
+      margin-top: -24px;
+    }
+  }
+}

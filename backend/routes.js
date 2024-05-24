@@ -111,7 +111,7 @@ export const setupRoutes = (router) => {
     const name = ctx.request.body.name;
     const timestamp = new Date().toISOString();
     const version = timestamp.replace(/:/g, "-"); 
-    if ((await getApiContextDebug()).invokingApi))){
+    if ((await getApiContextDebug()).invokingApi){
       ctx.status = 403;
       ctx.body = { error: "Cannot switch Thread while invoking API" };
     }
@@ -148,7 +148,7 @@ export const setupRoutes = (router) => {
     const { version } = ctx.request.body;
     const db = await dbVersions;
     const key = ctx.params.key;
-    if ((await getApiContextDebug()).invokingApi))){
+    if ((await getApiContextDebug()).invokingApi){
       ctx.status = 403;
       ctx.body = { error: "Cannot switch Thread while invoking API" };
     }

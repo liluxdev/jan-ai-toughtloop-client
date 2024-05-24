@@ -80,8 +80,6 @@ export const setToughtloopInterval = (timing = 333) => {
     }
     console.error("Sending toughloop prompt...", toughloopPrompt);
     await invokeApi(toughloopPrompt, false);
-    console.error("Wrote a unsolecited message, waiting your next interaction for a new one...");
-    clearToughtloopInterval();
   }, timing * 1000);
   etaIntervalSecs = timing;
 };

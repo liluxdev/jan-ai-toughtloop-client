@@ -316,6 +316,7 @@ export const invokeApi = async (instructions, isInteractive = true) => {
               messageBuffer.startsWith("safeword:notoughts")
             ) {
               await incrementSafewordCounter(messageBuffer);
+              setToughtloopInterval();
               console.error("Received safeword, stopping the API call");
               source.cancel("Safeword detected, API call cancelled");
               controller.abort();
@@ -368,8 +369,13 @@ export const invokeApi = async (instructions, isInteractive = true) => {
             role: "assistant",
           });
           sendJsonMessage(HR_SEPARATOR, "system", false, undefined, timestamp);
+          if (!isInteractive){
+            console.error("Pause toughtloop waiting for further interactions...");
+            clearToughtloopInterval();
+          }
         }else{
           await incrementSafewordCounter(lastMessage);
+          setToughtloopInterval();
         }
 
         invokingApi = false;

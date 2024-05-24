@@ -1,134 +1,422 @@
-import Koa from "koa";
-import Router from "koa-router";
-import koaStatic from "koa-static";
-import websockify from "koa-websocket";
-import fs from "fs";
-import { getWebsocketClients, wsRouter } from "./backend/websockets.js";
+import { createParser } from "eventsource-parser";
+import axios from "axios";
+import { dbPromise, dbPromiseMemory, dbVersions, getConversationFriendlyName } from "./db.js";
+import { formatMessage, sendJsonMessage } from "./utils.js";
 import {
-  dbPromise,
-  dbPromiseMemory,
-  dbPromisePrompts,
-  dbVersions,
-  initDb,
-  setMessageVersion,
-} from "./backend/db.js";
-import { startCpuWebSocket } from "./backend/cpu.js";
-import { FROGOT_ABOUT_YOU_PROBABILITY, PREFORMANCE_MODE_NO_CONSOLE_LOG, REMEMBER_ABOUT_YOU_PROBABILITY, getRandomPrompt } from "./backend/constants.js";
-import { getApiContextDebug, getConfiguration, incrementGenericCounter, invokeApi } from "./backend/api.js";
-import bodyParser from "koa-bodyparser";
-import { setupRoutes } from "./backend/routes.js";
+  API_ALREADY_INVOKED_MESSAGE,
+  RESPONSE_SEPARATOR,
+  MODEL_NAME,
+  HR_SEPARATOR,
+  NUMBER_OF_MESSAGES_IN_BUFFER,
+  RANDOM_MEMORY_PROBABILITY,
+} from "./constants.js";
+import { clearToughtloopInterval, getEtaIntervalSecs, setToughtloopInterval } from "../index.js";
+import fs from "fs";
+import { OMISSIS_LIMIT } from "./websockets.js";
 
-const silentifyConsole = () => {
-  console.log("Silencing console for better performance...");
-  console.log = () => {};
-  //console.error = () => {};
-  console.warn = () => {};
-  console.info = () => {};
-  console.debug = () => {};
-  console.trace = () => {};
+let invokingApi = false;
+
+const apiUrl = "http://localhost:1337/v1/chat/completions";
+const apiCallBody = {
+  messages: [],
+  model: MODEL_NAME,
+  stream: true,
+  max_tokens: 2048,
+  stop: [],
+  frequency_penalty: 0,
+  presence_penalty: 0,
+  temperature: 0.777,
+  top_p: 0.95,
 };
 
-if (PREFORMANCE_MODE_NO_CONSOLE_LOG){
-  setTimeout(()=>silentifyConsole(), 7*1000);
+export const getConfiguration = async () => {
+  const db = await dbVersions;
+  const conf = await db.all("SELECT key,value FROM config");
+  let confMap = {};
+  for (const c of conf) {
+    console.log("Configuration key:", c.key, "value:", c.value);
+    confMap[c.key] = c.value;
+  }
+  return confMap;
+};
+
+
+const incrementSafewordCounter = async (msgMatchingSafeword) =>{
+  const db = await dbVersions;
+  const conf = await db.all("SELECT value FROM config WHERE key = 'safeword_counter'");
+  let counter = 0;
+  if (conf.length > 0) {
+    counter = parseInt(conf[0].value);
+  }
+  counter++;
+  await db.run("INSERT OR REPLACE INTO config (key, value) VALUES ('safeword_counter', ?)", counter);
+  const db2 = await dbPromise();
+  const timestamp = new Date().toISOString();
+  await db2.run("INSERT INTO messages (content, role, timestamp) VALUES (?, ?, ?)", msgMatchingSafeword, "assistant_safeword", timestamp);
+  console.log("Saved safeword message:", msgMatchingSafeword);
+
 }
 
-const app = websockify(new Koa());
-const router = new Router();
-// Usa bodyparser per analizzare il corpo della richiesta JSON
-app.use(bodyParser());
+export const incrementGenericCounter = async (key) =>{
+  const db = await dbVersions;
+  const conf = await db.all("SELECT value FROM config WHERE key = ?", key);
+  let counter = 0;
+  if (conf.length > 0) {
+    counter = parseInt(conf[0].value);
+  }
+  counter++;
+  await db.run("INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)", key, counter);
+}
 
-initDb();
 
-router.get("/", async (ctx) => {
-  ctx.type = "html";
-  ctx.body = await fs.promises.readFile("./public/index.html", "utf8");
-});
-
-app.ws.use(wsRouter.routes()).use(wsRouter.allowedMethods());
-startCpuWebSocket(wsRouter);
-setupRoutes(router);
-app.use(router.routes()).use(router.allowedMethods());
-app.use(koaStatic("./public"));
-
-app.listen(3000, "0.0.0.0", () => {
-  console.log("Server is running on http://0.0.0.0:3000");
-});
-
-let interval = null;
-let intervalTimer = null;
-let etaIntervalSecs = -1;
-let currentIntervalLengthSecs = 333;
-
-export const getEtaIntervalSecs = () => {
-  return etaIntervalSecs;
+export const getApiContextDebug = async () => {
+  return {
+    invokingApi,
+    etaIntervalSecs: getEtaIntervalSecs(),
+    etaIntervalHours: getEtaIntervalSecs() / 60 / 60,
+    maxToughtloopIntervalHours: (parseInt(await getConfiguration().toughtloopIntervalRandomMaxSecs) || 333) / 60 / 60,
+    configuration: await getConfiguration(),
+    systemMessagesCount: apiCallBody.messages.filter(m => m.role === "system").length,
+    conversationMessageCount: apiCallBody.messages.filter(m => m.role !== "system" && m.role !== "avatar").length,
+    conversationMessageLimit: await getBufferMessagesLimit(),
+    queue: messageQueue,
+    ...apiCallBody,
+  };
 };
 
+let bufferMessaageLimit = NUMBER_OF_MESSAGES_IN_BUFFER;
 
-export const setToughtloopInterval = async (timing = 333) => {
-  const conf = await getConfiguration();
-  console.error(conf);
-  const toughtloopIntervalRandomMaxSecs = parseInt(conf.toughtloopIntervalRandomMaxSecs) || 333;
-  console.error("Random max secs", toughtloopIntervalRandomMaxSecs);
-  const radnomAdditionalSecs = Math.floor(Math.random() * toughtloopIntervalRandomMaxSecs);
-  console.error("Random additional secs", radnomAdditionalSecs);
-  timing += radnomAdditionalSecs;
-  currentIntervalLengthSecs =  timing;
-  clearToughtloopInterval();
-  console.log("Setting interval", timing);
-  interval = setInterval(async () => {
-    if (getWebsocketClients().length === 0) {
-      console.error("No clients connected, skipping toughtloop");
-      return;
+export const getBufferMessagesLimit = async () => {
+  try{
+    const db = await dbVersions;
+    const conf = await db.all("SELECT value FROM config WHERE key = 'buffer'");
+    if (conf.length > 0) {
+      bufferMessaageLimit = parseInt(conf[0].value);
     }
-    const toughloopPrompt = await getRandomPrompt();
-    if (!toughloopPrompt) {
-      console.log("No toughtloop prompt found");
-      return;
-    }
-    console.error("Sending toughloop prompt...", toughloopPrompt);
-    await invokeApi(toughloopPrompt, false);
-  }, timing * 1000);
-  etaIntervalSecs = timing;
+  }catch(e){
+    console.error("Error getting buffer limit", e);
+  }
+  return bufferMessaageLimit;
 };
 
-intervalTimer = setInterval(async () => {
-  etaIntervalSecs--;
-  if (etaIntervalSecs < 0) {
-    if (await getApiContextDebug().invokingApi){
-      console.log("I'm writing a message...");
-      return;
-    }
-    console.log("I don't want to write a message", etaIntervalSecs);
-  } else {
-    console.log("I want to write a message in", etaIntervalSecs, "seconds");
-  }
-  const forgotToWriteMessageChance = Math.random();
-  if (etaIntervalSecs > 0) {
-    if (forgotToWriteMessageChance < FROGOT_ABOUT_YOU_PROBABILITY / currentIntervalLengthSecs * 333 ) {
-      await incrementGenericCounter("forgot_count");
-      console.error("Forgotting to write message");
-      etaIntervalSecs = -1;
-      clearToughtloopInterval();
-    }
-  }
-  if (etaIntervalSecs < 0) {
-    const rememberedToWriteMessageChance = Math.random();
-    if (rememberedToWriteMessageChance < REMEMBER_ABOUT_YOU_PROBABILITY / currentIntervalLengthSecs * 333) {
-      await incrementGenericCounter("remeber_count");
-      console.error("Remembered to write message");
-      clearInterval(intervalTimer);
-      setToughtloopInterval();
-    }
-  }
-}, 1000);
+export const setBufferMessagesLimit = async (limit) => {
+  bufferMessaageLimit = limit;
+  const db = await dbVersions;
+  await db.run("INSERT OR REPLACE INTO config (key, value) VALUES ('buffer', ?)", limit);
+}
 
-export const clearToughtloopInterval = () => {
+
+let pendingChunks = [];
+
+const axiosInstance = axios.create({
+  timeout: 12 * 60 * 1000, // 12 minutes
+});
+
+export const setRecentMessages = async (content, role) => {
+  apiCallBody.messages.push({ content, role });
+  const system_messages = apiCallBody.messages.filter(
+    (m) => m.role === "system"
+  );
+  const other_messages = apiCallBody.messages.filter(
+    (m) => m.role !== "system" && m.role !== "avatar"
+  );
+  apiCallBody.messages = system_messages.concat(
+    other_messages.slice(- await getBufferMessagesLimit())
+  );
+};
+
+export const clearRecentMessages = () => {
+  apiCallBody.messages = [];
+};
+
+export const getRandomAvatar = async () => {
+  //fs list all files named avatar_*.png in ./public/ directory and return a random one
+  const files = fs.readdirSync("./public/avatars");
+  //.filter((file) => file.startsWith("avatar_"));
+  const randomFile = files[Math.floor(Math.random() * files.length)];
+  //get the randomFile name to be just the relative file name
+  const db = await dbPromise();
+  const timestamp = new Date().toISOString();
+  await db.run(
+    "INSERT INTO messages (content, role, timestamp) VALUES (?, ?, ?)",
+    "/avatars/" + randomFile,
+    "avatar",
+    timestamp
+  );
+  console.log("Saved avatar:", randomFile);
+  return "/avatars/" + randomFile;
+};
+
+export const messageQueue = [];
+
+export const enqueueMessage = (message) => {
+  messageQueue.push({ m: message });
+  console.log("Enqueuing message...", message);
+};
+
+export const dequeueMessage = () => {
+  if (messageQueue.length > 0) {
+    const { m } = messageQueue.shift();
+    console.log("Dequeueing message...", m);
+    sendJsonMessage("<i>Dequeued message:</i>: " + m, "user");
+    invokeApi(m, true);
+  }
+};
+
+export const invokeApi = async (instructions, isInteractive = true) => {
+  console.log("invokeApi", invokingApi, instructions);
   try {
-    clearInterval(interval);
-    //clearInterval(intervalTimer);
-    console.log("Interval cleared");
-    console.trace();
+    if (invokingApi) {
+      console.log("API is already being invoked, request ignored.");
+      if (isInteractive) {
+        sendJsonMessage(API_ALREADY_INVOKED_MESSAGE, "system");
+        enqueueMessage(instructions);
+      }
+      return;
+    }
+
+    if (!isInteractive) {
+      apiCallBody.temperature = 2;
+    } else {
+      apiCallBody.temperature = 0.777;
+    }
+
+    invokingApi = true;
+    clearToughtloopInterval();
+    console.log("Invoking API with instructions:", instructions);
+
+    const dbMem = await dbPromiseMemory;
+
+    const memory = await dbMem.all(`
+    SELECT content, role FROM messages WHERE role = 'system_memory'
+    ORDER BY timestamp DESC
+    LIMIT 27
+  `);
+
+    console.log("Retrived memory messages: " + memory.length);
+
+    //sendJsonMessage(ctx.websocket, USER_TOUGHTLOOPPROMPT_INIT, "system");
+
+    clearRecentMessages();
+
+    await setRecentMessages("NOTICE: this conversation thread was named by the user: "+ await getConversationFriendlyName(), "system");
+
+    for (const message of memory.reverse()) {
+      let content = message.content;
+      if (content) {
+        if (content.length > OMISSIS_LIMIT) {
+          content =
+            content.slice(0, OMISSIS_LIMIT) +
+            "...omissis at (" +
+            OMISSIS_LIMIT +
+            ")..";
+        }
+
+        await setRecentMessages(content, "system");
+        // sendJsonMessage(ctx.websocket, content, "system_memory");
+        console.log("Pushing memory message..");
+      } else {
+        console.log("Content is null");
+      }
+    }
+    const dbConv = await dbPromise();
+
+    const messageConvHistory = await dbConv.all(
+      `SELECT content, role,timestamp FROM messages WHERE role = 'user' OR  role = 'assistant' ORDER BY timestamp DESC LIMIT ${await getBufferMessagesLimit()}`
+    );
+
+    console.log(
+      "Retrived conversation history messages: " + messageConvHistory.length,
+      messageConvHistory
+    );
+    for (const message of messageConvHistory.reverse()) {
+      await setRecentMessages(message.content, message.role);
+    }
+    apiCallBody.messages.concat(messageConvHistory);
+
+    if (Math.random() < RANDOM_MEMORY_PROBABILITY) {
+      const convHistoryRandomMemory = await dbConv.all(`
+    SELECT content, role,timestamp FROM messages WHERE role != 'assistant_safeword' AND role != 'system_memory' AND role != 'avatar' AND role != 'system_session_start' AND role != 'system'
+    ORDER BY RANDOM() LIMIT 3`);
+      console.log(
+        "Retrived conversation history messages: " +
+          convHistoryRandomMemory.length
+      );
+      for (const message of convHistoryRandomMemory.reverse()) {
+        let content = message.content;
+        if (content) {
+          if (content.length > OMISSIS_LIMIT) {
+            content =
+              content.slice(0, OMISSIS_LIMIT) +
+              "...omissis at (" +
+              OMISSIS_LIMIT +
+              ")..";
+          }
+          if (apiCallBody.messages.find((m) => m.content === content)) {
+            continue;
+          }
+          const quotePromptString =
+            "<b>Random conversation memory:</b> If you want you can quote following message sent by " +
+            message.role +
+            " on " +
+            message.timestamp +
+            ": '" +
+            content +
+            "'";
+          await setRecentMessages(quotePromptString, "system");
+          sendJsonMessage(
+            quotePromptString,
+            "system",
+            false,
+            undefined,
+            message.timestamp
+          );
+          // sendJsonMessage(ctx.websocket, content, message.role);
+          console.log("Pushing conversation history message..");
+          break;
+        } else {
+          console.log("Content is null");
+        }
+      }
+    }
+    apiCallBody.messages.push({ content: instructions, role: "user" });
+
+    const db = await dbPromise();
+    const timestamp = new Date().toISOString();
+    await db.run(
+      "INSERT INTO messages (content, role, timestamp) VALUES (?, ?, ?)",
+      instructions,
+      isInteractive ? "user" : "toughtloop",
+      timestamp
+    );
+    console.log("Savend API prompt:", instructions);
+
+    sendJsonMessage(RESPONSE_SEPARATOR, "system", false, undefined, timestamp);
+    sendJsonMessage(
+      await getRandomAvatar(),
+      "avatar",
+      true,
+      undefined,
+      timestamp
+    );
+
+    const source = axios.CancelToken.source();
+    const controller = new AbortController();
+
+    try {
+      console.log("Invoking API...");
+      console.log("API call body:", apiCallBody);
+      const response = await axiosInstance({
+        method: "post",
+        url: apiUrl,
+        data: apiCallBody,
+        responseType: "stream",
+        cancelToken: source.token,
+        signal: controller.signal,
+      });
+
+      console.log("POST API prompt:", instructions);
+
+      let messageBuffer = "";
+
+      const parser = createParser(async(event) => {
+        if (event.type === "event") {
+          if (event.data.startsWith("[DONE]")) {
+            return;
+          }
+
+          try {
+            const data = JSON.parse(event.data);
+            const messageContent = data.choices[0].delta.content;
+
+            if (
+              messageContent.startsWith("safeword:notoughts") ||
+              messageBuffer.startsWith("safeword:notoughts")
+            ) {
+              await incrementSafewordCounter(messageBuffer);
+              setToughtloopInterval();
+              console.error("Received safeword, stopping the API call");
+              source.cancel("Safeword detected, API call cancelled");
+              controller.abort();
+              invokingApi = false;
+              return;
+            }
+
+            messageBuffer = messageBuffer.concat(messageContent);
+            sendJsonMessage(
+              messageContent,
+              "assistant",
+              true,
+              undefined,
+              timestamp
+            );
+            console.log("chunk: ", messageContent);
+            pendingChunks.push({
+              content: messageContent,
+              role: "assistant_chunk",
+            });
+          } catch (parseErr) {
+            console.error("Error parsing response:", parseErr);
+          }
+        }
+      });
+
+      response.data.on("data", (chunk) => {
+        parser.feed(chunk.toString());
+      });
+
+      response.data.on("end", async () => {
+        const assistant_chunks = pendingChunks.filter(
+          (message) => message.role === "assistant_chunk"
+        );
+        pendingChunks = [];
+
+        let lastMessage = assistant_chunks
+          .map((chunk) => chunk.content)
+          .join("");
+
+        if (!lastMessage.startsWith("safeword:notoughts")) {
+          await db.run(
+            "INSERT INTO messages (content, role, timestamp) VALUES (?, ?, ?)",
+            lastMessage,
+            "assistant",
+            new Date().toISOString()
+          );
+          apiCallBody.messages.push({
+            content: lastMessage,
+            role: "assistant",
+          });
+          sendJsonMessage(HR_SEPARATOR, "system", false, undefined, timestamp);
+          if (!isInteractive){
+            console.error("Pause toughtloop waiting for further interactions...");
+            clearToughtloopInterval();
+          }
+        }else{
+          await incrementSafewordCounter(lastMessage);
+          setToughtloopInterval();
+        }
+
+        invokingApi = false;
+        dequeueMessage();
+        if(isInteractive){
+          setToughtloopInterval();
+        }
+      });
+    } catch (error) {
+      console.log("Error invoking API:", error);
+      if (axios.isCancel(error)) {
+        console.log("Request canceled", error.message);
+      } else {
+        console.error("Error invoking API:", error);
+      }
+
+      invokingApi = false;
+      dequeueMessage();
+      if(isInteractive){
+        setToughtloopInterval();
+      }
+    }
   } catch (e) {
-    console.log("Error clearing interval", e);
+    console.error("Errore", e);
   }
 };

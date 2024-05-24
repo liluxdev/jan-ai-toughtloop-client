@@ -13,7 +13,7 @@ import {
   setMessageVersion,
 } from "./backend/db.js";
 import { startCpuWebSocket } from "./backend/cpu.js";
-import { FROGOT_ABOUT_YOU_PROBABILITY, PREFORMANCE_MODE_NO_CONSOLE_LOG, REMEMBER_ABOUT_YOU_PROBABILITY, RESCHEDULE_PROBABILIT, getRandomPrompt } from "./backend/constants.js";
+import { FROGOT_ABOUT_YOU_PROBABILITY, PREFORMANCE_MODE_NO_CONSOLE_LOG, REMEMBER_ABOUT_YOU_PROBABILITY, RESCHEDULE_PROBABILITY, getRandomPrompt } from "./backend/constants.js";
 import { getApiContextDebug, getConfiguration, incrementGenericCounter, invokeApi } from "./backend/api.js";
 import bodyParser from "koa-bodyparser";
 import { setupRoutes } from "./backend/routes.js";

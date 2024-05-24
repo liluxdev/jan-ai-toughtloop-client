@@ -54,5 +54,6 @@ None, it is simply open source, you can do anything with this public domain code
    -  Button to 'quote' a message
    -  Button to copy a message in the clipboard
    -  Show a 'running cog' while 'thinking' - DONE!
+   -  Stats - IN PROGRESS!
    -  Machanism to let the model be able to generate and save new toughloop prompt (auto creating the self prompts to be randomly send periodically)
       - E.g. make another inverval to ask if she wants to add a prompt to the pool, instructing to respond with a safeword:addprompt to be matched (contained) in the response (then replaced) and if it matches it adds and save the prompt to prompts.db

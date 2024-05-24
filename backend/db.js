@@ -11,7 +11,7 @@ export const dbVersions = open({
 });
 
 export const setMessageVersion = async (version) => {
-  VERSION_DB_MGS = version;
+  VERSION_DB_MGS = version.replace(":","-");
 };
 
 const dbVersionsInit = async () => {
@@ -28,11 +28,16 @@ const dbVersionsInit = async () => {
     VERSION_DB_MGS,
     "messages"
   );
+  console.log("Current version is", VERSION_DB_MGS);
+
   const versions = await db.all(
     "SELECT * FROM versions WHERE key = 'messages'"
   );
+  console.log("Current version are", versions);
+
   if (versions.length > 0) {
-    VERSION_DB_MGS = versions[0].version;
+    VERSION_DB_MGS = versions[0].version.replace(":","-");
+
   }
 };
 

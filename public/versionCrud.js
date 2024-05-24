@@ -39,7 +39,7 @@ const editVersion = (key, button) => {
 
 const loadThreads = async () => {
     try {
-        const response = await fetch(`${baseUrl}/threads`);
+        const response = await fetch(`${baseUrlVersions}/threads`);
         const threads = await response.json();
         const threadList = document.getElementById('threadList');
         threadList.innerHTML = '';
@@ -71,9 +71,26 @@ const updateCurrentThreadTitle = (threads) => {
     }
 };
 
+const startNewThread = async (name="") => {
+    name = prompt('Enter the name of the new thread:', new Date().toISOString());
+    try {
+        await fetch(`${baseUrlVersions}/threads/new`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name }),
+        });
+        loadThreads();
+        location.reload(true);
+    } catch (error) {
+        console.error('Error starting thread:', error);
+    }
+};
+
 const updateVersion = async (key, version) => {
     try {
-        await fetch(`${baseUrl}/version/${key}`, {
+        await fetch(`${baseUrlVersions}/version/${key}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

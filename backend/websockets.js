@@ -56,7 +56,7 @@ export const pushRecentMessages = async (clientId, onlyRam = false) => {
           ")..";
       }
 
-      setRecentMessages(content, message.role);
+      await setRecentMessages(content, message.role);
       recentMessagesToPush.push({
         content,
         role: message.role,

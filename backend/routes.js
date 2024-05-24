@@ -1,4 +1,4 @@
-import { clearRecentMessages, getApiContextDebug } from "./api.js";
+import { clearRecentMessages, getApiContextDebug, setBufferMessagesLimit } from "./api.js";
 import {
   dbPromiseMemory,
   dbPromisePrompts,
@@ -87,7 +87,7 @@ export const setupRoutes = (router) => {
     ctx.body = { id };
   });
   router.get("/apiContextDebug", async (ctx) => {
-    ctx.body = getApiContextDebug();
+    ctx.body = await getApiContextDebug();
   });
   router.get("/version", async (ctx) => {
     const db = await dbVersions;
@@ -149,5 +149,16 @@ export const setupRoutes = (router) => {
     setMessageVersion(version);
     clearRecentMessages();
     initDb();
+  });
+
+  router.put("/config/:key", async (ctx) => {
+    const { value } = ctx.request.body;
+    const db = await dbVersions;
+    const key = ctx.params.key;
+    await db.run("UPDATE config SET value = ? WHERE key = ?", value, key);
+    if (key === 'buffer'){
+      setBufferMessagesLimit(value);
+    }
+    ctx.body = { key:value };
   });
 };

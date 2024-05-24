@@ -5,11 +5,15 @@ const isInvokingApi = async () => {
     const debug = await response.json();
     return debug.invokingApi;
 };
-
+let refreshingBufferSize = false;
 const fetchDebug = async () => {
     try {
         const response = await fetch(`${baseUrlPrompts}/apiContextDebug`);
         const debug = await response.json();
+
+        refreshingBufferSize = true;
+        app.range.setValue('.bufferSize', debug.conversationMessageLimit);
+        refreshingBufferSize = false;
 
         const memories = [];
         for (const key in debug) {
@@ -33,5 +37,21 @@ const fetchDebug = async () => {
         });
     } catch (error) {
         console.error('Error loading debug:', error);
+    }
+};
+
+const updateConfigValue = async (key, value) => {
+    if (refreshingBufferSize) return;
+    try {
+        await fetch(`${baseUrlDebug}/config/${key}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ value }),
+        });
+        loadThreads();
+    } catch (error) {
+        console.error('Error updating config:', error);
     }
 };

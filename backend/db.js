@@ -109,6 +109,13 @@ export const initDb = async () => {
       timestampLastUpdate TEXT
     )
   `);
+
+  await dbVer.exec(`
+  CREATE TABLE IF NOT EXISTS config (
+    value TEXT,
+    key TEXT PRIMARY KEY
+  )
+`);
   console.log("Database initialized");
   doDbMigrations();
 };

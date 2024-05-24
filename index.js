@@ -89,7 +89,7 @@ export const setToughtloopInterval = (timing = 333) => {
 intervalTimer = setInterval(async () => {
   etaIntervalSecs--;
   if (etaIntervalSecs < 0) {
-    if (getApiContextDebug().invokingApi){
+    if (await getApiContextDebug().invokingApi){
       console.log("I'm writing a message...");
       return;
     }

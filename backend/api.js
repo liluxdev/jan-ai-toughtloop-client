@@ -1,6 +1,6 @@
 import { createParser } from "eventsource-parser";
 import axios from "axios";
-import { dbPromise, dbPromiseMemory, getConversationFriendlyName } from "./db.js";
+import { dbPromise, dbPromiseMemory, dbVersions, getConversationFriendlyName } from "./db.js";
 import { formatMessage, sendJsonMessage } from "./utils.js";
 import {
   API_ALREADY_INVOKED_MESSAGE,
@@ -29,13 +29,13 @@ const apiCallBody = {
   top_p: 0.95,
 };
 
-export const getApiContextDebug = () => {
+export const getApiContextDebug = async () => {
   return {
     invokingApi,
     etaIntervalSecs: getEtaIntervalSecs(),
     systemMessagesCount: apiCallBody.messages.filter(m => m.role === "system").length,
     conversationMessageCount: apiCallBody.messages.filter(m => m.role !== "system" && m.role !== "avatar").length,
-    conversationMessageLimit: getBufferMessagesLimit(),
+    conversationMessageLimit: await getBufferMessagesLimit(),
     queue: messageQueue,
     ...apiCallBody,
   };
@@ -43,13 +43,25 @@ export const getApiContextDebug = () => {
 
 let bufferMessaageLimit = NUMBER_OF_MESSAGES_IN_BUFFER;
 
-export const getBufferMessagesLimit = () => {
+export const getBufferMessagesLimit = async () => {
+  try{
+    const db = await dbVersions;
+    const conf = await db.all("SELECT value FROM config WHERE key = 'buffer'");
+    if (conf.length > 0) {
+      bufferMessaageLimit = parseInt(conf[0].value);
+    }
+  }catch(e){
+    console.error("Error getting buffer limit", e);
+  }
   return bufferMessaageLimit;
 };
 
-export const setBufferMessagesLimit = (limit) => {
+export const setBufferMessagesLimit = async (limit) => {
   bufferMessaageLimit = limit;
-};
+  const db = await dbVersions;
+  await db.run("UPDATE config SET value = ? WHERE key = 'buffer'", limit);
+}
+
 
 let pendingChunks = [];
 
@@ -57,7 +69,7 @@ const axiosInstance = axios.create({
   timeout: 12 * 60 * 1000, // 12 minutes
 });
 
-export const setRecentMessages = (content, role) => {
+export const setRecentMessages = async (content, role) => {
   apiCallBody.messages.push({ content, role });
   const system_messages = apiCallBody.messages.filter(
     (m) => m.role === "system"
@@ -66,7 +78,7 @@ export const setRecentMessages = (content, role) => {
     (m) => m.role !== "system" && m.role !== "avatar"
   );
   apiCallBody.messages = system_messages.concat(
-    other_messages.slice(-getBufferMessagesLimit())
+    other_messages.slice(- await getBufferMessagesLimit())
   );
 };
 
@@ -144,7 +156,7 @@ export const invokeApi = async (instructions, isInteractive = true) => {
 
     clearRecentMessages();
 
-    setRecentMessages("NOTICE: this conversation thread was named by the user: "+ await getConversationFriendlyName(), "system");
+    await setRecentMessages("NOTICE: this conversation thread was named by the user: "+ await getConversationFriendlyName(), "system");
 
     for (const message of memory.reverse()) {
       let content = message.content;
@@ -157,7 +169,7 @@ export const invokeApi = async (instructions, isInteractive = true) => {
             ")..";
         }
 
-        setRecentMessages(content, "system");
+        await setRecentMessages(content, "system");
         // sendJsonMessage(ctx.websocket, content, "system_memory");
         console.log("Pushing memory message..");
       } else {
@@ -167,7 +179,7 @@ export const invokeApi = async (instructions, isInteractive = true) => {
     const dbConv = await dbPromise();
 
     const messageConvHistory = await dbConv.all(
-      `SELECT content, role,timestamp FROM messages WHERE role = 'user' OR  role = 'assistant' ORDER BY timestamp DESC LIMIT ${getBufferMessagesLimit()}`
+      `SELECT content, role,timestamp FROM messages WHERE role = 'user' OR  role = 'assistant' ORDER BY timestamp DESC LIMIT ${await getBufferMessagesLimit()}`
     );
 
     console.log(
@@ -175,7 +187,7 @@ export const invokeApi = async (instructions, isInteractive = true) => {
       messageConvHistory
     );
     for (const message of messageConvHistory.reverse()) {
-      setRecentMessages(message.content, message.role);
+      await setRecentMessages(message.content, message.role);
     }
     apiCallBody.messages.concat(messageConvHistory);
 
@@ -208,7 +220,7 @@ export const invokeApi = async (instructions, isInteractive = true) => {
             ": '" +
             content +
             "'";
-          setRecentMessages(quotePromptString, "system");
+          await setRecentMessages(quotePromptString, "system");
           sendJsonMessage(
             quotePromptString,
             "system",

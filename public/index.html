@@ -2,7 +2,7 @@
 <html class="dark" lang="en">
   <head>
     <script>
-        const RUNNING_COG_THRESHOLD = 33;
+      const RUNNING_COG_THRESHOLD = 33;
     </script>
     <!-- Required meta tags-->
     <meta charset="utf-8" />
@@ -42,7 +42,13 @@
                 </a>
               </div>
               <div class="title" id="currentThreadTitle">Current Thread</div>
-              <button style="margin-left: 12px; width: 27px;" class="button button-outline mr-1" onclick="editFriendlyName()"><i class="fas fa-edit"></i></button>    
+              <button
+                style="margin-left: 12px; width: 27px"
+                class="button button-outline mr-1"
+                onclick="editFriendlyName()"
+              >
+                <i class="fas fa-edit"></i>
+              </button>
             </div>
           </div>
           <!-- Page content -->
@@ -64,7 +70,7 @@
               <button class="button button-fill" onclick="sendMessage()">
                 <i class="fas fa-paper-plane"></i>
               </button>
-       <!--        <button
+              <!--        <button
                 class="button button-outline"
                 onclick="toggleVersionList()"
               >
@@ -76,9 +82,12 @@
               >
                 <i class="fas fa-bell"></i>
               </button>
-              <button class="button button-outline" onclick="toggleToughtloops()">
+              <button
+                class="button button-outline"
+                onclick="toggleToughtloops()"
+              >
                 <i class="fas fa-list"></i>
-              </button>              
+              </button>
               <button
                 class="button button-outline"
                 onclick="location.reload(true)"
@@ -122,12 +131,16 @@
               <div class="list no-hairlines-md">
                 <ul id="threadListNew">
                   <li>
-                    <a onclick="startNewThread()" href="#" class="item-link item-content">
+                    <a
+                      onclick="startNewThread()"
+                      href="#"
+                      class="item-link item-content"
+                    >
                       <div class="item-inner">
                         <div class="item-title">New Thread</div>
-                        </div>
+                      </div>
                     </a>
-                   </li>
+                  </li>
                 </ul>
               </div>
               <div class="list no-hairlines-md">
@@ -241,6 +254,23 @@
             <div class="page-content">
               <div class="block-title">Debug Context</div>
               <div class="centered">
+                <div class="range-slider">
+                  <div class="block-title">Conversation Buffer (msg)</div>
+                  <div class="block block-strong-ios block-outline-ios">
+                    <div
+                      class="bufferSize range-slider range-slider-init"
+                      data-min="0"
+                      data-max="100"
+                      data-label="true"
+                      data-step="5"
+                      data-value="25"
+                      data-scale="true"
+                      data-scale-steps="5"
+                      data-scale-sub-steps="4"
+                      @range:change="${onBufferChange}"
+                    ></div>
+                  </div>
+                </div>
                 <div
                   class="gauge gauge-init cpuUsage"
                   data-type="semicircle"
@@ -301,6 +331,16 @@
           //if open, update the debug view
           if (app.panel.get("#debugView").opened) {
             fetchDebug();
+            var range = app.range.create({
+              el: ".bufferSize",
+              on: {
+                change: function (event) {
+                  console.log("Range Slider value changed", event.value);
+                  updateConfigValue("buffer", event.value);
+                  fetchDebug();
+                },
+              },
+            });
           }
         }
 

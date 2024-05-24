@@ -15,7 +15,7 @@ const loadVersions = async () => {
             listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
             listItem.innerHTML = `
                 <span class="version-content">${version.version}</span>
-                <div>
+                <div class="grid grid-cols-2">
                     <button class="button button-outline mr-1" onclick="editVersion('${version.key}', this)"><i class="fas fa-edit"></i></button>
                 </div>
             `;

@@ -12,7 +12,7 @@ const loadMemories = async () => {
             listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
             listItem.innerHTML = `
                 <span class="memory-content">${memory.content}</span>
-                <div>
+                <div class="grid grid-cols-2">
                     <button class="button button-outline mr-1" onclick="editMemory(${memory.id}, this)"><i class="fas fa-edit"></i></button>
                     <button class="button button-outline" onclick="deleteMemory(${memory.id})"><i class="fas fa-trash"></i></button>
                 </div>

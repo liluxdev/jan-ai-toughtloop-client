@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html class="dark" lang="en">
   <head>
+    <script>
+        const RUNNING_COG_THRESHOLD = 33;
+    </script>
     <!-- Required meta tags-->
     <meta charset="utf-8" />
     <meta
@@ -72,12 +75,9 @@
               >
                 <i class="fas fa-bell"></i>
               </button>
-              <button
-                class="button button-outline"
-                onclick="toggleToughtloops()"
-              >
-                <i class="fas fa-cog"></i>
-              </button>
+              <button class="button button-outline" onclick="toggleToughtloops()">
+                <i id="runningCog" class="runningCog fas fa-cog"></i>
+              </button>              
               <button
                 class="button button-outline"
                 onclick="location.reload(true)"
@@ -304,6 +304,12 @@
         }
 
         function updateCpuUsage(percentage) {
+
+          if (percentage > RUNNING_COG_THRESHOLD) {
+            setCogRunning(true);
+          } else {
+            setCogRunning(false);
+          }
           let gauge = app.gauge.get(".cpuUsage");
           if (!gauge) {
             gauge = app.gauge.create({

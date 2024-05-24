@@ -98,3 +98,20 @@ body {
     text-align: left;
     overflow-x: auto;
 }
+@keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .runningCog {
+    transition: transform 0.5s;
+  }
+  
+  .runningCog.running {
+    animation: spin 1s linear infinite;
+  }
+  

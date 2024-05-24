@@ -337,3 +337,12 @@ if ("serviceWorker" in navigator) {
       console.log("Service Worker registration failed:", error);
     });
 }
+
+function setCogRunning(state) {
+  const cog = document.getElementById('runningCog');
+  if (state) {
+    cog.classList.add('running');
+  } else {
+    cog.classList.remove('running');
+  }
+}

@@ -14,7 +14,7 @@ import {
 } from "./backend/db.js";
 import { startCpuWebSocket } from "./backend/cpu.js";
 import { FROGOT_ABOUT_YOU_PROBABILITY, PREFORMANCE_MODE_NO_CONSOLE_LOG, REMEMBER_ABOUT_YOU_PROBABILITY, getRandomPrompt } from "./backend/constants.js";
-import { getApiContextDebug, invokeApi } from "./backend/api.js";
+import { getApiContextDebug, getConfiguration, invokeApi } from "./backend/api.js";
 import bodyParser from "koa-bodyparser";
 import { setupRoutes } from "./backend/routes.js";
 
@@ -62,9 +62,9 @@ export const getEtaIntervalSecs = () => {
   return etaIntervalSecs;
 };
 
-export const setToughtloopInterval = (timing = 333) => {
-  const radnomAdditionalSecs = Math.floor(Math.random() * 333);
-  timing += radnomAdditionalSecs * parseInt(Math.random() * 5);
+export const setToughtloopInterval = async (timing = 333) => {
+  const radnomAdditionalSecs = Math.floor(Math.random() * await getConfiguration().toughtloopIntervalRandomMaxSecs || 333);
+  timing += radnomAdditionalSecs;
 
   clearToughtloopInterval();
   console.log("Setting interval", timing);

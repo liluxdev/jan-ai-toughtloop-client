@@ -32,7 +32,12 @@ const apiCallBody = {
 export const getConfiguration = async () => {
   const db = await dbVersions;
   const conf = await db.all("SELECT key,value FROM config");
-  return conf;
+  let confMap = {};
+  for (const c of conf) {
+    console.log("Configuration key:", c.key, "value:", c.value);
+    confMap[c.key] = c.value;
+  }
+  return confMap;
 };
 
 
@@ -57,6 +62,7 @@ export const getApiContextDebug = async () => {
   return {
     invokingApi,
     etaIntervalSecs: getEtaIntervalSecs(),
+    etaIntervalHours: getEtaIntervalSecs() / 60 / 60,
     configuration: await getConfiguration(),
     systemMessagesCount: apiCallBody.messages.filter(m => m.role === "system").length,
     conversationMessageCount: apiCallBody.messages.filter(m => m.role !== "system" && m.role !== "avatar").length,

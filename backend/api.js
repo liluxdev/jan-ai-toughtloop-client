@@ -63,6 +63,7 @@ export const getApiContextDebug = async () => {
     invokingApi,
     etaIntervalSecs: getEtaIntervalSecs(),
     etaIntervalHours: getEtaIntervalSecs() / 60 / 60,
+    maxToughtloopIntervalHours: (parseInt(await getConfiguration().toughtloopIntervalRandomMaxSecs) || 333) / 60 / 60,
     configuration: await getConfiguration(),
     systemMessagesCount: apiCallBody.messages.filter(m => m.role === "system").length,
     conversationMessageCount: apiCallBody.messages.filter(m => m.role !== "system" && m.role !== "avatar").length,

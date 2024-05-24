@@ -96,7 +96,7 @@ export const setupRoutes = (router) => {
   });
   router.get("/threads", async (ctx) => {
     const db = await dbVersions;
-    const threads = await db.all("SELECT key, friendlyName, timestamp, timestampLastUpdate FROM threads ORDER BY timestampLastUpdate,timestamp ASC");
+    const threads = await db.all("SELECT key, friendlyName, timestamp, timestampLastUpdate FROM threads ORDER BY timestampLastUpdate DESC,timestamp DESC");
     const currentThreadKey = await getMessagesVersion();
     for (const thread of threads) {
       if (thread.key === currentThreadKey) {

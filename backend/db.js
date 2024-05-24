@@ -1,5 +1,6 @@
 import { open } from "sqlite";
 import sqlite3 from "sqlite3";
+import fs from "fs";
 
 let VERSION_DB_MGS = "-0.0.0.0";
 const VERSION_DB_PROMPTS = "-0.0.0.0";
@@ -122,6 +123,49 @@ export const initDb = async () => {
 
 const doDbMigrations = async () => {
   const db = await dbVersions;
+  console.log("Checking for database migrations");
+  console.log("Migrating db files to threads...");
+  const files = fs.readdirSync("./stealth_db/")
+   .filter((file) => file.startsWith("database-") && file.endsWith(".db"));
+  console.log("Files found", files);
+  for (const file of files) {
+    const version = file.replace("database-", "").replace(".db", "");
+    
+    console.log("Migrating", version);
+    if (fs.existsSync("./stealth_db/database"+version+".db")) {
+      console.log("File aready migrated", version);
+      setTimeout(() => {
+        try{
+        fs.unlinkSync("./stealth_db/" + file);
+        } catch (err) {
+          console.log("\n\n\nLEGACY FILE FOUND!\n\nPLEASE DELETE MANUALLY THE ./stealth_db/"+file+"\n\nError deleting file");
+        }
+      }, 1000);
+      continue;
+
+    }
+    const fileStats = fs.statSync("./stealth_db/" + file);
+    const creationDate = fileStats.birthtime.toISOString();
+    await db.run(
+      "INSERT OR IGNORE INTO threads (key, friendlyName, timestamp, timestampLastUpdate) VALUES (?, ?, ?, ?)",
+      version,
+      "Migrated legacy thread v." + version,
+      creationDate,
+      creationDate
+    );
+    //copy the file to the new location
+ 
+    fs.copyFileSync
+    ("./stealth_db/" + file, "./stealth_db/database"+version+".db");
+    setTimeout(() => {
+      try{
+      fs.unlinkSync("./stealth_db/" + file);
+      } catch (err) {
+        console.log("Error deleting file", err);
+      }
+    }, 3000);
+    console.log("Migrated", version, creationDate);
+  }
   //Add fiendlyName column to versions table only if it doesn't exist
   try {
     await db.exec(`ALTER TABLE versions ADD COLUMN fiendlyName TEXT`);

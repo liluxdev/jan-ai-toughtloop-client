@@ -6,6 +6,7 @@ const isInvokingApi = async () => {
     return debug.invokingApi;
 };
 let refreshingBufferSize = false;
+let refreshingToughloopInterval = false;
 const fetchDebug = async () => {
     try {
         const response = await fetch(`${baseUrlPrompts}/apiContextDebug`);
@@ -14,6 +15,10 @@ const fetchDebug = async () => {
         refreshingBufferSize = true;
         app.range.setValue('.bufferSize', debug.conversationMessageLimit);
         refreshingBufferSize = false;
+
+        refreshingToughloopInterval = true;
+        app.range.setValue('.toughtloopIntervalRandomMaxSecs', debug?.configuration?.toughtloopIntervalRandomMaxSecs || 333);
+        refreshingToughloopInterval = false;
 
         const memories = [];
         for (const key in debug) {
@@ -42,6 +47,7 @@ const fetchDebug = async () => {
 
 const updateConfigValue = async (key, value) => {
     if (refreshingBufferSize) return;
+    if (refreshingToughloopInterval) return;
     try {
         await fetch(`${baseUrlDebug}/config/${key}`, {
             method: 'PUT',

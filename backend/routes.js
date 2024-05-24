@@ -126,6 +126,20 @@ export const setupRoutes = (router) => {
     initDb();
   });
 
+  router.put("/threads/current", async (ctx) => {
+    const currentThreadKey = await getMessagesVersion();
+    const { name } = ctx.request.body;
+    const db = await dbVersions;
+    const timestamp = new Date().toISOString();
+    await db.run(
+      "UPDATE threads SET friendlyName = ?, timestampLastUpdate = ? WHERE key = ?",
+      name,
+      timestamp,
+      currentThreadKey
+    );
+    ctx.body = { name };
+  });
+
   router.put("/version/:key", async (ctx) => {
     const { version } = ctx.request.body;
     const db = await dbVersions;

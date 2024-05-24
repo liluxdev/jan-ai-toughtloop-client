@@ -2,6 +2,25 @@ const baseUrlVersions = location.origin;
 
 
 
+const editFriendlyName = async (newName=currentThreadTitle) => {
+    newName = prompt('Edit new name:', newName);
+    if (newName && newName.trim() !== currentThreadTitle) {
+        try {
+            await fetch(`${baseUrlVersions}/threads/current`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name: newName }),
+            });
+            loadThreads();
+           // location.reload(true);
+        } catch (error) {
+            console.error('Error starting thread:', error);
+        }
+    }
+}
+
 
 
 const loadVersions = async () => {
@@ -60,13 +79,16 @@ const loadThreads = async () => {
     }
 };
 
+let currentThreadTitle = "Conversation";
+
 const updateCurrentThreadTitle = (threads) => {
     const currentThread = threads.find(thread => thread.current);
     if (currentThread) {
         document.title = currentThread.friendlyName;
-        const currentThreadTitle = document.getElementById('currentThreadTitle');
-        currentThreadTitle.textContent = currentThread.friendlyName;
-        currentThreadTitle.style.left = '0';
+        const currentThreadTitleDiv = document.getElementById('currentThreadTitle');
+        currentThreadTitle = currentThread.friendlyName;
+        currentThreadTitleDiv.textContent = currentThreadTitle;
+        currentThreadTitleDiv.style.left = '0';
        // currentThreadTitle.style.left = '0';
     }
 };

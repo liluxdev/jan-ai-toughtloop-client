@@ -16,7 +16,7 @@ const loadVersions = async () => {
             listItem.innerHTML = `
                 <span class="version-content">${version.version}</span>
                 <div>
-                    <button class="button button-outline-secondary mr-1" onclick="editVersion('${version.key}', this)"><i class="fas fa-edit"></i></button>
+                    <button class="button button-outline mr-1" onclick="editVersion('${version.key}', this)"><i class="fas fa-edit"></i></button>
                 </div>
             `;
             versionList.appendChild(listItem);

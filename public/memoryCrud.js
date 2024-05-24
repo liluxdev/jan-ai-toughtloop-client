@@ -13,8 +13,8 @@ const loadMemories = async () => {
             listItem.innerHTML = `
                 <span class="memory-content">${memory.content}</span>
                 <div>
-                    <button class="button button-outline-secondary mr-1" onclick="editMemory(${memory.id}, this)"><i class="fas fa-edit"></i></button>
-                    <button class="button button-outline-secondary" onclick="deleteMemory(${memory.id})"><i class="fas fa-trash"></i></button>
+                    <button class="button button-outline mr-1" onclick="editMemory(${memory.id}, this)"><i class="fas fa-edit"></i></button>
+                    <button class="button button-outline" onclick="deleteMemory(${memory.id})"><i class="fas fa-trash"></i></button>
                 </div>
             `;
             memoryList.appendChild(listItem);

@@ -115,4 +115,6 @@ body {
   .runningCog.running {
     animation: spin 1s linear infinite;
   }
-  
+  .list-group-item{
+    padding-left: 12px;
+  }

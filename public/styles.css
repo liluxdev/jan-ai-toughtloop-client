@@ -63,7 +63,8 @@ body {
     float: left;
     background-color: #d4edda;
 }
-.card.assistant {
+.card.assistant,
+.card.avatar {
     text-align: right;
     background-color: #f8f9fa;
     float: right;

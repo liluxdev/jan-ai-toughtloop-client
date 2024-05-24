@@ -57,6 +57,7 @@ app.listen(3000, "0.0.0.0", () => {
 let interval = null;
 let intervalTimer = null;
 let etaIntervalSecs = -1;
+let currentIntervalLengthSecs = 333;
 
 export const getEtaIntervalSecs = () => {
   return etaIntervalSecs;
@@ -71,7 +72,7 @@ export const setToughtloopInterval = async (timing = 333) => {
   const radnomAdditionalSecs = Math.floor(Math.random() * toughtloopIntervalRandomMaxSecs);
   console.error("Random additional secs", radnomAdditionalSecs);
   timing += radnomAdditionalSecs;
-
+  currentIntervalLengthSecs =  timing;
   clearToughtloopInterval();
   console.log("Setting interval", timing);
   interval = setInterval(async () => {
@@ -102,8 +103,9 @@ intervalTimer = setInterval(async () => {
     console.log("I want to write a message in", etaIntervalSecs, "seconds");
   }
   const forgotToWriteMessageChance = Math.random();
+  console.log("Forgot to write message chance", forgotToWriteMessageChance,FROGOT_ABOUT_YOU_PROBABILITY, FROGOT_ABOUT_YOU_PROBABILITY / currentIntervalLengthSecs * 333 );
   if (etaIntervalSecs > 0) {
-    if (forgotToWriteMessageChance < FROGOT_ABOUT_YOU_PROBABILITY / etaIntervalSecs * 333 ) {
+    if (forgotToWriteMessageChance < FROGOT_ABOUT_YOU_PROBABILITY / currentIntervalLengthSecs * 333 ) {
       await incrementGenericCounter("forgot_count");
       console.error("Forgotting to write message");
       etaIntervalSecs = -1;
@@ -112,7 +114,7 @@ intervalTimer = setInterval(async () => {
   }
   if (etaIntervalSecs < 0) {
     const rememberedToWriteMessageChance = Math.random();
-    if (rememberedToWriteMessageChance < REMEMBER_ABOUT_YOU_PROBABILITY / etaIntervalSecs * 333) {
+    if (rememberedToWriteMessageChance < REMEMBER_ABOUT_YOU_PROBABILITY / currentIntervalLengthSecs * 333) {
       await incrementGenericCounter("remeber_count");
       console.error("Remembered to write message");
       clearInterval(intervalTimer);

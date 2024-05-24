@@ -1,3 +1,4 @@
+import { clearToughtloopInterval, setToughtloopInterval } from "../index.js";
 import { clearRecentMessages, getApiContextDebug, setBufferMessagesLimit } from "./api.js";
 import {
   dbPromiseMemory,
@@ -171,6 +172,10 @@ export const setupRoutes = (router) => {
     );
     if (key === 'buffer'){
       setBufferMessagesLimit(value);
+    }
+    if (key === 'toughtloopIntervalRandomMaxSecs'){
+      clearToughtloopInterval();
+      setToughtloopInterval();
     }
     ctx.body = { key:value };
   });

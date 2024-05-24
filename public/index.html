@@ -1,104 +1,343 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html class="dark" lang="en">
+  <head>
+    <!-- Required meta tags-->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- Color theme for statusbar (Android only) -->
+    <meta name="theme-color" content="#2196f3" />
     <title>Toughtloop AI</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="container-fluid d-flex flex-column vh-100">
-        <div id="messages" class="flex-grow-none"></div>
-        <textarea placeholder="Enter your message..." id="messageInput" class="form-control" rows="4" onkeypress="handleKeyPress(event)"></textarea>
-        <div class="d-flex align-items-center mt-2">
-            <i class="fa fa-chip"></i>
-            <div class="progress flex-grow-1 mr-2">
-                <div id="cpuUsage" class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/framework7/7.0.11/css/framework7.bundle.min.css"
+    />
+    <link rel="stylesheet" href="framework7/framework7-bundle.css" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="framework7/framework7-bundle.min.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <!-- App root element -->
+      <div class="view view-main view-init safe-areas">
+        <!-- Initial Page -->
+        <div class="page" data-name="home">
+          <!-- Navbar -->
+          <div class="navbar">
+            <div class="navbar-bg"></div>
+            <div class="navbar-inner">
+              <div class="left">
+                <a href="#" class="link icon-only panel-open" data-panel="left">
+                  <i class="fas fa-bars"></i>
+                </a>
+              </div>
+              <div class="title" id="currentThreadTitle">Current Thread</div>
             </div>
-            <span id="cpuUsageText">0%</span>
+          </div>
+          <!-- Page content -->
+          <div class="page-content">
+            <div class="no-block" id="messages"></div>
+            <div class="no-block">
+              <textarea
+                id="messageInput"
+                class="resizable"
+                placeholder="Enter your message..."
+                rows="4"
+                onkeypress="handleKeyPress(event)"
+              ></textarea>
+            </div>
+          </div>
+          <!-- Bottom Toolbar -->
+          <div class="toolbar toolbar-bottom">
+            <div class="toolbar-inner">
+              <button class="button button-fill" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+       <!--        <button
+                class="button button-outline"
+                onclick="toggleVersionList()"
+              >
+                <i class="fa fa-solid fa-code-compare"></i>
+              </button> -->
+              <button
+                class="button button-outline"
+                onclick="enableNotifications()"
+              >
+                <i class="fas fa-bell"></i>
+              </button>
+              <button
+                class="button button-outline"
+                onclick="toggleToughtloops()"
+              >
+                <i class="fas fa-cog"></i>
+              </button>
+              <button
+                class="button button-outline"
+                onclick="location.reload(true)"
+              >
+                <i class="fas fa-sync-alt"></i>
+              </button>
+              <button
+                id="wakeLock"
+                class="button button-outline"
+                onclick="requestWakeLock()"
+              >
+                <i class="fas fa-lock"></i>
+              </button>
+              <button class="button button-outline" onclick="toggleDebug()">
+                <i class="fas fa-bug"></i>
+              </button>
+              <button
+                class="button button-outline"
+                onclick="toggleMemoryList()"
+              >
+                <i class="fas fa-memory"></i>
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="toolbar d-flex justify-content-around mt-2">
-            <button class="btn btn-primary" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
-            <button class="btn btn-outline-primary" onclick="toggleVersionList()"><i class="fa fa-solid fa-code-compare"></i></button>
-            <button class="btn btn-outline-primary" onclick="enableNotifications()"><i class="fas fa-bell"></i></button>
-            <button class="btn btn-secondary" onclick="toggleToughtloops()"><i class="fas fa-cog"></i></button>
-            <button class="btn btn-outline-secondary" onclick="location.reload(true)"><i class="fas fa-sync-alt"></i></button>
-            <button class="btn btn-secondary" id="wakeLock" onclick="requestWakeLock()"><i class="fas fa-lock"></i></button>
-            <button class="btn btn-secondary" id="debug" onclick="toggleDebug()"><i class="fas fa-bug"></i></button>
-            <button class="btn btn-outline-secondary" onclick="toggleMemoryList()"><i class="fas fa-memory"></i></button>
+      </div>
+      <!-- Left panel with cover effect -->
+      <div class="panel panel-left panel-cover">
+        <div class="view">
+          <div class="page">
+            <div class="page-content">
+              <div class="block-title">Threads</div>
+              <div class="block">
+                <input
+                  type="text"
+                  id="threadFilter"
+                  placeholder="Filter threads..."
+                  onkeyup="filterThreads()"
+                />
+              </div>
+              <div class="list no-hairlines-md">
+                <ul id="threadListNew">
+                  <li>
+                    <a onclick="startNewThread()" href="#" class="item-link item-content">
+                      <div class="item-inner">
+                        <div class="item-title">New Thread</div>
+                        </div>
+                    </a>
+                   </li>
+                </ul>
+              </div>
+              <div class="list no-hairlines-md">
+                <ul id="threadList">
+                  <!-- Thread items will be appended here -->
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
-        <div id="toughtloops" class="panel prompt-list collapse mt-2">
-            <div class="row">
-                <div class="col-11">
-                    <h4 class="" onclick="toggleToughtloops()">Toughtloop Prompts</h4>
+      </div>
+      <div
+        id="toughtloops"
+        class="panel panel-resizable panel-right panel-cover panel-hidden"
+      >
+        <div class="view">
+          <div class="page">
+            <div class="page-content">
+              <div class="block-title">Toughtloop Prompts</div>
+              <div class="list no-hairlines-md">
+                <ul class="list-group">
+                  <!-- Prompt items will be appended here -->
+                </ul>
+              </div>
+              <div class="block">
+                <div class="input-group mt-2">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="newPromptInput"
+                    placeholder="New prompt..."
+                  />
+                  <div class="input-group-append">
+                    <button
+                      class="button button-outline-secondary"
+                      type="button"
+                      onclick="addPrompt()"
+                    >
+                      <i class="fas fa-plus"></i>
+                    </button>
+                  </div>
                 </div>
-                <div class="col-1">
-                    <i class="fa fa-times" onclick="toggleToughtloops()"></i>
-                </div>
+              </div>
             </div>
-            <ul class="list-group">
-                <!-- Prompt items will be appended here -->
-            </ul>
-            <div class="input-group mt-2">
-                <input type="text" class="form-control" id="newPromptInput" placeholder="New prompt...">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button" onclick="addPrompt()"><i class="fas fa-plus"></i></button>
-                </div>
-            </div>
+          </div>
         </div>
-        <div id="memoryList" class="panel memory-list collapse mt-2">
-            <div class="row">
-                <div class="col-11">
-                    <h4 class="" onclick="toggleMemoryList()">Memory (Instructions and System Memories)</h4>
+      </div>
+      <div
+        id="memoryList"
+        class="panel panel-resizable panel-right panel-cover panel-hidden"
+      >
+        <div class="view">
+          <div class="page">
+            <div class="page-content">
+              <div class="block-title">
+                Memory (Instructions and System Memories)
+              </div>
+              <div class="list no-hairlines-md">
+                <ul class="list-group">
+                  <!-- Memory items will be appended here -->
+                </ul>
+              </div>
+              <div class="block">
+                <div class="input-group mt-2">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="newMemoryInput"
+                    placeholder="New memory..."
+                  />
+                  <div class="input-group-append">
+                    <button
+                      class="button button-outline-secondary"
+                      type="button"
+                      onclick="addMemory()"
+                    >
+                      <i class="fas fa-plus"></i>
+                    </button>
+                  </div>
                 </div>
-                <div class="col-1">
-                    <i class="fa fa-times" onclick="toggleMemoryList()"></i>
-                </div>
+              </div>
             </div>
-            <ul class="list-group">
-                <!-- Memory items will be appended here -->
-            </ul>
-            <div class="input-group mt-2">
-                <input type="text" class="form-control" id="newMemoryInput" placeholder="New memory...">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button" onclick="addMemory()"><i class="fas fa-plus"></i></button>
-                </div>
-            </div>
+          </div>
         </div>
-        <div id="versionList" class="panel version-list collapse mt-2">
-            <div class="row">
-                <div class="col-11">
-                    <h4 class="" onclick="toggleVersionList()">DB Versions (change to start a new thread)</h4>
-                </div>
-                <div class="col-1">
-                    <i class="fa fa-times" onclick="toggleVersionList()"></i>
-                </div>
+      </div>
+      <div
+        id="versionList"
+        class="panel panel-resizable panel-right panel-cover panel-hidden"
+      >
+        <div class="view">
+          <div class="page">
+            <div class="page-content">
+              <div class="block-title">
+                DB Versions (change to start a new thread)
+              </div>
+              <div class="list no-hairlines-md">
+                <ul class="list-group">
+                  <!-- Version items will be appended here -->
+                </ul>
+              </div>
             </div>
-            <ul class="list-group">
-                <!-- Version items will be appended here -->
-            </ul>
+          </div>
         </div>
-        <div id="debugView" class="panel debug-list collapse mt-2">
-            <div class="row">
-                <div class="col-11">
-                    <h4 class="" onclick="toggleDebug()">Debug Context</h4>
+      </div>
+      <div
+        id="debugView"
+        class="panel panel-resizable panel-right panel-cover panel-hidden"
+      >
+        <div class="view">
+          <div class="page">
+            <div class="page-content">
+              <div class="block-title">Debug Context</div>
+              <div class="centered">
+                <div
+                  class="gauge gauge-init cpuUsage"
+                  data-type="semicircle"
+                  data-value="0.00"
+                  data-value-text="0%"
+                  data-lable-text="CPU Usage"
+                  data-value-text-color="#ff9800"
+                  data-border-color="#ff9800"
+                ></div>
+
+                <div class="debug-list list no-hairlines-md">
+                  <ul class="list-group">
+                    <!-- Debug items will be appended here -->
+                  </ul>
                 </div>
-                <div class="col-1">
-                    <i class="fa fa-times" onclick="toggleDebug()"></i>
-                </div>
+              </div>
             </div>
-            <ul class="list-group">
-                <!-- Version items will be appended here -->
-            </ul>
+          </div>
         </div>
+      </div>
+      <!-- Framework7 library -->
+      <script>
+        var app = new Framework7({
+          // App root element
+          el: "#app",
+          // App Name
+          name: "Toughtloop AI",
+          // App id
+          id: "dev.lilux.ai.toughtloop.frontend",
+          // Enable swipe panel
+          panel: {
+            swipe: true,
+          },
+          // Add default routes
+          routes: [
+            {
+              path: "/about/",
+              url: "about.html",
+            },
+          ],
+        });
+
+        function toggleToughtloops() {
+          app.panel.toggle("#toughtloops");
+          console.log("Toughtloops toggled");
+        }
+
+        function toggleMemoryList() {
+          app.panel.toggle("#memoryList");
+        }
+
+        function toggleVersionList() {
+          app.panel.toggle("#versionList");
+        }
+
+        function toggleDebug() {
+          app.panel.toggle("#debugView");
+          //if open, update the debug view
+          if (app.panel.get("#debugView").opened) {
+            fetchDebug();
+          }
+        }
+
+        function updateCpuUsage(percentage) {
+          let gauge = app.gauge.get(".cpuUsage");
+          if (!gauge) {
+            gauge = app.gauge.create({
+              el: ".cpuUsage",
+              type: "semicircle",
+              value: percentage / 100,
+              valueText: percentage + "%",
+              labelText: "CPU Usage",
+              valueTextColor: "#ff9800",
+              borderColor: "#ff9800",
+            });
+          }
+          console.log({ gauge });
+
+          gauge.update({
+            value: percentage / 100,
+            valueText: percentage + "%",
+          });
+          console.log({ gauge });
+        }
+      </script>
+      <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/2.0.2/timeago.min.js"
+        integrity="sha512-sl01o/gVwybF1FNzqO4NDRDNPJDupfN0o2+tMm4K2/nr35FjGlxlvXZ6kK6faa9zhXbnfLIXioHnExuwJdlTMA=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+      ></script>
+
+      <!-- App scripts -->
+      <script src="scripts.js"></script>
+      <script src="memoryCrud.js"></script>
+      <script src="toughtloopsCrud.js"></script>
+      <script src="versionCrud.js"></script>
+      <script src="debugCrud.js"></script>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/2.0.2/timeago.min.js" integrity="sha512-sl01o/gVwybF1FNzqO4NDRDNPJDupfN0o2+tMm4K2/nr35FjGlxlvXZ6kK6faa9zhXbnfLIXioHnExuwJdlTMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="scripts.js"></script>
-    <script src="memoryCrud.js"></script>
-    <script src="toughtloopsCrud.js"></script>
-    <script src="versionCrud.js"></script>
-    <script src="debugCrud.js"></script>
-</body>
+  </body>
 </html>

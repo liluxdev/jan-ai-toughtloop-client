@@ -38,7 +38,7 @@ const dbVersionsInit = async () => {
 
 await dbVersionsInit();
 
-const getMessagesVersion = () => {
+export const getMessagesVersion = () => {
   console.log("Messages version is", VERSION_DB_MGS);
   return VERSION_DB_MGS;
 };
@@ -87,6 +87,15 @@ export const initDb = async () => {
         timestamp TEXT
         )
     `);
+  const dbVer = await dbVersions;
+  await dbVer.exec(`
+    CREATE TABLE IF NOT EXISTS threads (
+      friendlyName TEXT,
+      key TEXT PRIMARY KEY,
+      timestamp TEXT,
+      timestampLastUpdate TEXT
+    )
+  `);
   console.log("Database initialized");
   doDbMigrations();
 };

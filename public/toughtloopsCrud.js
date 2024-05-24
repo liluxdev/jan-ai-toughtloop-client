@@ -1,9 +1,6 @@
 const baseUrlPrompts = location.origin;
 
-const toggleToughtloops = () => {
-    const memoryList = document.getElementById('toughtloops');
-    memoryList.classList.toggle('collapse');
-};
+
 
 const loadPrompts = async () => {
     try {
@@ -17,8 +14,8 @@ const loadPrompts = async () => {
             listItem.innerHTML = `
                 <span class="prompt-content">${memory.content}</span>
                 <div>
-                    <button class="btn btn-sm btn-outline-secondary mr-1" onclick="editPrompt(${memory.id}, this)"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="deletePrompt(${memory.id})"><i class="fas fa-trash"></i></button>
+                    <button class="button button-outline-secondary mr-1" onclick="editPrompt(${memory.id}, this)"><i class="fas fa-edit"></i></button>
+                    <button class="button button-outline-secondary" onclick="deletePrompt(${memory.id})"><i class="fas fa-trash"></i></button>
                 </div>
             `;
             memoryList.appendChild(listItem);

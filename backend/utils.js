@@ -1,3 +1,4 @@
+import { dbVersions, getMessagesVersion } from "./db.js";
 import { broadcast } from "./websockets.js";
 
 export const formatMessage = (content, role, chunk = false, timestamp = new Date().toISOString) => {
@@ -8,10 +9,31 @@ export const formatMessage = (content, role, chunk = false, timestamp = new Date
     }
   };
   
-  export const sendJsonMessage = (content, role, chunk = false, clientId=undefined, timestamp=new Date().toISOString()) => {
+  export const sendJsonMessage = async (content, role, chunk = false, clientId=undefined, timestamp=new Date().toISOString()) => {
     console.log("Sending message to all clients: ", content, role, chunk);
     const jsonString = formatMessage(content, role, chunk, timestamp);
     //ws.send(jsonString);
     broadcast(jsonString, clientId);
+    const dbVer = await dbVersions;
+    const timestampLastUpdate = new Date().toISOString();
+    const version = getMessagesVersion();
+    if (content.recentMessages){
+      try{
+      content = content.recentMessages[0].content;
+      }catch(e){
+        console.error("Error parsing recentMessages", e);
+        content = "thread-"+ version;
+      }
+    }
+    const friendlyName = content.length > 55 ? content.substring(0, 55) + '...' : content;
+    // SQLite insert or update
+    await dbVer.run(
+      `INSERT INTO threads (key, friendlyName, timestamp, timestampLastUpdate) VALUES (?, ?, ?, ?)
+      ON CONFLICT(key) DO UPDATE SET friendlyName = excluded.friendlyName, timestampLastUpdate = excluded.timestampLastUpdate`,
+      version,
+      friendlyName,
+      timestampLastUpdate,
+      timestampLastUpdate
+    );
   };
   

@@ -1,12 +1,8 @@
 const baseUrlDebug = location.origin;
 
-const toggleDebug = () => {
-    loadDebug();
-    const memoryList = document.getElementById('debugView');
-    memoryList.classList.toggle('collapse');
-};
 
-const loadDebug = async () => {
+
+const fetchDebug = async () => {
     try {
         const response = await fetch(`${baseUrlPrompts}/apiContextDebug`);
         const debug = await response.json();
@@ -25,8 +21,8 @@ const loadDebug = async () => {
             listItem.innerHTML = `
                 <span class="debug-content">${memory.key}:<br/><pre>${memory.content}</pre></span>
                 <div>
-                    <button class="btn btn-sm btn-outline-secondary mr-1" onclick="editPrompt(${memory.id}, this)"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="deletePrompt(${memory.id})"><i class="fas fa-trash"></i></button>
+                    <button class="button button-outline-secondary mr-1" onclick="editPrompt(${memory.id}, this)"><i class="fas fa-edit"></i></button>
+                    <button class="button button-outline-secondary" onclick="deletePrompt(${memory.id})"><i class="fas fa-trash"></i></button>
                 </div>
             `;
             memoryList.appendChild(listItem);

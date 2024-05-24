@@ -2,15 +2,15 @@ body {
     font-family: Arial, sans-serif;
 }
 #messages {
-    height: calc(100vh - 197px);
+    height: calc(100vh - 195px);
     overflow-y: scroll;
-    border: 1px solid #ccc;
     padding: 10px;
 }
 #messageInput {
-    margin-top: 20px;
-    padding: 10px;
-    height: calc(12vh - 22px);
+    border: 1px solid lightgray;
+    padding: 12px;
+    width: calc(100% - 0px);
+    height: calc(13vh - 0px);
 }
 .chunk {
     color: orangered;
@@ -32,7 +32,6 @@ body {
     bottom: 60px;
     left: 0;
     right: 0;
-    background: whitesmoke;
 }
 .avatar {
     width: 88px;
@@ -80,36 +79,12 @@ body {
     user-select: all;
     display: inline-block;
 }
-.toolbar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: whitesmoke;
-    padding: 10px;
-}
 
-.panel{
-    padding: 18px;
-    position: fixed;
-    left: 0;
-    bottom: 0;
-    min-height: 33vh;
-    width: 100vw;
-    z-index: 100;
-    background-color: whitesmoke;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.777);
+.centered{
+    text-align: center;
+    margin: 0 auto;
 }
-
-.version-list,
-.memory-list,
-.prompt-list,
-.debug-list {
-    max-height: 50vh;
-    overflow-y: auto;
-    transition: all 0.3s ease;
-}
-
 .debug-list pre{
+    text-align: left;
     overflow-x: auto;
 }

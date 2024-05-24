@@ -3,6 +3,7 @@ import {
   dbPromiseMemory,
   dbPromisePrompts,
   dbVersions,
+  getMessagesVersion,
   initDb,
   setMessageVersion,
 } from "./db.js";
@@ -92,6 +93,17 @@ export const setupRoutes = (router) => {
     const db = await dbVersions;
     const versions = await db.all("SELECT * FROM versions");
     ctx.body = versions;
+  });
+  router.get("/threads", async (ctx) => {
+    const db = await dbVersions;
+    const threads = await db.all("SELECT key, friendlyName, timestamp, timestampLastUpdate FROM threads ORDER BY timestampLastUpdate,timestamp DESC");
+    const currentThreadKey = await getMessagesVersion();
+    for (const thread of threads) {
+      if (thread.key === currentThreadKey) {
+        thread.current = true;
+      }
+    }
+    ctx.body = threads;
   });
   router.put("/version/:key", async (ctx) => {
     const { version } = ctx.request.body;

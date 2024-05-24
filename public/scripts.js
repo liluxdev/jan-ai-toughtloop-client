@@ -192,9 +192,10 @@ if (window.Worker) {
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     } else if (type === "cpu") {
       const cpuUsage = parseFloat(data);
-      cpuUsageBar.style.width = cpuUsage + "%";
-      cpuUsageBar.setAttribute("aria-valuenow", cpuUsage);
-      cpuUsageText.textContent = cpuUsage + "%";
+      //cpuUsageBar.style.width = cpuUsage + "%";
+      //cpuUsageBar.setAttribute("aria-valuenow", cpuUsage);
+      updateCpuUsage(cpuUsage);
+    //  cpuUsageText.textContent = cpuUsage + "%";
     } else if (type === "notify") {
       if (Notification.permission === "granted") {
         navigator.serviceWorker.ready.then((registration) => {

@@ -111,6 +111,10 @@ export const setupRoutes = (router) => {
     const name = ctx.request.body.name;
     const timestamp = new Date().toISOString();
     const version = timestamp.replace(/:/g, "-"); 
+    if ((await getApiContextDebug()).invokingApi))){
+      ctx.status = 403;
+      ctx.body = { error: "Cannot switch Thread while invoking API" };
+    }
     await db.run(
       `INSERT INTO threads (key, friendlyName, timestamp, timestampLastUpdate) VALUES (?, ?, ?, ?)`,
       version,
@@ -144,6 +148,10 @@ export const setupRoutes = (router) => {
     const { version } = ctx.request.body;
     const db = await dbVersions;
     const key = ctx.params.key;
+    if ((await getApiContextDebug()).invokingApi))){
+      ctx.status = 403;
+      ctx.body = { error: "Cannot switch Thread while invoking API" };
+    }
     await db.run("UPDATE versions SET version = ? WHERE key = ?", version, key);
     ctx.body = { version };
     setMessageVersion(version);

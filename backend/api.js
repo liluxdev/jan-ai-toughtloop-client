@@ -351,8 +351,8 @@ export const invokeApi = async (instructions, isInteractive = true) => {
             isFirstChunk = false;
             let end = new Date().getTime();
             thinkingTime = end - start;
-            console.error("Thinking time:", thinkingTime);
-            incrementGenericAvg("thinking_time", thinkingTime);
+            console.error("Thinking time:", thinkingTime/1000/60);
+            incrementGenericAvg("thinking_time_minutes", thinkingTime/1000/60);
           }
           if (event.data.startsWith("[DONE]")) {
             return;
@@ -402,8 +402,9 @@ export const invokeApi = async (instructions, isInteractive = true) => {
         console.error("API call ended");
         const end = new Date().getTime();
         completionTime = end - start;
-        console.error("Completion time:", completionTime);
-        incrementGenericAvg("completion_time", completionTime);
+        console.error("Completion time:", completionTime/1000/60);
+        incrementGenericAvg("completion_time_minutes", completionTime/1000/60);
+        
         const assistant_chunks = pendingChunks.filter(
           (message) => message.role === "assistant_chunk"
         );

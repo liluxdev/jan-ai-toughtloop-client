@@ -68,6 +68,29 @@ export const incrementGenericCounter = async (key) =>{
   await db.run("INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)", key, counter);
 }
 
+export const incrementGenericAvg = async (key, currentValue) =>{
+  currentValue = parseFloat(currentValue);
+  const db = await dbVersions;
+  const conf = await db.all("SELECT value FROM config WHERE key = ?", key);
+  let counter = 0;
+  if (conf.length > 0) {
+    const json = conf[0].value;
+    let {count, avg} = JSON.parse(json);
+    count = parseInt(count);
+    avg = parseFloat(avg);
+    counter = count + 1;
+    let newAvg = (currentValue + avg * count) / (counter);
+    await db.run("INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)", key, JSON.stringify({count: counter, avg: newAvg}));
+  }else{
+    let count = 1;
+    let avg = currentValue;
+    await db.run("INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)", key, JSON.stringify({count, avg}));
+  }
+  counter++;
+  await db.run("INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)", key, counter);
+}
+
+
 
 export const getApiContextDebug = async () => {
   return {
@@ -162,7 +185,8 @@ export const dequeueMessage = () => {
     invokeApi(m, true);
   }
 };
-
+let thinkingTime = 0;
+let completionTime = 0;
 export const invokeApi = async (instructions, isInteractive = true) => {
   console.log("invokeApi", invokingApi, instructions);
   try {
@@ -304,6 +328,8 @@ export const invokeApi = async (instructions, isInteractive = true) => {
     const controller = new AbortController();
 
     try {
+      let start = new Date().getTime();
+      let isFirstChunk = true;
       console.log("Invoking API...");
       console.log("API call body:", apiCallBody);
       const response = await axiosInstance({
@@ -321,6 +347,13 @@ export const invokeApi = async (instructions, isInteractive = true) => {
 
       const parser = createParser(async(event) => {
         if (event.type === "event") {
+          if (isFirstChunk){
+            isFirstChunk = false;
+            let end = new Date().getTime();
+            thinkingTime = end - start;
+            console.error("Thinking time:", thinkingTime);
+            incrementGenericAvg("thinking_time", thinkingTime);
+          }
           if (event.data.startsWith("[DONE]")) {
             return;
           }
@@ -366,6 +399,11 @@ export const invokeApi = async (instructions, isInteractive = true) => {
       });
 
       response.data.on("end", async () => {
+        console.error("API call ended");
+        const end = new Date().getTime();
+        completionTime = end - start;
+        console.error("Completion time:", completionTime);
+        incrementGenericAvg("completion_time", completionTime);
         const assistant_chunks = pendingChunks.filter(
           (message) => message.role === "assistant_chunk"
         );

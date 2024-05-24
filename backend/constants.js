@@ -1,6 +1,6 @@
 import { dbPromisePrompts } from "./db.js";
 
-export const ASSISTANT_NAME = "Toughtloop AI";
+export const ASSISTANT_NAME = "SEKHMET (Syria)";
 
 export const MODEL_NAME = 'stealth-v1.2-7b';
 
@@ -11,6 +11,7 @@ export const NUMBER_OF_MESSAGES_IN_BUFFER = 8;
 export const RANDOM_MEMORY_PROBABILITY = 0.12;
 export const FROGOT_ABOUT_YOU_PROBABILITY = 0.00333;
 export const REMEMBER_ABOUT_YOU_PROBABILITY = 0.0777;
+export const RESCHEDULE_PROBABILITY = 0.0012;
 
 export const SAFEWORD_INSTRUCTIONS = " safeword:notoughts, is the stopword you can use at message start if you have nothing to say this round.";
 

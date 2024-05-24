@@ -303,10 +303,9 @@
           }
         }
 
-        function updateCpuUsage(percentage) {
-
+        async function updateCpuUsage(percentage) {
           if (percentage > RUNNING_COG_THRESHOLD) {
-            setCogRunning(true);
+            setCogRunning(await isInvokingApi());
           } else {
             setCogRunning(false);
           }

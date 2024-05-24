@@ -1,6 +1,10 @@
 const baseUrlDebug = location.origin;
 
-
+const isInvokingApi = async () => {
+    const response = await fetch(`${baseUrlPrompts}/apiContextDebug`);
+    const debug = await response.json();
+    return debug.isInvokingApi;
+};
 
 const fetchDebug = async () => {
     try {

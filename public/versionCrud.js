@@ -66,6 +66,8 @@ const updateCurrentThreadTitle = (threads) => {
         document.title = currentThread.friendlyName;
         const currentThreadTitle = document.getElementById('currentThreadTitle');
         currentThreadTitle.textContent = currentThread.friendlyName;
+        currentThreadTitle.style.left = '0';
+       // currentThreadTitle.style.left = '0';
     }
 };
 
@@ -98,4 +100,8 @@ const filterThreads = () => {
 document.addEventListener('DOMContentLoaded', loadVersions);
 document.addEventListener('DOMContentLoaded', loadThreads);
 setInterval(loadThreads, 30*1000);
+/* setInterval(() => {
+    const currentThreadTitle = document.getElementById('currentThreadTitle');
+    currentThreadTitle.style.left = '0';
+}, 1000); */
 

@@ -33,9 +33,22 @@ export const getApiContextDebug = () => {
   return {
     invokingApi,
     etaIntervalSecs: getEtaIntervalSecs(),
+    systemMessagesCount: apiCallBody.messages.filter(m => m.role === "system").length,
+    conversationMessageCount: apiCallBody.messages.filter(m => m.role !== "system" && m.role !== "avatar").length,
+    conversationMessageLimit: getBufferMessagesLimit(),
     queue: messageQueue,
     ...apiCallBody,
   };
+};
+
+let bufferMessaageLimit = NUMBER_OF_MESSAGES_IN_BUFFER;
+
+export const getBufferMessagesLimit = () => {
+  return bufferMessaageLimit;
+};
+
+export const setBufferMessagesLimit = (limit) => {
+  bufferMessaageLimit = limit;
 };
 
 let pendingChunks = [];
@@ -53,7 +66,7 @@ export const setRecentMessages = (content, role) => {
     (m) => m.role !== "system" && m.role !== "avatar"
   );
   apiCallBody.messages = system_messages.concat(
-    other_messages.slice(-NUMBER_OF_MESSAGES_IN_BUFFER)
+    other_messages.slice(-getBufferMessagesLimit())
   );
 };
 
@@ -152,7 +165,7 @@ export const invokeApi = async (instructions, isInteractive = true) => {
     const dbConv = await dbPromise();
 
     const messageConvHistory = await dbConv.all(
-      `SELECT content, role,timestamp FROM messages WHERE role = 'user' OR  role = 'assistant' ORDER BY timestamp DESC LIMIT ${NUMBER_OF_MESSAGES_IN_BUFFER}`
+      `SELECT content, role,timestamp FROM messages WHERE role = 'user' OR  role = 'assistant' ORDER BY timestamp DESC LIMIT ${getBufferMessagesLimit()}`
     );
 
     console.log(

@@ -57,6 +57,17 @@ const incrementSafewordCounter = async (msgMatchingSafeword) =>{
 
 }
 
+export const incrementGenericCounter = async (key) =>{
+  const db = await dbVersions;
+  const conf = await db.all("SELECT value FROM config WHERE key = ?", key);
+  let counter = 0;
+  if (conf.length > 0) {
+    counter = parseInt(conf[0].value);
+  }
+  counter++;
+  await db.run("INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)", key, counter);
+}
+
 
 export const getApiContextDebug = async () => {
   return {

@@ -63,7 +63,7 @@ export const getEtaIntervalSecs = () => {
 };
 
 export const setToughtloopInterval = async (timing = 333) => {
-  const radnomAdditionalSecs = Math.floor(Math.random() * await getConfiguration().toughtloopIntervalRandomMaxSecs || 333);
+  const radnomAdditionalSecs = Math.floor(Math.random() * ((await getConfiguration()).toughtloopIntervalRandomMaxSecs || 333));
   timing += radnomAdditionalSecs;
 
   clearToughtloopInterval();

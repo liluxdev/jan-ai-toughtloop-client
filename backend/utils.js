@@ -14,8 +14,28 @@ export const formatMessage = (content, role, chunk = false, timestamp = new Date
     const jsonString = formatMessage(content, role, chunk, timestamp);
     //ws.send(jsonString);
     broadcast(jsonString, clientId);
+    updateThread(content);
     //autocreateThread(content);
   };
+
+  export const updateThread = async (content) => {
+    try{
+    const dbVer = await dbVersions;
+    const timestampLastUpdate = new Date().toISOString();
+    const version = getMessagesVersion();
+    if (content.recentMessages){
+      return;
+    }
+    // SQLite insert or update
+    await dbVer.run(
+      `UPDATE threads SET timestampLastUpdate = ? WHERE key = ?`,
+      timestampLastUpdate,
+      version
+    );
+    }catch(e){
+      console.error("Error updating thread", e);
+    }
+  }
 
   export const autocreateThread = async (content) => {
     const dbVer = await dbVersions;

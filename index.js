@@ -62,6 +62,7 @@ export const getEtaIntervalSecs = () => {
   return etaIntervalSecs;
 };
 
+
 export const setToughtloopInterval = async (timing = 333) => {
   const conf = await getConfiguration();
   console.error(conf);
@@ -102,16 +103,16 @@ intervalTimer = setInterval(async () => {
   }
   const forgotToWriteMessageChance = Math.random();
   if (etaIntervalSecs > 0) {
-    if (forgotToWriteMessageChance < FROGOT_ABOUT_YOU_PROBABILITY) {
-      console.log("Forgotting to write message");
+    if (forgotToWriteMessageChance < FROGOT_ABOUT_YOU_PROBABILITY / etaIntervalSecs * 333 ) {
+      console.error("Forgotting to write message");
       etaIntervalSecs = -1;
       clearToughtloopInterval();
     }
   }
   if (etaIntervalSecs < 0) {
     const rememberedToWriteMessageChance = Math.random();
-    if (rememberedToWriteMessageChance < REMEMBER_ABOUT_YOU_PROBABILITY) {
-      console.log("Remembered to write message");
+    if (rememberedToWriteMessageChance < REMEMBER_ABOUT_YOU_PROBABILITY / etaIntervalSecs * 333) {
+      console.error("Remembered to write message");
       clearInterval(intervalTimer);
       setToughtloopInterval();
     }

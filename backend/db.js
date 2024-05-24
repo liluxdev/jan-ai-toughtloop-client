@@ -48,6 +48,14 @@ export const getMessagesVersion = () => {
   return VERSION_DB_MGS;
 };
 
+
+export const getConversationFriendlyName = async () => {
+  const db = await dbVersions;
+  const currentThreadKey = await getMessagesVersion();
+  const threads = await db.all("SELECT friendlyName FROM threads WHERE key = ?", currentThreadKey);
+  return threads[0].friendlyName;
+};
+
 export const dbPromise = async () =>
   await open({
     filename: "./stealth_db/database" + getMessagesVersion() + ".db",

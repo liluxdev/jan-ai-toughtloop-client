@@ -1,6 +1,6 @@
 import { createParser } from "eventsource-parser";
 import axios from "axios";
-import { dbPromise, dbPromiseMemory } from "./db.js";
+import { dbPromise, dbPromiseMemory, getConversationFriendlyName } from "./db.js";
 import { formatMessage, sendJsonMessage } from "./utils.js";
 import {
   API_ALREADY_INVOKED_MESSAGE,
@@ -143,6 +143,8 @@ export const invokeApi = async (instructions, isInteractive = true) => {
     //sendJsonMessage(ctx.websocket, USER_TOUGHTLOOPPROMPT_INIT, "system");
 
     clearRecentMessages();
+
+    setRecentMessages("NOTICE: this conversation thread was named by the user: "+getConversationFriendlyName(), "system");
 
     for (const message of memory.reverse()) {
       let content = message.content;

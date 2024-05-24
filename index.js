@@ -130,8 +130,9 @@ intervalTimer = setInterval(async () => {
     const emojiChance = Math.random();
     if (emojiChance < SEND_EMOJI_PROBABILITY / currentIntervalLengthSecs * 333) {
       await incrementGenericCounter("emoji_count");
-      console.error("Sending emoji");
-      await invokeApi(getRandomAsciiEmoji() + EMOJII_REQUEST_PROMPT, false);
+      const emoji = getRandomAsciiEmoji();
+      console.error("Sending emoji",emoji);
+      await invokeApi(emoji + EMOJII_REQUEST_PROMPT, false);
     }
     const rescheduleCahnce = Math.random();
     if (rescheduleCahnce < RESCHEDULE_PROBABILITY / currentIntervalLengthSecs * 333) {

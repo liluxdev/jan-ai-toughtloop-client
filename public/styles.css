@@ -13,7 +13,7 @@ body {
 }
 @media screen and (min-height: 600px) {
     #messages {
-        height: calc(100vh - 237px);
+        height: calc(100vh - 247px);
     }
 }
 #messageInput {

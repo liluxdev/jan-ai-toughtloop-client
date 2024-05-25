@@ -671,7 +671,7 @@
             var sendAllThreads = app.toggle.create({
               el: ".sendAllThreads",
               on: {
-                change: function () {
+                change: function (event) {
                   console.log("Toggle changed");
                   updateConfigValue("sendAllThreads", event.value);
                 },

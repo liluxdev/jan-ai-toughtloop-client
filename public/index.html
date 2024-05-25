@@ -125,6 +125,11 @@
         if (isInStandaloneMode || isStandaloneModeAndroid()){
           console.log("Running in standalone mode");
           setTimeout(closeInstallMessage, 0.5*1000);
+        }else{
+          if (isAndroid()) {
+            console.log("Not running in standalone mode");
+            document.getElementById("messages").classList.add("androidBrowser");
+          }
         }
 
         if (!isMobile()) {

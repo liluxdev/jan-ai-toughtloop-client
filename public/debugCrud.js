@@ -134,7 +134,7 @@ const fetchDebug = async () => {
     console.trace();
     debouncedFetchDebug();
 }
-const debouncedUpdateConfigValue = debounce(updateConfigValue, 333);
+const debouncedUpdateConfigValue = debounce(_updateConfigValue, 333);
 const updateConfigValue = async(key, value) => {
     if (refreshingBufferSize) return;
     if (refreshingToughloopInterval) return;

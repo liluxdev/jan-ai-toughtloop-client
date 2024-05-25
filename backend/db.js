@@ -57,6 +57,24 @@ export const getConversationFriendlyName = async () => {
   return threads[0].friendlyName;
 };
 
+export const dbPromiseMessageGeneric = async (version) =>
+  await open({
+    filename: "./stealth_db/database" + version + ".db",
+    driver: sqlite3.Database,
+  });
+
+export const queryAllMessagesOfAllThreads = async () => {
+  const db = await dbVersions;
+  const threads = await db.all("SELECT key FROM threads");
+  const allMessages = [];
+  for (const thread of threads) {
+    const db = await dbPromiseMessageGeneric(thread.key);
+    const messages = await db.all("SELECT * FROM messages");
+    allMessages.push({ thread: thread.key, messages });
+  }
+  return allMessages;
+};
+
 export const dbPromise = async () =>
   await open({
     filename: "./stealth_db/database" + getMessagesVersion() + ".db",

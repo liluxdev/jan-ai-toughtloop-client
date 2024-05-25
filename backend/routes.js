@@ -115,6 +115,7 @@ export const setupRoutes = (router) => {
     if ((await getApiContextDebug()).invokingApi){
       ctx.status = 403;
       ctx.body = { error: "Cannot switch Thread while invoking API" };
+      return;
     }
     await db.run(
       `INSERT INTO threads (key, friendlyName, timestamp, timestampLastUpdate) VALUES (?, ?, ?, ?)`,
@@ -152,6 +153,7 @@ export const setupRoutes = (router) => {
     if ((await getApiContextDebug()).invokingApi){
       ctx.status = 403;
       ctx.body = { error: "Cannot switch Thread while invoking API" };
+      return;
     }
     await db.run("UPDATE versions SET version = ? WHERE key = ?", version, key);
     ctx.body = { version };

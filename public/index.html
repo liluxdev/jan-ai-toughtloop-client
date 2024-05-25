@@ -97,6 +97,22 @@
         document.body.insertAdjacentHTML("afterbegin", installMessage);
       }
 
+      function isStandaloneModeAndroid() {
+        return window.matchMedia('(display-mode: standalone)').matches;
+      }
+
+      function isAndroid() {
+        return /android/i.test(navigator.userAgent);
+      }
+
+      function isIOS() {
+        return /iphone|ipad|ipod/i.test(navigator.userAgent);
+      }
+
+      function isMobile() {
+        return isAndroid() || isIOS();
+      }
+
       window.addEventListener("load", () => {
         const isIos = /iphone|ipad|ipod/.test(
           navigator.userAgent.toLowerCase()
@@ -106,7 +122,25 @@
         if (isIos && !isInStandaloneMode) {
           showInstallInstructionsForiOS();
         }
+        if (isInStandaloneMode || isStandaloneModeAndroid()){
+          console.log("Running in standalone mode");
+          setTimeout(closeInstallMessage, 0.5*1000);
+        }
+
+        if (!isMobile()) {
+          console.log("Not running on a mobile device");
+          setTimeout(closeInstallMessage, 0.3*1000);
+        }
+
       });
+
+      const closeInstallMessage = () => {
+        document.getElementById("installMessage").style.display = "none";
+      };
+
+      setTimeout(() => {
+        closeInstallMessage();
+      }, 5*1000);
     </script>
   </head>
   <body>
@@ -115,7 +149,7 @@
       <div class="view view-main view-init safe-areas">
         <!-- Initial Page -->
         <div class="page" data-name="home">
-          <div class="block block-strong">
+          <div id="installMessage" class="block block-strong">
             <div class="alert alert-success alert-dismissible">
               <p>Install Toughtloop AI for a better experience.</p>
               <button
@@ -126,7 +160,7 @@
               </button>
               <span
                 class="close"
-                onclick="this.parentElement.style.display='none'"
+                onclick="this.parentElement.parentElement.style.display='none'"
                 >&times;</span
               >
             </div>

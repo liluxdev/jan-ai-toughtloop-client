@@ -70,6 +70,13 @@ export const queryAllMessagesOfAllThreads = async () => {
   for (const thread of threads) {
     try{
     const db2 = await dbPromiseMessageGeneric(thread.key);
+    try {
+      await db2.exec(`ALTER TABLE messages ADD COLUMN model TEXT`);
+      console.log("Column added");
+    } catch (err) {
+      console.log("Column already exists");
+    }
+  
     const messages = await db2.all("SELECT * FROM messages ORDER BY timestamp ASC");
     allMessages.push({ thread: thread, messages });
     console.error("Messages queried", messages.length);
@@ -145,6 +152,16 @@ export const initDb = async () => {
 };
 
 const doDbMigrations = async () => {
+  const dbMsg = await dbPromise();
+  
+  try {
+    await db.exec(`ALTER TABLE messages ADD COLUMN model TEXT`);
+    console.log("Column added");
+  } catch (err) {
+    console.log("Column already exists");
+  }
+
+
   const db = await dbVersions;
   console.log("Checking for database migrations");
   console.log("Migrating db files to threads...");

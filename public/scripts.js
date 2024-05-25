@@ -56,7 +56,7 @@ if (window.Worker) {
 
     if (type === "message") {
       const messageData = JSON.parse(data);
-      const { content, role, chunk, timestamp } = messageData;
+      const { content, role, chunk, timestamp, model} = messageData;
 
       if (role === "user") {
         const lastUserCard = document.querySelector(".card.user.sending");
@@ -71,7 +71,7 @@ if (window.Worker) {
           cardBody.textContent = content;
           const cardTime = document.createElement("div");
           cardTime.className = "card-time";
-          cardTime.innerHTML =
+          cardTime.innerHTML = 
             timestamp +
             ' <div class="timeago-div-render" datetime="' +
             timestamp +
@@ -112,6 +112,7 @@ if (window.Worker) {
           const cardTime = document.createElement("div");
           cardTime.className = "card-time";
           cardTime.innerHTML =
+            model + "@" +
             timestamp +
             ' <div class="timeago-div-render" datetime="' +
             timestamp +
@@ -152,6 +153,7 @@ if (window.Worker) {
           );
           if (lastAssistantCardTime) {
             lastAssistantCardTime.innerHTML =
+              model + "@" +
               timestamp +
               ' <div class="timeago-div-render" datetime="' +
               timestamp +
@@ -201,7 +203,7 @@ if (window.Worker) {
         navigator.serviceWorker.ready.then((registration) => {
           registration.showNotification("New message", {
             body: data,
-            icon: "avatars/avatar_1.png",
+            icon: "favicon.webp",
             data: { url: location.href },
           });
         });

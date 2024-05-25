@@ -165,10 +165,11 @@ const sendJsonMessage = (
   content,
   role,
   chunk = false,
-  timestamp = new Date().toISOString()
+  timestamp = new Date().toISOString(),
+  model = undefined
 ) => {
   console.trace("Sending message: ", content, role, chunk);
-  const message = JSON.stringify({ content, role, chunk, timestamp });
+  const message = JSON.stringify({ content, role, chunk, timestamp, model});
   postMessage({ type: "message", data: message });
 };
 

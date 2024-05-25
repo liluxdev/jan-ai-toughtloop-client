@@ -67,11 +67,13 @@ const incrementSafewordCounter = async (msgMatchingSafeword) => {
   );
   const db2 = await dbPromise();
   const timestamp = new Date().toISOString();
+  const confMap = await getConfiguration();
   await db2.run(
-    "INSERT INTO messages (content, role, timestamp) VALUES (?, ?, ?)",
+    "INSERT INTO messages (content, role, timestamp, model) VALUES (?, ?, ?, ?)",
     msgMatchingSafeword,
     "assistant_safeword",
-    timestamp
+    timestamp,
+    confMap.model || MODEL_NAME
   );
   console.log("Saved safeword message:", msgMatchingSafeword);
 };
@@ -229,11 +231,13 @@ export const getRandomAvatar = async () => {
   //get the randomFile name to be just the relative file name
   const db = await dbPromise();
   const timestamp = new Date().toISOString();
+  const confMap = await getConfiguration();
   await db.run(
     "INSERT INTO messages (content, role, timestamp) VALUES (?, ?, ?)",
     "/avatars/" + randomFile,
     "avatar",
-    timestamp
+    timestamp,
+    confMap.model || MODEL_NAME
   );
   console.log("Saved avatar:", randomFile);
   return "/avatars/" + randomFile;
@@ -246,11 +250,16 @@ export const enqueueMessage = (message) => {
   console.log("Enqueuing message...", message);
 };
 
-export const dequeueMessage = () => {
+export const getModel = async () => {
+  const conf = await getConfiguration();
+  return conf.model || MODEL_NAME;
+};
+
+export const dequeueMessage = async () => {
   if (messageQueue.length > 0) {
     const { m } = messageQueue.shift();
     console.log("Dequeueing message...", m);
-    sendJsonMessage("<i>Dequeued message:</i>: " + m, "user");
+    sendJsonMessage("<i>Dequeued message:</i>: " + m, "user", await getModel());
     invokeApi(m, true);
   }
 };
@@ -268,7 +277,7 @@ export const invokeApi = async (
       console.log("API is already being invoked, request ignored.");
       if (isInteractive || isSendingEmoji) {
         if (!isSendingEmoji) {
-          sendJsonMessage(API_ALREADY_INVOKED_MESSAGE, "system");
+          sendJsonMessage(API_ALREADY_INVOKED_MESSAGE, "system", getModel());
         }
         enqueueMessage(instructions);
       }
@@ -444,7 +453,8 @@ export const invokeApi = async (
             "system",
             false,
             undefined,
-            message.timestamp
+            message.timestamp,
+            await getModel()
           );
           // sendJsonMessage(ctx.websocket, content, message.role);
           console.log("Pushing conversation history message..");
@@ -459,11 +469,13 @@ export const invokeApi = async (
 
     const db = await dbPromise();
     const timestamp = new Date().toISOString();
+    const confMap = await getConfiguration();
     await db.run(
       "INSERT INTO messages (content, role, timestamp) VALUES (?, ?, ?)",
       instructions,
       isInteractive ? "user" : "toughtloop",
-      timestamp
+      timestamp,
+      conf.model || MODEL_NAME
     );
     console.log("Savend API prompt:", instructions);
 
@@ -473,7 +485,8 @@ export const invokeApi = async (
       "avatar",
       true,
       undefined,
-      timestamp
+      timestamp,
+      getModel()
     );
 
     const source = axios.CancelToken.source();
@@ -541,7 +554,8 @@ export const invokeApi = async (
               "assistant",
               true,
               undefined,
-              timestamp
+              timestamp,
+              getModel()
             );
             console.log("chunk: ", messageContent);
             pendingChunks.push({
@@ -582,17 +596,19 @@ export const invokeApi = async (
           .join("");
 
         if (!lastMessage.startsWith("safeword:notoughts")) {
+          const confMap = await getConfiguration();
           await db.run(
             "INSERT INTO messages (content, role, timestamp) VALUES (?, ?, ?)",
             lastMessage,
             "assistant",
-            new Date().toISOString()
+            new Date().toISOString(),
+            confMap.model || MODEL_NAME
           );
           apiCallBody.messages.push({
             content: lastMessage,
             role: "assistant",
           });
-          sendJsonMessage(HR_SEPARATOR, "system", false, undefined, timestamp);
+          sendJsonMessage(HR_SEPARATOR, "system", false, undefined, timestamp, getModel());
           if (!isInteractive) {
             console.error(
               "Pause toughtloop waiting for further interactions..."

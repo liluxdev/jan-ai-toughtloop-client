@@ -1,3 +1,4 @@
+import { MODEL_NAME } from "./constants.js";
 import { dbVersions, getMessagesVersion } from "./db.js";
 import { broadcast } from "./websockets.js";
 
@@ -9,7 +10,7 @@ export const formatMessage = (content, role, chunk = false, timestamp = new Date
     }
   };
   
-  export const sendJsonMessage = async (content, role, chunk = false, clientId=undefined, timestamp=new Date().toISOString()) => {
+  export const sendJsonMessage = async (content, role, chunk = false, clientId=undefined, timestamp=new Date().toISOString(), model = MODEL_NAME) => {
     console.log("Sending message to all clients: ", content, role, chunk);
     const jsonString = formatMessage(content, role, chunk, timestamp);
     //ws.send(jsonString);

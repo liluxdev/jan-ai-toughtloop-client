@@ -205,6 +205,9 @@ export const setRecentMessages = async (content, role) => {
       other_messages.slice(-(await getBufferMessagesLimit()))
     );
   }
+  if (conf.onlyUser){
+    apiCallBody.messages = apiCallBody.messages.filter((m) => m.role === "user" || m.role === "system");
+  }
 };
 
 export const clearRecentMessages = () => {

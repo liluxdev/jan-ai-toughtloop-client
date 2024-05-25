@@ -42,13 +42,20 @@ const fetchDebug = async () => {
         refreshingBufferSize = false;
 
         refreshingBufferSize = true;
-        var sendAllThreads = app.toggle.get('.sendAllThreads');
+        const sendAllThreads = app.toggle.get('.sendAllThreads');
         const sendAllThreadsValue =  debug?.configuration?.sendAllThreads || false;
         if (sendAllThreads.checked !== sendAllThreadsValue) {
             sendAllThreads.toggle();
         }
         refreshingBufferSize = false;
 
+        refreshingBufferSize = true;
+        const onlyUser = app.toggle.get('.onlyUser');
+        const onlyUserValue =  debug?.configuration?.onlyUser || false;
+        if (onlyUser.checked !== onlyUserValue) {
+            onlyUser.toggle();
+        }
+        refreshingBufferSize = false;
 
         const memories = [];
         for (const key in debug) {

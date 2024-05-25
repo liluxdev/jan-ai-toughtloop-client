@@ -417,6 +417,20 @@
                         </div>
                       </li>
                     </ul>
+
+                    <ul>
+                      <li class="item-content">
+                        <div class="item-inner">
+                          <div class="item-title">Consider only 'user' messages</div>
+                          <div class="item-after">
+                            <label class="toggle onlyUser">
+                              <input type="checkbox" />
+                              <span class="toggle-icon"></span>
+                            </label>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
                   </div>
 
                   <div class="block-title">
@@ -679,6 +693,17 @@
                 console.log("Toggle changed");
                 const toggle = app.toggle.get(".sendAllThreads");
                 updateConfigValue("sendAllThreads", toogle.checked);
+              },
+            },
+          });
+
+          var onlyUser = app.toggle.create({
+            el: ".onlyUser",
+            on: {
+              change: function (event) {
+                console.log("Toggle changed");
+                const toggle = app.toggle.get(".onlyUser");
+                updateConfigValue("onlyUser", toogle.checked);
               },
             },
           });

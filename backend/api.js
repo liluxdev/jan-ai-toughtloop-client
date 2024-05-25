@@ -598,7 +598,7 @@ export const invokeApi = async (
         if (!lastMessage.startsWith("safeword:notoughts")) {
           const confMap = await getConfiguration();
           await db.run(
-            "INSERT INTO messages (content, role, timestamp, ?) VALUES (?, ?, ?, ?)",
+            "INSERT INTO messages (content, role, timestamp, model) VALUES (?, ?, ?, ?)",
             lastMessage,
             "assistant",
             new Date().toISOString(),

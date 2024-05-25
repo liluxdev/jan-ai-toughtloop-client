@@ -39,7 +39,7 @@ const addPrompt = async () => {
             body: JSON.stringify({ message: content }),
         });
         const newMemory = await response.json();
-        showToast('Prompt added to toughloop', 'success');
+        showToast('Prompt added to toughtloop', 'success');
         loadPrompts();
         input.value = '';
     } catch (error) {
@@ -66,7 +66,7 @@ const updatePrompt = async (id, content) => {
             body: JSON.stringify({ message: content }),
         });
         showToast('Prompt updated', 'success');
-        loadMemories();
+        loadPrompts();
     } catch (error) {
         console.error('Error updating prompt:', error);
         showToast('Error updating prompt', 'error');
@@ -76,11 +76,13 @@ const updatePrompt = async (id, content) => {
 const deletePrompt = async (id) => {
     if (confirm('Are you sure you want to delete this prompt?') === false) return;
     try {
-        await fetch(`${baseUrlPrompts}/toughloop/${id}`, {
+        const resp = await fetch(`${baseUrlPrompts}/toughtloop/${id}`, {
             method: 'DELETE',
         });
-        showToast('Prompt deleted', 'success');
-        loadMemories();
+        if (resp.ok){
+            showToast('Prompt deleted', 'success');
+        }
+        loadPrompts();
     } catch (error) {
         console.error('Error deleting prompt:', error);
         showToast('Error deleting prompt', 'error');

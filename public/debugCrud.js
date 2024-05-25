@@ -42,7 +42,11 @@ const fetchDebug = async () => {
         refreshingBufferSize = false;
 
         refreshingBufferSize = true;
-        app.toogle.setValue('.sendAllThreads', debug?.configuration?.sendAllThreads || false);
+        var sendAllThreads = app.toggle.get('.sendAllThreads');
+        const sendAllThreadsValue =  debug?.configuration?.sendAllThreads || false;
+        if (sendAllThreads.checked !== sendAllThreadsValue) {
+            sendAllThreads.toggle();
+        }
         refreshingBufferSize = false;
 
 
@@ -52,7 +56,7 @@ const fetchDebug = async () => {
             memories.push({ id: key, content: formattedJson, key: key });
         }
 
-        const memoryList = document.querySelector('#debugView .list-group');
+        const memoryList = document.querySelector('.debug-list .list-group');
         memoryList.innerHTML = '';
         memories.forEach(memory => {
             const listItem = document.createElement('li');

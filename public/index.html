@@ -390,7 +390,7 @@
         <div class="view">
           <div class="page">
             <div class="page-content">
-              <div class="block-title">Debug Context</div>
+              <div class="block-title">Context Settings</div>
               <div class="centered">
                 <div class="range-slider">
                   <div class="list">
@@ -549,6 +549,7 @@
                     ></div>
                   </div>
                 </div>
+                <div class="block-title">Debug Context</div>
                 <div class="debug-list list no-hairlines-md">
                   <ul class="list-group">
                     <!-- Debug items will be appended here -->
@@ -559,167 +560,167 @@
           </div>
         </div>
       </div>
-      <!-- Framework7 library -->
-      <script>
-        var app = new Framework7({
-          // App root element
-          el: "#app",
-          // App Name
-          name: "Toughtloop AI",
-          // App id
-          id: "dev.lilux.ai.toughtloop.frontend",
-          // Enable swipe panel
-          panel: {
-            swipe: true,
+    </div>
+    <!-- Framework7 library -->
+    <script>
+      var app = new Framework7({
+        // App root element
+        el: "#app",
+        // App Name
+        name: "Toughtloop AI",
+        // App id
+        id: "dev.lilux.ai.toughtloop.frontend",
+        // Enable swipe panel
+        panel: {
+          swipe: true,
+        },
+        // Add default routes
+        routes: [
+          {
+            path: "/about/",
+            url: "about.html",
           },
-          // Add default routes
-          routes: [
-            {
-              path: "/about/",
-              url: "about.html",
+        ],
+      });
+
+      function toggleToughtloops() {
+        app.panel.toggle("#toughtloops");
+        console.log("Toughtloops toggled");
+      }
+
+      function toggleMemoryList() {
+        app.panel.toggle("#memoryList");
+      }
+
+      function toggleVersionList() {
+        app.panel.toggle("#versionList");
+      }
+
+      function toggleDebug() {
+        app.panel.toggle("#debugView");
+        //if open, update the debug view
+        if (app.panel.get("#debugView").opened) {
+          fetchDebug();
+          var range = app.range.create({
+            el: ".bufferSize",
+            on: {
+              change: function (event) {
+                console.log("Range Slider value changed", event.value);
+                updateConfigValue("buffer", event.value);
+                fetchDebug();
+              },
             },
-          ],
-        });
+          });
 
-        function toggleToughtloops() {
-          app.panel.toggle("#toughtloops");
-          console.log("Toughtloops toggled");
+          var range2 = app.range.create({
+            el: ".toughtloopIntervalRandomMaxSecs",
+            on: {
+              change: function (event) {
+                console.log("Range Slider value changed", event.value);
+                updateConfigValue(
+                  "toughtloopIntervalRandomMaxSecs",
+                  event.value
+                );
+                fetchDebug();
+              },
+            },
+          });
+
+          var range3 = app.range.create({
+            el: ".temperature",
+            on: {
+              change: function (event) {
+                console.log("Range Slider value changed", event.value);
+                updateConfigValue("temperature", event.value);
+                fetchDebug();
+              },
+            },
+          });
+
+          var range4 = app.range.create({
+            el: ".topP",
+            on: {
+              change: function (event) {
+                console.log("Range Slider value changed", event.value);
+                updateConfigValue("top_p", event.value);
+                fetchDebug();
+              },
+            },
+          });
+
+          var range5 = app.range.create({
+            el: ".presencePenality",
+            on: {
+              change: function (event) {
+                console.log("Range Slider value changed", event.value);
+                updateConfigValue("presence_penalty", event.value);
+                fetchDebug();
+              },
+            },
+          });
+
+          var range6 = app.range.create({
+            el: ".frequencyPenality",
+            on: {
+              change: function (event) {
+                console.log("Range Slider value changed", event.value);
+                updateConfigValue("frequency_penalty", event.value);
+                fetchDebug();
+              },
+            },
+          });
+
+          var sendAllThreads = app.toggle.create({
+            el: ".sendAllThreads",
+            on: {
+              change: function (event) {
+                console.log("Toggle changed");
+                updateConfigValue("sendAllThreads", event.value);
+              },
+            },
+          });
         }
+      }
 
-        function toggleMemoryList() {
-          app.panel.toggle("#memoryList");
+      async function updateCpuUsage(percentage) {
+        if (percentage > RUNNING_COG_THRESHOLD) {
+          setCogRunning(await isInvokingApi());
+        } else {
+          setCogRunning(false);
         }
-
-        function toggleVersionList() {
-          app.panel.toggle("#versionList");
-        }
-
-        function toggleDebug() {
-          app.panel.toggle("#debugView");
-          //if open, update the debug view
-          if (app.panel.get("#debugView").opened) {
-            fetchDebug();
-            var range = app.range.create({
-              el: ".bufferSize",
-              on: {
-                change: function (event) {
-                  console.log("Range Slider value changed", event.value);
-                  updateConfigValue("buffer", event.value);
-                  fetchDebug();
-                },
-              },
-            });
-
-            var range2 = app.range.create({
-              el: ".toughtloopIntervalRandomMaxSecs",
-              on: {
-                change: function (event) {
-                  console.log("Range Slider value changed", event.value);
-                  updateConfigValue(
-                    "toughtloopIntervalRandomMaxSecs",
-                    event.value
-                  );
-                  fetchDebug();
-                },
-              },
-            });
-
-            var range3 = app.range.create({
-              el: ".temperature",
-              on: {
-                change: function (event) {
-                  console.log("Range Slider value changed", event.value);
-                  updateConfigValue("temperature", event.value);
-                  fetchDebug();
-                },
-              },
-            });
-
-            var range4 = app.range.create({
-              el: ".topP",
-              on: {
-                change: function (event) {
-                  console.log("Range Slider value changed", event.value);
-                  updateConfigValue("top_p", event.value);
-                  fetchDebug();
-                },
-              },
-            });
-
-            var range5 = app.range.create({
-              el: ".presencePenality",
-              on: {
-                change: function (event) {
-                  console.log("Range Slider value changed", event.value);
-                  updateConfigValue("presence_penalty", event.value);
-                  fetchDebug();
-                },
-              },
-            });
-
-            var range6 = app.range.create({
-              el: ".frequencyPenality",
-              on: {
-                change: function (event) {
-                  console.log("Range Slider value changed", event.value);
-                  updateConfigValue("frequency_penalty", event.value);
-                  fetchDebug();
-                },
-              },
-            });
-
-            var sendAllThreads = app.toggle.create({
-              el: ".sendAllThreads",
-              on: {
-                change: function (event) {
-                  console.log("Toggle changed");
-                  updateConfigValue("sendAllThreads", event.value);
-                },
-              },
-            });
-          }
-        }
-
-        async function updateCpuUsage(percentage) {
-          if (percentage > RUNNING_COG_THRESHOLD) {
-            setCogRunning(await isInvokingApi());
-          } else {
-            setCogRunning(false);
-          }
-          let gauge = app.gauge.get(".cpuUsage");
-          if (!gauge) {
-            gauge = app.gauge.create({
-              el: ".cpuUsage",
-              type: "semicircle",
-              value: percentage / 100,
-              valueText: percentage + "%",
-              labelText: "CPU Usage",
-              valueTextColor: "#ff9800",
-              borderColor: "#ff9800",
-            });
-          }
-          console.log({ gauge });
-
-          gauge.update({
+        let gauge = app.gauge.get(".cpuUsage");
+        if (!gauge) {
+          gauge = app.gauge.create({
+            el: ".cpuUsage",
+            type: "semicircle",
             value: percentage / 100,
             valueText: percentage + "%",
+            labelText: "CPU Usage",
+            valueTextColor: "#ff9800",
+            borderColor: "#ff9800",
           });
-          console.log({ gauge });
         }
-      </script>
-      <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/2.0.2/timeago.min.js"
-        integrity="sha512-sl01o/gVwybF1FNzqO4NDRDNPJDupfN0o2+tMm4K2/nr35FjGlxlvXZ6kK6faa9zhXbnfLIXioHnExuwJdlTMA=="
-        crossorigin="anonymous"
-        referrerpolicy="no-referrer"
-      ></script>
+        console.log({ gauge });
 
-      <!-- App scripts -->
-      <script src="scripts.js"></script>
-      <script src="memoryCrud.js"></script>
-      <script src="toughtloopsCrud.js"></script>
-      <script src="versionCrud.js"></script>
-      <script src="debugCrud.js"></script>
-    </div>
+        gauge.update({
+          value: percentage / 100,
+          valueText: percentage + "%",
+        });
+        console.log({ gauge });
+      }
+    </script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/2.0.2/timeago.min.js"
+      integrity="sha512-sl01o/gVwybF1FNzqO4NDRDNPJDupfN0o2+tMm4K2/nr35FjGlxlvXZ6kK6faa9zhXbnfLIXioHnExuwJdlTMA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <!-- App scripts -->
+    <script src="scripts.js"></script>
+    <script src="memoryCrud.js"></script>
+    <script src="toughtloopsCrud.js"></script>
+    <script src="versionCrud.js"></script>
+    <script src="debugCrud.js"></script>
   </body>
 </html>

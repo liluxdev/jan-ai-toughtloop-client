@@ -1,6 +1,6 @@
 import { dbPromisePrompts } from "./db.js";
 
-export const ASSISTANT_NAME = "SEKHMET (Syria)";
+export const ASSISTANT_NAME = "Toughtloop AI (Her)";
 
 export const MODEL_NAME = 'stealth-v1.2-7b';
 

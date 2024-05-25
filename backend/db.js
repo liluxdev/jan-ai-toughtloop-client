@@ -155,7 +155,7 @@ const doDbMigrations = async () => {
   const dbMsg = await dbPromise();
   
   try {
-    await db.exec(`ALTER TABLE messages ADD COLUMN model TEXT`);
+    await dbMsg.exec(`ALTER TABLE messages ADD COLUMN model TEXT`);
     console.log("Column added");
   } catch (err) {
     console.log("Column already exists");

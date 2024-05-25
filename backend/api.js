@@ -233,7 +233,7 @@ export const getRandomAvatar = async () => {
   const timestamp = new Date().toISOString();
   const confMap = await getConfiguration();
   await db.run(
-    "INSERT INTO messages (content, role, timestamp) VALUES (?, ?, ?)",
+    "INSERT INTO messages (content, role, timestamp, model) VALUES (?, ?, ?, ?)",
     "/avatars/" + randomFile,
     "avatar",
     timestamp,
@@ -471,7 +471,7 @@ export const invokeApi = async (
     const timestamp = new Date().toISOString();
     const confMap = await getConfiguration();
     await db.run(
-      "INSERT INTO messages (content, role, timestamp) VALUES (?, ?, ?)",
+      "INSERT INTO messages (content, role, timestamp, model) VALUES (?, ?, ?, ?)",
       instructions,
       isInteractive ? "user" : "toughtloop",
       timestamp,
@@ -598,7 +598,7 @@ export const invokeApi = async (
         if (!lastMessage.startsWith("safeword:notoughts")) {
           const confMap = await getConfiguration();
           await db.run(
-            "INSERT INTO messages (content, role, timestamp) VALUES (?, ?, ?)",
+            "INSERT INTO messages (content, role, timestamp, ?) VALUES (?, ?, ?, ?)",
             lastMessage,
             "assistant",
             new Date().toISOString(),

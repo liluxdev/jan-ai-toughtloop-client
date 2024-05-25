@@ -202,7 +202,8 @@ ws.setOnMessage((event) => {
               message.content,
               message.role,
               false,
-              message.timestamp
+              message.timestamp,
+              message.model
             );
             needsRecentNewMessage = false;
             return;
@@ -223,7 +224,8 @@ ws.setOnMessage((event) => {
           parsedData.content,
           parsedData.role,
           parsedData.chunk === true,
-          parsedData.timestamp
+          parsedData.timestamp,
+          parsedData.model
         );
       }
     } catch (error) {

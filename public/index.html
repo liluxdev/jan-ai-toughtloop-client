@@ -675,7 +675,8 @@
             on: {
               change: function (event) {
                 console.log("Toggle changed");
-                updateConfigValue("sendAllThreads", event.checked);
+                const toggle = app.toggle.get(".sendAllThreads");
+                updateConfigValue("sendAllThreads", toogle.checked);
               },
             },
           });

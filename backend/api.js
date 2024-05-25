@@ -365,7 +365,7 @@ export const invokeApi = async (
           "system"
         );
         for (const message of thread.messages) {
-          if ((message.role === "user", message.role === "assistant")) {
+          if ((message.role === "user" || message.role === "assistant")) {
             let content = message.content;
             if (content) {
               if (content.length > OMISSIS_LIMIT) {
@@ -377,13 +377,14 @@ export const invokeApi = async (
               }
               await pushRecentMessageInAPIBody(content, message.role);
               // sendJsonMessage(ctx.websocket, content, message.role);
-              console.log("Pushing all messages..");
+            
             } else {
               console.log("Content is null");
             }
           }
         }
       }
+      console.error("All threads messages prepared for API", apiCallBody.messages.length);
     }
 
     let limit = await getBufferMessagesLimit();

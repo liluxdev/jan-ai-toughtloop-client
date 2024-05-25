@@ -147,6 +147,7 @@ intervalTimer = setInterval(async () => {
 export const clearToughtloopInterval = () => {
   try {
     clearInterval(interval);
+    etaIntervalSecs = -1;
     //clearInterval(intervalTimer);
     console.log("Interval cleared");
     console.trace();

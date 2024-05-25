@@ -90,6 +90,15 @@ export const incrementGenericCounter = async (key) => {
   );
 };
 
+export const settGenericStatValue = async (key, value) => {
+  const db = await dbVersions;
+  await db.run(
+    "INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)",
+    key,
+    value
+  );
+};
+
 export const incrementGenericAvg = async (key, currentValue) => {
   currentValue = parseFloat(currentValue);
   const db = await dbVersions;
@@ -458,6 +467,7 @@ export const invokeApi = async (instructions, isInteractive = true, isEmojiOnly 
             let end = new Date().getTime();
             thinkingTime = end - start;
             console.error("Thinking time:", thinkingTime / 1000 / 60);
+            settGenericStatValue("thinking_time_last_mins", thinkingTime / 1000 / 60);
             incrementGenericAvg(
               "thinking_time_minutes",
               thinkingTime / 1000 / 60
@@ -513,6 +523,7 @@ export const invokeApi = async (instructions, isInteractive = true, isEmojiOnly 
         const end = new Date().getTime();
         completionTime = end - start;
         console.error("Completion time:", completionTime / 1000 / 60);
+        settGenericStatValue("completion_time_last_mins", completionTime / 1000 / 60);
         incrementGenericAvg(
           "completion_time_minutes",
           completionTime / 1000 / 60

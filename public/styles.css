@@ -17,7 +17,7 @@ body {
     }
 
     #messages.androidBrowser {
-        height: calc(100vh - 300px);
+        height: calc(100vh - 297px);
     }
 }
 #messageInput {

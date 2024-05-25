@@ -64,7 +64,7 @@ const loadThreads = async () => {
       }`;
       listItem.innerHTML = `
                 <div class="item-inner">
-                    <div class="item-title thread-content">${thread.friendlyName}</div>
+                    <div class="item-title thread-content clickable">${thread.friendlyName}</div>
                 </div>
             `;
       listItem.onclick = () => updateVersion("messages", thread.key);

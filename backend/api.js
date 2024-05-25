@@ -6,6 +6,7 @@ import {
   dbVersions,
   getConversationFriendlyName,
   getMessagesVersion,
+  queryAllMessagesOfAllThreads,
 } from "./db.js";
 import { formatMessage, sendJsonMessage } from "./utils.js";
 import {

@@ -32,8 +32,8 @@ const apiCallBody = {
   stream: true,
   max_tokens: 2048,
   stop: [],
-  frequency_penality: 0,
-  presence_penality: 0,
+  frequency_penalty: 0,
+  presence_penalty: 0,
   temperature: 0.777,
   top_p: 0.95,
 };
@@ -257,8 +257,8 @@ export const invokeApi = async (instructions, isInteractive = true, isEmojiOnly 
    
 
     apiCallBody.top_p = typeof conf.top_p !== 'undefined' ? parseFloat(conf.top_p) : 0.95;
-    apiCallBody.frequency_penality = typeof conf.frequency_penality !== 'undefined' ? parseFloat(conf.frequency_penality) : 0;
-    apiCallBody.presence_penality = typeof conf.presence_penalty !== 'undefined' ? parseFloat(conf.presence_penality) : 0;
+    apiCallBody.frequency_penalty = typeof conf.frequency_penalty !== 'undefined' ? parseFloat(conf.frequency_penalty) : 0;
+    apiCallBody.presence_penalty = typeof conf.presence_penalty !== 'undefined' ? parseFloat(conf.presence_penalty) : 0;
 
 
     console.error("API configuration:", apiCallBody);

@@ -98,7 +98,7 @@
       }
 
       function isStandaloneModeAndroid() {
-        return window.matchMedia('(display-mode: standalone)').matches;
+        return window.matchMedia("(display-mode: standalone)").matches;
       }
 
       function isAndroid() {
@@ -122,10 +122,10 @@
         if (isIos && !isInStandaloneMode) {
           showInstallInstructionsForiOS();
         }
-        if (isInStandaloneMode || isStandaloneModeAndroid()){
+        if (isInStandaloneMode || isStandaloneModeAndroid()) {
           console.log("Running in standalone mode");
-          setTimeout(closeInstallMessage, 0.5*1000);
-        }else{
+          setTimeout(closeInstallMessage, 0.5 * 1000);
+        } else {
           if (isAndroid()) {
             console.log("Not running in standalone mode");
             document.getElementById("messages").classList.add("androidBrowser");
@@ -134,9 +134,8 @@
 
         if (!isMobile()) {
           console.log("Not running on a mobile device");
-          setTimeout(closeInstallMessage, 0.3*1000);
+          setTimeout(closeInstallMessage, 0.3 * 1000);
         }
-
       });
 
       const closeInstallMessage = () => {
@@ -145,7 +144,7 @@
 
       setTimeout(() => {
         closeInstallMessage();
-      }, 7*1000);
+      }, 7 * 1000);
     </script>
   </head>
   <body>
@@ -394,8 +393,31 @@
               <div class="block-title">Debug Context</div>
               <div class="centered">
                 <div class="range-slider">
+                  <div class="list">
+                    <ul>
+                      <li class="item-content">
+                        <div class="item-inner">
+                          <div class="item-title">Send all threads</div>
+                          <div class="item-after">
+                            <label class="toggle sendAllThreads">
+                              <input type="checkbox" />
+                              <span class="toggle-icon"></span>
+                            </label>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
 
-                  <div class="block-title">Temperature (<span id="temperature"></span>)</div>
+                  <div class="block-title">
+                    Temperature (<span id="temperature"></span>)
+                  </div>
+                  <button
+                    class="button button-fill"
+                    onclick="updateConfigValue('temperature',0.7)"
+                  >
+                    Reset
+                  </button>
                   <div class="block block-strong-ios block-outline-ios">
                     <div
                       class="temperature range-slider range-slider-init"
@@ -412,7 +434,15 @@
                 </div>
 
                 <div class="range-slider">
-                  <div class="block-title">Top P (<span id="top_p"></span>)</div>
+                  <div class="block-title">
+                    Top P (<span id="top_p"></span>)
+                  </div>
+                  <button
+                    class="button button-fill"
+                    onclick="updateConfigValue('top_p',0.95)"
+                  >
+                    Reset
+                  </button>
                   <div class="block block-strong-ios block-outline-ios">
                     <div
                       class="topP range-slider range-slider-init"
@@ -429,7 +459,15 @@
                 </div>
 
                 <div class="range-slider">
-                  <div class="block-title">Presence Penality (<span id="presence_penalty"></span>)</div>
+                  <div class="block-title">
+                    Presence Penality (<span id="presence_penalty"></span>)
+                  </div>
+                  <button
+                    class="button button-fill"
+                    onclick="updateConfigValue('presence_penalty',0.0)"
+                  >
+                    Reset
+                  </button>
                   <div class="block block-strong-ios block-outline-ios">
                     <div
                       class="presencePenality range-slider range-slider-init"
@@ -445,9 +483,16 @@
                   </div>
                 </div>
 
-                
                 <div class="range-slider">
-                  <div class="block-title">Frequency Penality (<span id="frequency_penalty"></span>)</div>
+                  <div class="block-title">
+                    Frequency Penality (<span id="frequency_penalty"></span>)
+                  </div>
+                  <button
+                    class="button button-fill"
+                    onclick="updateConfigValue('frequency_penalty',0.0)"
+                  >
+                    Reset
+                  </button>
                   <div class="block block-strong-ios block-outline-ios">
                     <div
                       class="frequencyPenality range-slider range-slider-init"
@@ -462,7 +507,7 @@
                     ></div>
                   </div>
                 </div>
-      
+
                 <div class="range-slider">
                   <div class="block-title">Conversation Buffer (msg)</div>
                   <div class="block block-strong-ios block-outline-ios">
@@ -623,6 +668,15 @@
               },
             });
 
+            var sendAllThreads = app.toggle.create({
+              el: ".sendAllThreads",
+              on: {
+                change: function () {
+                  console.log("Toggle changed");
+                  updateConfigValue("sendAllThreads", event.value);
+                },
+              },
+            });
           }
         }
 

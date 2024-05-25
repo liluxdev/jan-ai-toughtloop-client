@@ -41,6 +41,9 @@ const fetchDebug = async () => {
         document.querySelector('#presence_penalty').textContent = debug?.configuration?.presence_penalty || 0.0;
         refreshingBufferSize = false;
 
+        refreshingBufferSize = true;
+        app.toogle.setValue('.sendAllThreads', debug?.configuration?.sendAllThreads || false);
+        refreshingBufferSize = false;
 
 
         const memories = [];

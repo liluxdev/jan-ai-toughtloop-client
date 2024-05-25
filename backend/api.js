@@ -5,6 +5,7 @@ import {
   dbPromiseMemory,
   dbVersions,
   getConversationFriendlyName,
+  getMessagesVersion,
 } from "./db.js";
 import { formatMessage, sendJsonMessage } from "./utils.js";
 import {
@@ -312,8 +313,44 @@ export const invokeApi = async (instructions, isInteractive = true, isEmojiOnly 
     }
     const dbConv = await dbPromise();
 
+    if (conf.sendAllThreads) {
+      const allMessages = await queryAllMessagesOfAllThreads();
+      console.error("All messages:", allMessages);
+      for (const thread of allMessages) {
+        if (thread.key===getMessagesVersion()){
+          continue;
+        }
+        await setRecentMessages("Following messages are from Thread named:" +thread.friendlyName, "system");
+        for (const message of thread.messages) {
+          if  (message.role ==='user', message.role ==='assistant'){
+            let content = message.content;
+            if (content) {
+              if (content.length > OMISSIS_LIMIT) {
+                content =
+                  content.slice(0, OMISSIS_LIMIT) +
+                  "...omissis at (" +
+                  OMISSIS_LIMIT +
+                  ")..";
+              }
+              await setRecentMessages(content, message.role);
+              // sendJsonMessage(ctx.websocket, content, message.role);
+              console.log("Pushing all messages..");
+            } else {
+              console.log("Content is null");
+            }
+          }
+        }
+      }
+    };
+
+    let limit = await getBufferMessagesLimit();
+
+    if (conf.sendAllThreads){
+      limit = 9999999;
+    }
+
     const messageConvHistory = await dbConv.all(
-      `SELECT content, role,timestamp FROM messages WHERE role = 'user' OR  role = 'assistant' ORDER BY timestamp DESC LIMIT ${await getBufferMessagesLimit()}`
+      `SELECT content, role,timestamp FROM messages WHERE role = 'user' OR  role = 'assistant' ORDER BY timestamp DESC LIMIT ${limit}`
     );
 
     console.log(
@@ -324,6 +361,8 @@ export const invokeApi = async (instructions, isInteractive = true, isEmojiOnly 
       await setRecentMessages(message.content, message.role);
     }
     apiCallBody.messages.concat(messageConvHistory);
+
+  
 
     if (Math.random() < RANDOM_MEMORY_PROBABILITY) {
       const convHistoryRandomMemory = await dbConv.all(`

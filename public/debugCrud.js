@@ -43,7 +43,7 @@ const fetchDebug = async () => {
 
         refreshingBufferSize = true;
         const sendAllThreads = app.toggle.get('.sendAllThreads');
-        const sendAllThreadsValue =  debug?.configuration?.sendAllThreads || false;
+        const sendAllThreadsValue =  debug?.configuration?.sendAllThreads ==="1" || false;
         if (sendAllThreads.checked !== sendAllThreadsValue) {
             sendAllThreads.toggle();
         }
@@ -51,7 +51,7 @@ const fetchDebug = async () => {
 
         refreshingBufferSize = true;
         const onlyUser = app.toggle.get('.onlyUser');
-        const onlyUserValue =  debug?.configuration?.onlyUser || false;
+        const onlyUserValue =  debug?.configuration?.onlyUser ==="1" || false;
         if (onlyUser.checked !== onlyUserValue) {
             onlyUser.toggle();
         }

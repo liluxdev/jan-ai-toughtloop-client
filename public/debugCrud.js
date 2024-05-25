@@ -20,6 +20,24 @@ const fetchDebug = async () => {
         app.range.setValue('.toughtloopIntervalRandomMaxSecs', debug?.configuration?.toughtloopIntervalRandomMaxSecs || 333);
         refreshingToughloopInterval = false;
 
+        refreshingBufferSize = true;
+        app.range.setValue('.temperature', debug?.configuration?.temperature || 0.7);
+        refreshingBufferSize = false;
+
+        refreshingBufferSize = true;
+        app.range.setValue('.topP', debug?.configuration?.top_p || 0.9);
+        refreshingBufferSize = false;
+
+        refreshingBufferSize = true;
+        app.range.setValue('.frequencyPenalty', debug?.configuration?.frequency_penalty || 0.0);
+        refreshingBufferSize = false;
+
+        refreshingBufferSize = true;
+        app.range.setValue('.presencePenalty', debug?.configuration?.presence_penalty || 0.0);
+        refreshingBufferSize = false;
+
+
+
         const memories = [];
         for (const key in debug) {
             const formattedJson = JSON.stringify(debug[key], null, 2);

@@ -692,7 +692,7 @@
               change: function (event) {
                 console.log("Toggle changed");
                 const toggle = app.toggle.get(".sendAllThreads");
-                updateConfigValue("sendAllThreads", toogle.checked);
+                updateConfigValue("sendAllThreads", toggle.checked);
               },
             },
           });
@@ -703,7 +703,7 @@
               change: function (event) {
                 console.log("Toggle changed");
                 const toggle = app.toggle.get(".onlyUser");
-                updateConfigValue("onlyUser", toogle.checked);
+                updateConfigValue("onlyUser", toggle.checked);
               },
             },
           });

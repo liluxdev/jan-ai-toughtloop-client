@@ -247,8 +247,15 @@ export const invokeApi = async (instructions, isInteractive = true, isEmojiOnly 
     if (!isInteractive) {
       apiCallBody.temperature = 2;
     } else {
-      apiCallBody.temperature = 0.777;
+     // apiCallBody.temperature = 0.777;
+      apiCallBody.temperature = await getConfiguration().temperature || 0.777;
     }
+
+    apiCallBody.top_p = await getConfiguration().top_p || 0.95;
+    apiCallBody.max_tokens = await getConfiguration().max_tokens || 2048;
+    apiCallBody.frequency_penalty = await getConfiguration().frequency_penalty || 0;
+    apiCallBody.presence_penalty = await getConfiguration().presence_penalty || 0;
+
 
     if(isEmojiOnly){  
       sendingEmoji = true;

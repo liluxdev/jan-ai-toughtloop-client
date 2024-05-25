@@ -394,6 +394,76 @@
               <div class="block-title">Debug Context</div>
               <div class="centered">
                 <div class="range-slider">
+
+                  <div class="block-title">Temperature</div>
+                  <div class="block block-strong-ios block-outline-ios">
+                    <div
+                      class="temperature range-slider range-slider-init"
+                      data-min="0"
+                      data-max="2"
+                      data-label="true"
+                      data-step="0.1"
+                      data-value="0.7"
+                      data-scale="true"
+                      data-scale-steps="5"
+                      data-scale-sub-steps="4"
+                    ></div>
+                  </div>
+                </div>
+
+                <div class="range-slider">
+                  <div class="block-title">Top P</div>
+                  <div class="block block-strong-ios block-outline-ios">
+                    <div
+                      class="topP range-slider range-slider-init"
+                      data-min="0"
+                      data-max="1"
+                      data-label="true"
+                      data-step="0.05"
+                      data-value="0.95"
+                      data-scale="true"
+                      data-scale-steps="5"
+                      data-scale-sub-steps="4"
+                    ></div>
+                  </div>
+                </div>
+
+                <div class="range-slider">
+                  <div class="block-title">Presence Penality</div>
+                  <div class="block block-strong-ios block-outline-ios">
+                    <div
+                      class="presencePenality range-slider range-slider-init"
+                      data-min="0"
+                      data-max="1"
+                      data-label="true"
+                      data-step="0.1"
+                      data-value="0"
+                      data-scale="true"
+                      data-scale-steps="5"
+                      data-scale-sub-steps="4"
+                    ></div>
+                  </div>
+                </div>
+
+                
+                <div class="range-slider">
+                  <div class="block-title">Frequency Penality</div>
+                  <div class="block block-strong-ios block-outline-ios">
+                    <div
+                      class="frequencyPenality range-slider range-slider-init"
+                      data-min="0"
+                      data-max="1"
+                      data-label="true"
+                      data-step="0.1"
+                      data-value="0"
+                      data-scale="true"
+                      data-scale-steps="5"
+                      data-scale-sub-steps="4"
+                    ></div>
+                  </div>
+                </div>
+      
+                <div class="range-slider">
                   <div class="block-title">Conversation Buffer (msg)</div>
                   <div class="block block-strong-ios block-outline-ios">
                     <div
@@ -508,6 +578,51 @@
                 },
               },
             });
+
+            var range3 = app.range.create({
+              el: ".temperature",
+              on: {
+                change: function (event) {
+                  console.log("Range Slider value changed", event.value);
+                  updateConfigValue("temperature", event.value);
+                  fetchDebug();
+                },
+              },
+            });
+
+            var range4 = app.range.create({
+              el: ".topP",
+              on: {
+                change: function (event) {
+                  console.log("Range Slider value changed", event.value);
+                  updateConfigValue("top_p", event.value);
+                  fetchDebug();
+                },
+              },
+            });
+
+            var range5 = app.range.create({
+              el: ".presencePenality",
+              on: {
+                change: function (event) {
+                  console.log("Range Slider value changed", event.value);
+                  updateConfigValue("presence_penality", event.value);
+                  fetchDebug();
+                },
+              },
+            });
+
+            var range6 = app.range.create({
+              el: ".frequencyPenality",
+              on: {
+                change: function (event) {
+                  console.log("Range Slider value changed", event.value);
+                  updateConfigValue("frequency_penality", event.value);
+                  fetchDebug();
+                },
+              },
+            });
+
           }
         }
 

@@ -110,7 +110,7 @@ export const incrementGenericAvg = async (key, currentValue) => {
     let count, avg;
     try {
       let parsed = JSON.parse(json);
-      if (!parsed.count || !parsed,avg) {
+      if ((!parsed.count || !parsed, avg)) {
         count = 0;
         avg = 0;
       } else {
@@ -196,9 +196,15 @@ export const setRecentMessages = async (content, role) => {
   const other_messages = apiCallBody.messages.filter(
     (m) => m.role !== "system" && m.role !== "avatar"
   );
-  apiCallBody.messages = system_messages.concat(
-    other_messages.slice(-(await getBufferMessagesLimit()))
-  );
+  const limit = await getBufferMessagesLimit();
+  const conf = await getConfiguration();
+  if (conf.sendAllThreads) {
+    apiCallBody.messages = system_messages.concat(other_messages);
+  } else {
+    apiCallBody.messages = system_messages.concat(
+      other_messages.slice(-(await getBufferMessagesLimit()))
+    );
+  }
 };
 
 export const clearRecentMessages = () => {
@@ -241,13 +247,17 @@ export const dequeueMessage = () => {
 let thinkingTime = 0;
 let completionTime = 0;
 let isSendingEmoji = false;
-export const invokeApi = async (instructions, isInteractive = true, isEmojiOnly = false) => {
+export const invokeApi = async (
+  instructions,
+  isInteractive = true,
+  isEmojiOnly = false
+) => {
   console.log("invokeApi", invokingApi, instructions);
   try {
     if (invokingApi) {
       console.log("API is already being invoked, request ignored.");
       if (isInteractive || isSendingEmoji) {
-        if(!isSendingEmoji){
+        if (!isSendingEmoji) {
           sendJsonMessage(API_ALREADY_INVOKED_MESSAGE, "system");
         }
         enqueueMessage(instructions);
@@ -258,24 +268,34 @@ export const invokeApi = async (instructions, isInteractive = true, isEmojiOnly 
     const conf = await getConfiguration();
 
     if (!isInteractive) {
-      apiCallBody.temperature = typeof conf.temperature !== 'undefined' ? parseFloat(conf.temperature) : 2;
+      apiCallBody.temperature =
+        typeof conf.temperature !== "undefined"
+          ? parseFloat(conf.temperature)
+          : 2;
     } else {
-     // apiCallBody.temperature = 0.777;
-      apiCallBody.temperature = typeof conf.temperature !== 'undefined' ? parseFloat(conf.temperature) : 0.7;
+      // apiCallBody.temperature = 0.777;
+      apiCallBody.temperature =
+        typeof conf.temperature !== "undefined"
+          ? parseFloat(conf.temperature)
+          : 0.7;
     }
 
     //apiCallBody.max_tokens = conf.max_tokens || 2048;
-   
 
-    apiCallBody.top_p = typeof conf.top_p !== 'undefined' ? parseFloat(conf.top_p) : 0.95;
-    apiCallBody.frequency_penalty = typeof conf.frequency_penalty !== 'undefined' ? parseFloat(conf.frequency_penalty) : 0;
-    apiCallBody.presence_penalty = typeof conf.presence_penalty !== 'undefined' ? parseFloat(conf.presence_penalty) : 0;
-
+    apiCallBody.top_p =
+      typeof conf.top_p !== "undefined" ? parseFloat(conf.top_p) : 0.95;
+    apiCallBody.frequency_penalty =
+      typeof conf.frequency_penalty !== "undefined"
+        ? parseFloat(conf.frequency_penalty)
+        : 0;
+    apiCallBody.presence_penalty =
+      typeof conf.presence_penalty !== "undefined"
+        ? parseFloat(conf.presence_penalty)
+        : 0;
 
     console.error("API configuration:", apiCallBody);
 
-
-    if(isEmojiOnly){  
+    if (isEmojiOnly) {
       sendingEmoji = true;
     }
 
@@ -327,12 +347,15 @@ export const invokeApi = async (instructions, isInteractive = true, isEmojiOnly 
       const allMessages = await queryAllMessagesOfAllThreads();
       console.log("All messages:", allMessages);
       for (const thread of allMessages) {
-        if (thread.key===getMessagesVersion()){
+        if (thread.key === getMessagesVersion()) {
           continue;
         }
-        await setRecentMessages("Following messages are from Thread named:" +thread.friendlyName, "system");
+        await setRecentMessages(
+          "Following messages are from Thread named:" + thread.friendlyName,
+          "system"
+        );
         for (const message of thread.messages) {
-          if  (message.role ==='user', message.role ==='assistant'){
+          if ((message.role === "user", message.role === "assistant")) {
             let content = message.content;
             if (content) {
               if (content.length > OMISSIS_LIMIT) {
@@ -351,11 +374,11 @@ export const invokeApi = async (instructions, isInteractive = true, isEmojiOnly 
           }
         }
       }
-    };
+    }
 
     let limit = await getBufferMessagesLimit();
 
-    if (conf.sendAllThreads){
+    if (conf.sendAllThreads) {
       limit = 9999999;
     }
 
@@ -371,8 +394,6 @@ export const invokeApi = async (instructions, isInteractive = true, isEmojiOnly 
       await setRecentMessages(message.content, message.role);
     }
     apiCallBody.messages.concat(messageConvHistory);
-
-  
 
     if (Math.random() < RANDOM_MEMORY_PROBABILITY) {
       const convHistoryRandomMemory = await dbConv.all(`
@@ -468,7 +489,10 @@ export const invokeApi = async (instructions, isInteractive = true, isEmojiOnly 
             let end = new Date().getTime();
             thinkingTime = end - start;
             console.error("Thinking time:", thinkingTime / 1000 / 60);
-            settGenericStatValue("thinking_time_last_mins", thinkingTime / 1000 / 60);
+            settGenericStatValue(
+              "thinking_time_last_mins",
+              thinkingTime / 1000 / 60
+            );
             incrementGenericAvg(
               "thinking_time_minutes",
               thinkingTime / 1000 / 60
@@ -524,7 +548,10 @@ export const invokeApi = async (instructions, isInteractive = true, isEmojiOnly 
         const end = new Date().getTime();
         completionTime = end - start;
         console.error("Completion time:", completionTime / 1000 / 60);
-        settGenericStatValue("completion_time_last_mins", completionTime / 1000 / 60);
+        settGenericStatValue(
+          "completion_time_last_mins",
+          completionTime / 1000 / 60
+        );
         incrementGenericAvg(
           "completion_time_minutes",
           completionTime / 1000 / 60
@@ -559,7 +586,10 @@ export const invokeApi = async (instructions, isInteractive = true, isEmojiOnly 
           }
         } else {
           await incrementSafewordCounter(lastMessage);
-          console.error("Received safeword, not saving lastMessage", lastMessage);
+          console.error(
+            "Received safeword, not saving lastMessage",
+            lastMessage
+          );
           setToughtloopInterval();
         }
 

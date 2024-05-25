@@ -484,7 +484,8 @@ export const invokeApi = async (
       "avatar",
       true,
       undefined,
-      timestamp
+      timestamp,
+      "math.random"
     );
 
     const source = axios.CancelToken.source();

@@ -68,7 +68,7 @@ export const setToughtloopInterval = async (timing = 333) => {
   const conf = await getConfiguration();
   console.error(conf);
   const toughtloopIntervalRandomMaxSecs = parseInt(conf.toughtloopIntervalRandomMaxSecs) || 333;
-  console.ò("Random max secs", toughtloopIntervalRandomMaxSecs);
+  console.error("Random max secs", toughtloopIntervalRandomMaxSecs);
   const radnomAdditionalSecs = Math.floor(Math.random() * toughtloopIntervalRandomMaxSecs);
   console.error("Random additional secs", radnomAdditionalSecs);
   timing += radnomAdditionalSecs;

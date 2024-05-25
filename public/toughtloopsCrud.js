@@ -22,6 +22,7 @@ const loadPrompts = async () => {
         });
     } catch (error) {
         console.error('Error loading memories:', error);
+        showToaster('Error loading prompts', 'error');
     }
 };
 
@@ -38,6 +39,7 @@ const addPrompt = async () => {
             body: JSON.stringify({ message: content }),
         });
         const newMemory = await response.json();
+        showToaster('Prompt added to toughloop', 'success');
         loadPrompts();
         input.value = '';
     } catch (error) {
@@ -50,7 +52,7 @@ const editPrompt = (id, button) => {
     const contentSpan = listItem.querySelector('.prompt-content');
     const newContent = prompt('Edit prompt:', contentSpan.textContent);
     if (newContent && newContent.trim() !== contentSpan.textContent) {
-        updateMemory(id, newContent.trim());
+        updatePrompt(id, newContent.trim());
     }
 };
 
@@ -63,9 +65,11 @@ const updatePrompt = async (id, content) => {
             },
             body: JSON.stringify({ message: content }),
         });
+        showToaster('Prompt updated', 'success');
         loadMemories();
     } catch (error) {
         console.error('Error updating prompt:', error);
+        showToaster('Error updating prompt', 'error');
     }
 };
 
@@ -75,9 +79,11 @@ const deletePrompt = async (id) => {
         await fetch(`${baseUrlPrompts}/toughloop/${id}`, {
             method: 'DELETE',
         });
+        showToaster('Prompt deleted', 'success');
         loadMemories();
     } catch (error) {
         console.error('Error deleting prompt:', error);
+        showToaster('Error deleting prompt', 'error');
     }
 };
 

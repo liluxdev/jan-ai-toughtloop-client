@@ -1,3 +1,5 @@
+import { show } from "js-snackbar";
+
 const baseUrl = location.origin;
 
 
@@ -21,6 +23,7 @@ const loadMemories = async () => {
         });
     } catch (error) {
         console.error('Error loading memories:', error);
+        showToaster('Error loading memories', 'error');
     }
 };
 
@@ -37,6 +40,7 @@ const addMemory = async () => {
             body: JSON.stringify({ message: content }),
         });
         const newMemory = await response.json();
+        showToaster('Memory added', 'success');
         loadMemories();
         input.value = '';
     } catch (error) {
@@ -62,8 +66,10 @@ const updateMemory = async (id, content) => {
             },
             body: JSON.stringify({ message: content }),
         });
+        showToaster('Memory updated', 'success');
         loadMemories();
     } catch (error) {
+        showToaster('Error updating memory', 'error');
         console.error('Error updating memory:', error);
     }
 };
@@ -74,8 +80,10 @@ const deleteMemory = async (id) => {
         await fetch(`${baseUrl}/memory/${id}`, {
             method: 'DELETE',
         });
+        showToaster('Memory deleted', 'success');
         loadMemories();
     } catch (error) {
+        showToaster('Error deleting memory', 'error');
         console.error('Error deleting memory:', error);
     }
 };

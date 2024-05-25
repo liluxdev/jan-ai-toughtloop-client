@@ -1,3 +1,5 @@
+import { show } from "js-snackbar";
+
 const baseUrlVersions = location.origin;
 
 const editFriendlyName = async (newName = currentThreadTitle) => {
@@ -102,9 +104,12 @@ const startNewThread = async (name = "") => {
         body: JSON.stringify({ name }),
       });
       loadThreads();
+      showToast("Thread started successfully", "success");
       location.reload(true);
     } catch (error) {
       console.error("Error starting thread:", error);
+      showToast("Error in creating thread ", "error");
+
     }
   }
 };
@@ -119,9 +124,12 @@ const updateVersion = async (key, version) => {
       body: JSON.stringify({ version }),
     });
     loadThreads();
+    showToast("Thread started successfully", "success");
     location.reload(true);
   } catch (error) {
     console.error("Error updating version:", error);
+    showToast("Error in creating thread ", "error");
+
   }
 };
 

@@ -244,17 +244,24 @@ export const invokeApi = async (instructions, isInteractive = true, isEmojiOnly 
       return;
     }
 
+    const conf = await getConfiguration();
+
     if (!isInteractive) {
-      apiCallBody.temperature = 2;
+      apiCallBody.temperature = typeof conf.temperature !== 'undefined' ? parseFloat(conf.temperature) : 2;
     } else {
      // apiCallBody.temperature = 0.777;
-      apiCallBody.temperature = await getConfiguration().temperature || 0.777;
+      apiCallBody.temperature = typeof conf.temperature !== 'undefined' ? parseFloat(conf.temperature) : 0.7;
     }
 
-    apiCallBody.top_p = await getConfiguration().top_p || 0.95;
-    apiCallBody.max_tokens = await getConfiguration().max_tokens || 2048;
-    apiCallBody.frequency_penalty = await getConfiguration().frequency_penalty || 0;
-    apiCallBody.presence_penalty = await getConfiguration().presence_penalty || 0;
+    //apiCallBody.max_tokens = conf.max_tokens || 2048;
+   
+
+    apiCallBody.top_p = typeof conf.top_p !== 'undefined' ? parseFloat(conf.top_p) : 0.95;
+    apiCallBody.frequency_penalty = typeof conf.frequency_penalty !== 'undefined' ? parseFloat(conf.frequency_penalty) : 0;
+    apiCallBody.presence_penalty = typeof conf.presence_penalty !== 'undefined' ? parseFloat(conf.presence_penalty) : 0;
+
+
+    console.error("API configuration:", apiCallBody);
 
 
     if(isEmojiOnly){  

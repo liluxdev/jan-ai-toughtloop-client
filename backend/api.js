@@ -27,7 +27,7 @@ import { OMISSIS_LIMIT } from "./websockets.js";
 
 let invokingApi = false;
 
-const apiUrl = "http://localhost:1337/v1/chat/completions";
+const apiUrl = "http://localhost:1337/v1/";
 const apiCallBody = {
   messages: [],
   model: MODEL_NAME,
@@ -277,6 +277,9 @@ export const invokeApi = async (
 
     const conf = await getConfiguration();
 
+    const model = conf.model || MODEL_NAME;
+    apiCallBody.model = model;
+
     if (!isInteractive) {
       apiCallBody.temperature =
         typeof conf.temperature !== "undefined"
@@ -483,7 +486,7 @@ export const invokeApi = async (
       console.log("API call body:", apiCallBody);
       const response = await axiosInstance({
         method: "post",
-        url: apiUrl,
+        url: apiUrl + 'chat/completions',
         data: apiCallBody,
         responseType: "stream",
         cancelToken: source.token,
@@ -631,3 +634,9 @@ export const invokeApi = async (
     console.error("Errore", e);
   }
 };
+
+
+export const getModels = async () => {
+  const response = await axiosInstance.get(apiUrl + "models");
+  return response.data;
+}

@@ -1,5 +1,5 @@
 import { clearToughtloopInterval, setToughtloopInterval } from "../index.js";
-import { clearRecentMessages, getApiContextDebug, setBufferMessagesLimit } from "./api.js";
+import { clearRecentMessages, getApiContextDebug, setBufferMessagesLimit, getModels } from "./api.js";
 import {
   dbPromiseMemory,
   dbPromisePrompts,
@@ -10,6 +10,13 @@ import {
 } from "./db.js";
 
 export const setupRoutes = (router) => {
+
+  
+  router.get("/models", async (ctx) => {
+    const models = await getModels();
+    ctx.body = models.data;
+  });
+
   router.get("/toughtloop", async (ctx) => {
     const db = await dbPromisePrompts;
     const messages = await db.all(

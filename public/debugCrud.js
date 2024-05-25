@@ -7,11 +7,25 @@ const isInvokingApi = async () => {
 };
 let refreshingBufferSize = false;
 let refreshingToughloopInterval = false;
-const fetchDebug = async () => {
+
+const debounce = (func, delay) => {
+    let timeoutId;
+    return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            func.apply(null, args);
+        }, delay);
+    };
+};
+
+
+
+const _fetchDebug = async () => {
+    console.warn("Fetching debug - debounced");
     try {
         const response = await fetch(`${baseUrlPrompts}/apiContextDebug`);
         const debug = await response.json();
-
+        console.warn("Fetched debug");
         refreshingBufferSize = true;
         app.range.setValue('.bufferSize', debug.conversationMessageLimit);
         refreshingBufferSize = false;
@@ -57,6 +71,29 @@ const fetchDebug = async () => {
         }
         refreshingBufferSize = false;
 
+        const model = debug?.configuration?.model || "stealth-v1.2-7b";
+        const modelSelect = document.querySelector('#modelPicker');
+        const modelSmartSelect = app.smartSelect.get('#modelPicker');
+        if (!modelSmartSelect){
+            const resp = await fetch(`${baseUrlDebug}/models`);
+            const models = await resp.json();
+            const modelOptions = models.map(model => ({ value: model.id, text: model.name }));
+            const modelOptionsHtml = modelOptions.map(option => `<option ${model===option.value ? "selected" : ""} value="${option.value}">${option.text}</option>`).join('');
+            modelSelect.innerHTML = modelOptionsHtml;
+            console.warn("Creating smart select", modelSelect.outerHTML);
+            /*app.smartSelect.create({
+                el: '#modelPicker',
+                onChange: async (value) => {
+                    updateConfigValue('model', value);
+                },
+            });*/
+            modelSelect.addEventListener('change', async (event) => {
+                updateConfigValue('model', event.target.value);
+            });
+        }
+
+
+
         const memories = [];
         for (const key in debug) {
             const formattedJson = JSON.stringify(debug[key], null, 2);
@@ -77,6 +114,16 @@ const fetchDebug = async () => {
         console.error('Error loading debug:', error);
     }
 };
+
+const debouncedFetchDebug = debounce(_fetchDebug, 333);
+
+const fetchDebug = async () => {
+    if (refreshingBufferSize) return;
+    if (refreshingToughloopInterval) return;
+    console.warn("Fetching debug");
+    console.trace();
+    debouncedFetchDebug();
+}
 
 const updateConfigValue = async (key, value) => {
     if (refreshingBufferSize) return;

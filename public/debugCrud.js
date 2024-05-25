@@ -82,7 +82,7 @@ const updateConfigValue = async (key, value) => {
             },
             body: JSON.stringify({ value }),
         });
-        loadThreads();
+        fetchDebug();
     } catch (error) {
         console.error('Error updating config:', error);
     }

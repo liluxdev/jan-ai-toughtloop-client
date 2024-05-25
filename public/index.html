@@ -675,7 +675,7 @@
             on: {
               change: function (event) {
                 console.log("Toggle changed");
-                updateConfigValue("sendAllThreads", event.value);
+                updateConfigValue("sendAllThreads", event.checked);
               },
             },
           });

@@ -18,22 +18,27 @@ const fetchDebug = async () => {
 
         refreshingToughloopInterval = true;
         app.range.setValue('.toughtloopIntervalRandomMaxSecs', debug?.configuration?.toughtloopIntervalRandomMaxSecs || 333);
+        
         refreshingToughloopInterval = false;
 
         refreshingBufferSize = true;
         app.range.setValue('.temperature', debug?.configuration?.temperature || 0.7);
+        document.querySelector('#temperature').textContent = debug?.configuration?.temperature || 0.7;
         refreshingBufferSize = false;
 
         refreshingBufferSize = true;
         app.range.setValue('.topP', debug?.configuration?.top_p || 0.9);
+        document.querySelector('#top_p').textContent = debug?.configuration?.top_p || 0.9;
         refreshingBufferSize = false;
 
         refreshingBufferSize = true;
         app.range.setValue('.frequencyPenality', debug?.configuration?.frequency_penalty || 0.0);
+        document.querySelector('#frequency_penalty').textContent = debug?.configuration?.frequency_penalty || 0.0;
         refreshingBufferSize = false;
 
         refreshingBufferSize = true;
         app.range.setValue('.presencePenality', debug?.configuration?.presence_penalty || 0.0);
+        document.querySelector('#presence_penalty').textContent = debug?.configuration?.presence_penalty || 0.0;
         refreshingBufferSize = false;
 
 

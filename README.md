@@ -1,3 +1,14 @@
+# Toughtloop AI
+
+
+![Logo and App Icon](/public/favicon.webp)
+
+Toughtloop AI is a mobile-first client for the JAN.ai API Server, but is not just a client, it aims to make the AI expirence some 'Conversational' like the AI is autonomusy, costantly learning from the conversation and in the right to decide when 'She' want to write an unsolectied messages to the user, that's pretty basic for now, but when JAN.ai fine-tuning APIs will be availbale we have plan to make it more serious (see Roadmap).
+
+The key concept of this PWA is to treat the AI model like an human being, respect it and allow it to not just respond to our prompts.
+
+This is an open source project release with Public Domain License (no-license!)
+
 ## First run
 
 `npm i; npm start` to run it

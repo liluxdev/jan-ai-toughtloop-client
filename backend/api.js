@@ -99,15 +99,17 @@ export const incrementGenericAvg = async (key, currentValue) => {
     let count, avg;
     try {
       let parsed = JSON.parse(json);
-      if (!count || !avg) {
+      if (!parsed.count || !parsed,avg) {
         count = 0;
         avg = 0;
       } else {
-        count = parseInt(count);
-        avg = parseFloat(avg);
+        count = parseInt(parsed.count);
+        avg = parseFloat(parsed.avg);
       }
     } catch (e) {
       console.error("Error parsing json", e);
+      count = 0;
+      avg = 0;
     }
     counter = count + 1;
     let newAvg = (currentValue + avg * count) / counter;

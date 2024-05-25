@@ -1,418 +1,324 @@
 <!DOCTYPE html>
 <html class="dark" lang="en">
-  <head>
+<head>
     <script>
-      const RUNNING_COG_THRESHOLD = 33;
+        const RUNNING_COG_THRESHOLD = 33;
     </script>
     <!-- Required meta tags-->
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <link rel="icon" type="image/webp" href="/favicon.webp" />
+    <link rel="apple-touch-icon" href="/favicon.webp" />
+    <link rel="icon" type="image/webp" href="/favicon.webp" sizes="192x192" />
+    <link rel="icon" type="image/webp" href="/favicon.webp" sizes="512x512" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <!-- Color theme for statusbar (Android only) -->
     <meta name="theme-color" content="#2196f3" />
     <title>Toughtloop AI</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/framework7/7.0.11/css/framework7.bundle.min.css"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/framework7/7.0.11/css/framework7.bundle.min.css" />
     <link rel="stylesheet" href="framework7/framework7-bundle.css" />
     <link rel="stylesheet" href="styles.css" />
     <script src="framework7/framework7-bundle.min.js"></script>
-  </head>
-  <body>
-    <div id="app">
-      <!-- App root element -->
-      <div class="view view-main view-init safe-areas">
-        <!-- Initial Page -->
-        <div class="page" data-name="home">
-          <!-- Navbar -->
-          <div class="navbar">
-            <div class="navbar-bg"></div>
-            <div class="navbar-inner">
-              <div class="left">
-                <a href="#" class="link icon-only panel-open" data-panel="left">
-                  <i class="fas fa-bars"></i>
-                </a>
-              </div>
-              <div class="title" id="currentThreadTitle">Current Thread</div>
-              <button
-                style="margin-left: 12px; width: 27px"
-                class="button button-outline mr-1"
-                onclick="editFriendlyName()"
-              >
-                <i class="fas fa-edit"></i>
-              </button>
-            </div>
-          </div>
-          <!-- Page content -->
-          <div class="page-content">
-            <div class="no-block" id="messages"></div>
-            <div class="no-block">
-              <textarea
-                id="messageInput"
-                class="resizable"
-                placeholder="Enter your message..."
-                rows="4"
-                onkeypress="handleKeyPress(event)"
-              ></textarea>
-            </div>
-          </div>
-          <!-- Bottom Toolbar -->
-          <div class="toolbar toolbar-bottom">
-            <div class="toolbar-inner">
-              <button class="button button-fill" onclick="sendMessage()">
-                <i class="fas fa-paper-plane"></i>
-              </button>
-              <!--        <button
-                class="button button-outline"
-                onclick="toggleVersionList()"
-              >
-                <i class="fa fa-solid fa-code-compare"></i>
-              </button> -->
-              <button
-                class="button button-outline"
-                onclick="enableNotifications()"
-              >
-                <i class="fas fa-bell"></i>
-              </button>
-              <button
-                class="button button-outline"
-                onclick="toggleToughtloops()"
-              >
-                <i class="fas fa-list"></i>
-              </button>
-              <button
-                class="button button-outline"
-                onclick="location.reload(true)"
-              >
-                <i class="fas fa-sync-alt"></i>
-              </button>
-              <button
-                id="wakeLock"
-                class="button button-outline"
-                onclick="requestWakeLock()"
-              >
-                <i class="fas fa-lock"></i>
-              </button>
-              <button class="button button-outline" onclick="toggleDebug()">
-                <i id="runningCog" class="runningCog fas fa-cog"></i>
-              </button>
-              <button
-                class="button button-outline"
-                onclick="toggleMemoryList()"
-              >
-                <i class="fas fa-memory"></i>
-              </button>
-            </div>
-          </div>
-        </div>
+</head>
+<body>
+<div id="app">
+    <!-- Install App Bar -->
+    <div class="block block-strong">
+      <div class="alert alert-success alert-dismissible">
+        <p>Install Toughtloop AI for a better experience.</p>
+        <button class="button button-fill button-small" onclick="installApp()">Install</button>
+        <span class="close" onclick="this.parentElement.style.display='none'">&times;</span>
       </div>
-      <!-- Left panel with cover effect -->
-      <div class="panel panel-left panel-cover">
+    </div>    
+    <!-- Left panel with cover effect -->
+    <div class="panel panel-left panel-cover">
         <div class="view">
-          <div class="page">
-            <div class="page-content">
-              <div class="block-title">Threads</div>
-              <div class="block">
-                <input
-                  type="text"
-                  id="threadFilter"
-                  placeholder="Filter threads..."
-                  onkeyup="filterThreads()"
-                />
-              </div>
-              <div class="list no-hairlines-md">
-                <ul id="threadListNew">
-                  <li>
-                    <a
-                      onclick="startNewThread()"
-                      href="#"
-                      class="item-link item-content"
-                    >
-                      <div class="item-inner">
-                        <div class="item-title">New Thread</div>
-                      </div>
-                    </a>
-                  </li>
-                </ul>
-              </div>
-              <div class="list no-hairlines-md">
-                <ul id="threadList">
-                  <!-- Thread items will be appended here -->
-                </ul>
-              </div>
+            <div class="page">
+                <div class="page-content">
+                    <div class="block-title">Threads</div>
+                    <div class="block">
+                        <input type="text" id="threadFilter" placeholder="Filter threads..." onkeyup="filterThreads()" />
+                    </div>
+                    <div class="list no-hairlines-md">
+                        <ul id="threadListNew">
+                            <li>
+                                <a onclick="startNewThread()" href="#" class="item-link item-content">
+                                    <div class="item-inner">
+                                        <div class="item-title">New Thread</div>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="list no-hairlines-md">
+                        <ul id="threadList">
+                            <!-- Thread items will be appended here -->
+                        </ul>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-      <div
-        id="toughtloops"
-        class="panel panel-resizable panel-right panel-cover panel-hidden"
-      >
+    </div>
+    <div id="toughtloops" class="panel panel-resizable panel-right panel-cover panel-hidden">
         <div class="view">
-          <div class="page">
-            <div class="page-content">
-              <div class="block-title">Toughtloop Prompts</div>
-              <div class="list no-hairlines-md">
-                <ul class="list-group">
-                  <!-- Prompt items will be appended here -->
-                </ul>
-              </div>
-              <div class="block">
-                <div class="input-group mt-2">
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="newPromptInput"
-                    placeholder="New prompt..."
-                  />
-                  <div class="input-group-append">
-                    <button
-                      class="button button-outline"
-                      type="button"
-                      onclick="addPrompt()"
-                    >
-                      <i class="fas fa-plus"></i>
-                    </button>
-                  </div>
+            <div class="page">
+                <div class="page-content">
+                    <div class="block-title">Toughtloop Prompts</div>
+                    <div class="list no-hairlines-md">
+                        <ul class="list-group">
+                            <!-- Prompt items will be appended here -->
+                        </ul>
+                    </div>
+                    <div class="block">
+                        <div class="input-group mt-2">
+                            <input type="text" class="form-control" id="newPromptInput" placeholder="New prompt..." />
+                            <div class="input-group-append">
+                                <button class="button button-outline" type="button" onclick="addPrompt()">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
         </div>
-      </div>
-      <div
-        id="memoryList"
-        class="panel panel-resizable panel-right panel-cover panel-hidden"
-      >
+    </div>
+    <div id="memoryList" class="panel panel-resizable panel-right panel-cover panel-hidden">
         <div class="view">
-          <div class="page">
-            <div class="page-content">
-              <div class="block-title">
-                Memory (Instructions and System Memories)
-              </div>
-              <div class="list no-hairlines-md">
-                <ul class="list-group">
-                  <!-- Memory items will be appended here -->
-                </ul>
-              </div>
-              <div class="block">
-                <div class="input-group mt-2">
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="newMemoryInput"
-                    placeholder="New memory..."
-                  />
-                  <div class="input-group-append">
-                    <button
-                      class="button button-outline"
-                      type="button"
-                      onclick="addMemory()"
-                    >
-                      <i class="fas fa-plus"></i>
-                    </button>
-                  </div>
+            <div class="page">
+                <div class="page-content">
+                    <div class="block-title">Memory (Instructions and System Memories)</div>
+                    <div class="list no-hairlines-md">
+                        <ul class="list-group">
+                            <!-- Memory items will be appended here -->
+                        </ul>
+                    </div>
+                    <div class="block">
+                        <div class="input-group mt-2">
+                            <input type="text" class="form-control" id="newMemoryInput" placeholder="New memory..." />
+                            <div class="input-group-append">
+                                <button class="button button-outline" type="button" onclick="addMemory()">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
         </div>
-      </div>
-      <div
-        id="versionList"
-        class="panel panel-resizable panel-right panel-cover panel-hidden"
-      >
+    </div>
+    <div id="versionList" class="panel panel-resizable panel-right panel-cover panel-hidden">
         <div class="view">
-          <div class="page">
-            <div class="page-content">
-              <div class="block-title">
-                DB Versions (change to start a new thread)
-              </div>
-              <div class="list no-hairlines-md">
-                <ul class="list-group">
-                  <!-- Version items will be appended here -->
-                </ul>
-              </div>
+            <div class="page">
+                <div class="page-content">
+                    <div class="block-title">DB Versions (change to start a new thread)</div>
+                    <div class="list no-hairlines-md">
+                        <ul class="list-group">
+                            <!-- Version items will be appended here -->
+                        </ul>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-      <div
-        id="debugView"
-        class="panel panel-resizable panel-right panel-cover panel-hidden"
-      >
+    </div>
+    <div id="debugView" class="panel panel-resizable panel-right panel-cover panel-hidden">
         <div class="view">
-          <div class="page">
-            <div class="page-content">
-              <div class="block-title">Context Settings</div>
-              <div class="centered">
-                <div class="range-slider">
-                  <div class="block-title">Conversation Buffer (msg)</div>
-                  <div class="block block-strong-ios block-outline-ios">
-                    <div
-                      class="bufferSize range-slider range-slider-init"
-                      data-min="5"
-                      data-max="100"
-                      data-label="true"
-                      data-step="5"
-                      data-value="25"
-                      data-scale="true"
-                      data-scale-steps="5"
-                      data-scale-sub-steps="4"
-                    ></div>
-                  </div>
+            <div class="page">
+                <div class="page-content">
+                    <div class="block-title">Context Settings</div>
+                    <div class="centered">
+                        <div class="range-slider">
+                            <div class="block-title">Conversation Buffer (msg)</div>
+                            <div class="block block-strong-ios block-outline-ios">
+                                <div class="bufferSize range-slider range-slider-init" data-min="5" data-max="100" data-label="true" data-step="5" data-value="25" data-scale="true" data-scale-steps="5" data-scale-sub-steps="4"></div>
+                            </div>
+                        </div>
+                        <div class="gauge gauge-init cpuUsage" data-type="semicircle" data-value="0.00" data-value-text="0%" data-lable-text="CPU Usage" data-value-text-color="#ff9800" data-border-color="#ff9800"></div>
+                        <div class="range-slider">
+                            <div class="block-title">Toughtloop Max Interval</div>
+                            <div class="block block-strong-ios block-outline-ios">
+                                <div class="toughtloopIntervalRandomMaxSecs range-slider range-slider-init" data-min="300" data-max="14400" data-label="true" data-step="77" data-value="333" data-scale="true" data-scale-steps="5" data-scale-sub-steps="4"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="block-title">Debug Context</div>
+                    <div class="centered">
+                        <div class="debug-list list no-hairlines-md">
+                            <ul class="list-group">
+                                <!-- Debug items will be appended here -->
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-                <div
-                  class="gauge gauge-init cpuUsage"
-                  data-type="semicircle"
-                  data-value="0.00"
-                  data-value-text="0%"
-                  data-lable-text="CPU Usage"
-                  data-value-text-color="#ff9800"
-                  data-border-color="#ff9800"
-                ></div>
-                <div class="range-slider">
-                  <div class="block-title">Toughtloop Max Interval</div>
-                  <div class="block block-strong-ios block-outline-ios">
-                    <div
-                      class="toughtloopIntervalRandomMaxSecs range-slider range-slider-init"
-                      data-min="300"
-                      data-max="14400"
-                      data-label="true"
-                      data-step="77"
-                      data-value="333"
-                      data-scale="true"
-                      data-scale-steps="5"
-                      data-scale-sub-steps="4"
-                    ></div>
-                  </div>
-                </div>
-                </div>
-                
-                <div class="block-title">Debug Context</div>
-                <div class="centered">
-                  <div class="debug-list list no-hairlines-md">
-                  <ul class="list-group">
-                    <!-- Debug items will be appended here -->
-                  </ul>
-                </div>
-              </div>
             </div>
-          </div>
         </div>
-      </div>
-      <!-- Framework7 library -->
-      <script>
+    </div>
+    <!-- Framework7 library -->
+    <script>
         var app = new Framework7({
-          // App root element
-          el: "#app",
-          // App Name
-          name: "Toughtloop AI",
-          // App id
-          id: "dev.lilux.ai.toughtloop.frontend",
-          // Enable swipe panel
-          panel: {
-            swipe: true,
-          },
-          // Add default routes
-          routes: [
-            {
-              path: "/about/",
-              url: "about.html",
+            // App root element
+            el: "#app",
+            // App Name
+            name: "Toughtloop AI",
+            // App id
+            id: "dev.lilux.ai.toughtloop.frontend",
+            // Enable swipe panel
+            panel: {
+                swipe: true,
             },
-          ],
+            // Add default routes
+            routes: [
+                {
+                    path: "/about/",
+                    url: "about.html",
+                },
+            ],
         });
 
         function toggleToughtloops() {
-          app.panel.toggle("#toughtloops");
-          console.log("Toughtloops toggled");
+            app.panel.toggle("#toughtloops");
+            console.log("Toughtloops toggled");
         }
 
         function toggleMemoryList() {
-          app.panel.toggle("#memoryList");
+            app.panel.toggle("#memoryList");
         }
 
         function toggleVersionList() {
-          app.panel.toggle("#versionList");
+            app.panel.toggle("#versionList");
         }
 
         function toggleDebug() {
-          app.panel.toggle("#debugView");
-          //if open, update the debug view
-          if (app.panel.get("#debugView").opened) {
-            fetchDebug();
-            var range = app.range.create({
-              el: ".bufferSize",
-              on: {
-                change: function (event) {
-                  console.log("Range Slider value changed", event.value);
-                  updateConfigValue("buffer", event.value);
-                  fetchDebug();
-                },
-              },
-            });
+            app.panel.toggle("#debugView");
+            //if open, update the debug view
+            if (app.panel.get("#debugView").opened) {
+                fetchDebug();
+                var range = app.range.create({
+                    el: ".bufferSize",
+                    on: {
+                        change: function (event) {
+                            console.log("Range Slider value changed", event.value);
+                            updateConfigValue("buffer", event.value);
+                            fetchDebug();
+                        },
+                    },
+                });
 
-            var range2 = app.range.create({
-              el: ".toughtloopIntervalRandomMaxSecs",
-              on: {
-                change: function (event) {
-                  console.log("Range Slider value changed", event.value);
-                  updateConfigValue("toughtloopIntervalRandomMaxSecs", event.value);
-                  fetchDebug();
-                },
-              },
-            });
-          }
+                var range2 = app.range.create({
+                    el: ".toughtloopIntervalRandomMaxSecs",
+                    on: {
+                        change: function (event) {
+                            console.log("Range Slider value changed", event.value);
+                            updateConfigValue("toughtloopIntervalRandomMaxSecs", event.value);
+                            fetchDebug();
+                        },
+                    },
+                });
+            }
         }
 
         async function updateCpuUsage(percentage) {
-          if (percentage > RUNNING_COG_THRESHOLD) {
-            setCogRunning(await isInvokingApi());
-          } else {
-            setCogRunning(false);
-          }
-          let gauge = app.gauge.get(".cpuUsage");
-          if (!gauge) {
-            gauge = app.gauge.create({
-              el: ".cpuUsage",
-              type: "semicircle",
-              value: percentage / 100,
-              valueText: percentage + "%",
-              labelText: "CPU Usage",
-              valueTextColor: "#ff9800",
-              borderColor: "#ff9800",
+            if (percentage > RUNNING_COG_THRESHOLD) {
+                setCogRunning(await isInvokingApi());
+            } else {
+                setCogRunning(false);
+            }
+            let gauge = app.gauge.get(".cpuUsage");
+            if (!gauge) {
+                gauge = app.gauge.create({
+                    el: ".cpuUsage",
+                    type: "semicircle",
+                    value: percentage / 100,
+                    valueText: percentage + "%",
+                    labelText: "CPU Usage",
+                    valueTextColor: "#ff9800",
+                    borderColor: "#ff9800",
+                });
+            }
+            console.log({ gauge });
+
+            gauge.update({
+                value: percentage / 100,
+                valueText: percentage + "%",
             });
-          }
-          console.log({ gauge });
-
-          gauge.update({
-            value: percentage / 100,
-            valueText: percentage + "%",
-          });
-          console.log({ gauge });
+            console.log({ gauge });
         }
-      </script>
-      <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/2.0.2/timeago.min.js"
-        integrity="sha512-sl01o/gVwybF1FNzqO4NDRDNPJDupfN0o2+tMm4K2/nr35FjGlxlvXZ6kK6faa9zhXbnfLIXioHnExuwJdlTMA=="
-        crossorigin="anonymous"
-        referrerpolicy="no-referrer"
-      ></script>
 
-      <!-- App scripts -->
-      <script src="scripts.js"></script>
-      <script src="memoryCrud.js"></script>
-      <script src="toughtloopsCrud.js"></script>
-      <script src="versionCrud.js"></script>
-      <script src="debugCrud.js"></script>
-    </div>
-  </body>
+        // PWA Installation Code
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            // Show the install prompt
+            showInstallPrompt();
+        });
+
+        function showInstallPrompt() {
+            // Show the install prompt to screen
+            const installAlert = document.getElementById('installAppAlert');
+            installAlert.style.display = 'block';
+        }
+
+        function installApp() {
+            if (deferredPrompt) {
+                // Show the install prompt
+                deferredPrompt.prompt();
+                // Wait for the user to respond to the prompt
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    } else {
+                        console.log('User dismissed the install prompt');
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                alert('To install this app, please use the "Add to Home Screen" option in your browser settings.');
+            }
+        }
+
+        // Show install instructions for iOS
+        function showInstallInstructionsForiOS() {
+            const installMessage = `
+                <div id="iosInstallMessage" style="position: fixed; top: 0; left: 0; width: 100%; background: white; color: black; padding: 20px; z-index: 1000;">
+                    <p>To install this app on your iPhone/iPad, press the "Share" icon and then select "Add to Home Screen".</p>
+                    <button onclick="document.getElementById('iosInstallMessage').style.display='none'">Close</button>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('afterbegin', installMessage);
+        }
+
+        window.addEventListener('load', () => {
+            const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+            const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
+            if (isIos && !isInStandaloneMode) {
+                showInstallInstructionsForiOS();
+            }
+        });
+
+        // Function to rotate or stop the cog icon
+        function setCogRunning(state) {
+            const cogIcon = document.querySelector('.runningCog');
+            if (state) {
+                cogIcon.style.animation = 'spin 2s linear infinite';
+            } else {
+                cogIcon.style.animation = '';
+            }
+        }
+
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/2.0.2/timeago.min.js" integrity="sha512-sl01o/gVwybF1FNzqO4NDRDNPJDupfN0o2+tMm4K2/nr35FjGlxlvXZ6kK6faa9zhXbnfLIXioHnExuwJdlTMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- App scripts -->
+    <script src="scripts.js"></script>
+    <script src="memoryCrud.js"></script>
+    <script src="toughtloopsCrud.js"></script>
+    <script src="versionCrud.js"></script>
+    <script src="debugCrud.js"></script>
+</div>
+</body>
 </html>

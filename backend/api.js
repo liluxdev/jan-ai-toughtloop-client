@@ -259,7 +259,7 @@ export const dequeueMessage = async () => {
   if (messageQueue.length > 0) {
     const { m } = messageQueue.shift();
     console.log("Dequeueing message...", m);
-    sendJsonMessage("<i>Dequeued message:</i>: " + m, "user", await getModel());
+    sendJsonMessage("<i>Dequeued message:</i>: " + m, "user");
     invokeApi(m, true);
   }
 };
@@ -277,7 +277,7 @@ export const invokeApi = async (
       console.log("API is already being invoked, request ignored.");
       if (isInteractive || isSendingEmoji) {
         if (!isSendingEmoji) {
-          sendJsonMessage(API_ALREADY_INVOKED_MESSAGE, "system", getModel());
+          sendJsonMessage(API_ALREADY_INVOKED_MESSAGE, "system");
         }
         enqueueMessage(instructions);
       }
@@ -453,8 +453,7 @@ export const invokeApi = async (
             "system",
             false,
             undefined,
-            message.timestamp,
-            await getModel()
+            message.timestamp
           );
           // sendJsonMessage(ctx.websocket, content, message.role);
           console.log("Pushing conversation history message..");
@@ -485,8 +484,7 @@ export const invokeApi = async (
       "avatar",
       true,
       undefined,
-      timestamp,
-      getModel()
+      timestamp
     );
 
     const source = axios.CancelToken.source();
@@ -555,7 +553,7 @@ export const invokeApi = async (
               true,
               undefined,
               timestamp,
-              getModel()
+              await getModel()
             );
             console.log("chunk: ", messageContent);
             pendingChunks.push({
@@ -608,7 +606,7 @@ export const invokeApi = async (
             content: lastMessage,
             role: "assistant",
           });
-          sendJsonMessage(HR_SEPARATOR, "system", false, undefined, timestamp, getModel());
+          sendJsonMessage(HR_SEPARATOR, "system", false, undefined, timestamp);
           if (!isInteractive) {
             console.error(
               "Pause toughtloop waiting for further interactions..."

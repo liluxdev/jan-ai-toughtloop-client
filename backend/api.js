@@ -494,6 +494,7 @@ export const invokeApi = async (instructions, isInteractive = true, isEmojiOnly 
           }
         } else {
           await incrementSafewordCounter(lastMessage);
+          console.error("Received safeword, not saving lastMessage", lastMessage);
           setToughtloopInterval();
         }
 

@@ -183,6 +183,7 @@ if (window.Worker) {
         const cardTime = document.createElement("div");
         cardTime.className = "card-time";
         cardTime.innerHTML =
+          (model ? model + "@":"") +
           timestamp +
           ' <div class="timeago-div-render" datetime="' +
           timestamp +

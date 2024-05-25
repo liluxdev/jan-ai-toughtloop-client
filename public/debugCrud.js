@@ -6,7 +6,7 @@ const isInvokingApi = async () => {
     return debug.invokingApi;
 };
 let refreshingBufferSize = false;
-let refreshingToughloopInterval = false;
+let refreshingtoughtloopInterval = false;
 
 const debounce = (func, delay) => {
     let timeoutId;
@@ -30,10 +30,10 @@ const _fetchDebug = async () => {
         app.range.setValue('.bufferSize', debug.conversationMessageLimit);
         refreshingBufferSize = false;
 
-        refreshingToughloopInterval = true;
+        refreshingtoughtloopInterval = true;
         app.range.setValue('.toughtloopIntervalRandomMaxSecs', debug?.configuration?.toughtloopIntervalRandomMaxSecs || 333);
         
-        refreshingToughloopInterval = false;
+        refreshingtoughtloopInterval = false;
 
         refreshingBufferSize = true;
         app.range.setValue('.temperature', debug?.configuration?.temperature || 0.7);
@@ -119,7 +119,7 @@ const debouncedFetchDebug = debounce(_fetchDebug, 333);
 
 const fetchDebug = async () => {
     if (refreshingBufferSize) return;
-    if (refreshingToughloopInterval) return;
+    if (refreshingtoughtloopInterval) return;
     console.warn("Fetching debug");
     console.trace();
     debouncedFetchDebug();
@@ -127,7 +127,7 @@ const fetchDebug = async () => {
 
 const updateConfigValue = async (key, value) => {
     if (refreshingBufferSize) return;
-    if (refreshingToughloopInterval) return;
+    if (refreshingtoughtloopInterval) return;
     try {
         await fetch(`${baseUrlDebug}/config/${key}`, {
             method: 'PUT',

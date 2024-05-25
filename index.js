@@ -80,13 +80,13 @@ export const setToughtloopInterval = async (timing = 333) => {
       console.error("No clients connected, skipping toughtloop");
       return;
     }
-    const toughloopPrompt = await getRandomPrompt();
-    if (!toughloopPrompt) {
+    const toughtloopPrompt = await getRandomPrompt();
+    if (!toughtloopPrompt) {
       console.log("No toughtloop prompt found");
       return;
     }
-    console.error("Sending toughloop prompt...", toughloopPrompt);
-    await invokeApi(toughloopPrompt, false);
+    console.error("Sending toughtloop prompt...", toughtloopPrompt);
+    await invokeApi(toughtloopPrompt, false);
   }, timing * 1000);
   etaIntervalSecs = timing;
 };

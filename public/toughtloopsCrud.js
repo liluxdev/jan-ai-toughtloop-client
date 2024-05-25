@@ -39,7 +39,7 @@ const addPrompt = async () => {
             body: JSON.stringify({ message: content }),
         });
         const newMemory = await response.json();
-        showToast('Prompt added to toughloop', 'success');
+        showToast('Prompt added to toughtloop', 'success');
         loadPrompts();
         input.value = '';
     } catch (error) {
@@ -76,7 +76,7 @@ const updatePrompt = async (id, content) => {
 const deletePrompt = async (id) => {
     if (confirm('Are you sure you want to delete this prompt?') === false) return;
     try {
-        await fetch(`${baseUrlPrompts}/toughloop/${id}`, {
+        await fetch(`${baseUrlPrompts}/toughtloop/${id}`, {
             method: 'DELETE',
         });
         showToast('Prompt deleted', 'success');

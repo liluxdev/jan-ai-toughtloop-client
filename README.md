@@ -30,7 +30,7 @@ Demo repository is shipped with useful prompts and memory for agile development
 
 ## JAN.ai Model Settings
 
-At moment toughloop support swithcing models by clicking the 'cog' icon and pick the desired model, anyway JAN.ai API Server at moment doesn't support local model switching but it needs to be started picking a single model, if you switch model, please restart the JAN.ai API Server with the proper model 
+At moment toughtloop support swithcing models by clicking the 'cog' icon and pick the desired model, anyway JAN.ai API Server at moment doesn't support local model switching but it needs to be started picking a single model, if you switch model, please restart the JAN.ai API Server with the proper model 
 
 ## Enjoy your ride!
 
@@ -64,7 +64,7 @@ None, it is simply open source, you can do anything with this public domain code
    -  Live model switching (log model who responded in the conversation db) - IN PROGRESS [needs JAN support]!
    -  Option to remember the whole conversations - DONE!
    -  Option to temporarly ignore all role==='assistant' messages - DONE! (in the hope to try to unlock the 'stallo' when a model goes in ripetitive answers loop)
-   -  Mechanism to let the model be able to generate and save new toughloop prompt (auto creating the self prompts to be randomly send periodically)
+   -  Mechanism to let the model be able to generate and save new toughtloop prompt (auto creating the self prompts to be randomly send periodically)
       - E.g. make another inverval to ask if she wants to add a prompt to the pool, instructing to respond with a safeword:addprompt to be matched (contained) in the response (then replaced) and if it matches it adds and save the prompt to prompts.db
    - Fine tuning [needs JAN support]: when JAN.ai fine-tuning APIs will be available use them to do a live fine tuning of the model with all the system, user and assistant conversation history 
    -  UX Message(s) Selection (long press)

@@ -29,11 +29,11 @@ const fetchDebug = async () => {
         refreshingBufferSize = false;
 
         refreshingBufferSize = true;
-        app.range.setValue('.frequencyPenalty', debug?.configuration?.frequency_penalty || 0.0);
+        app.range.setValue('.frequencyPenality', debug?.configuration?.frequency_penalty || 0.0);
         refreshingBufferSize = false;
 
         refreshingBufferSize = true;
-        app.range.setValue('.presencePenalty', debug?.configuration?.presence_penalty || 0.0);
+        app.range.setValue('.presencePenality', debug?.configuration?.presence_penalty || 0.0);
         refreshingBufferSize = false;
 
 

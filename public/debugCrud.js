@@ -6,18 +6,28 @@ const isInvokingApi = async () => {
     return debug.invokingApi;
 };
 let refreshingBufferSize = false;
-let refreshingtoughtloopInterval = false;
+let refreshingToughloopInterval = false;
 
 const debounce = (func, delay) => {
     let timeoutId;
-    return (...args) => {
+    let lastArgs;
+    let lastThis;
+
+    const debounced = function (...args) {
+        lastArgs = args;
+        lastThis = this;
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => {
-            func.apply(null, args);
+            func.apply(lastThis, lastArgs);
         }, delay);
     };
-};
 
+    debounced.cancel = function () {
+        clearTimeout(timeoutId);
+    };
+
+    return debounced;
+};
 
 
 const _fetchDebug = async () => {
@@ -30,10 +40,10 @@ const _fetchDebug = async () => {
         app.range.setValue('.bufferSize', debug.conversationMessageLimit);
         refreshingBufferSize = false;
 
-        refreshingtoughtloopInterval = true;
+        refreshingToughloopInterval = true;
         app.range.setValue('.toughtloopIntervalRandomMaxSecs', debug?.configuration?.toughtloopIntervalRandomMaxSecs || 333);
         
-        refreshingtoughtloopInterval = false;
+        refreshingToughloopInterval = false;
 
         refreshingBufferSize = true;
         app.range.setValue('.temperature', debug?.configuration?.temperature || 0.7);
@@ -119,15 +129,20 @@ const debouncedFetchDebug = debounce(_fetchDebug, 333);
 
 const fetchDebug = async () => {
     if (refreshingBufferSize) return;
-    if (refreshingtoughtloopInterval) return;
+    if (refreshingToughloopInterval) return;
     console.warn("Fetching debug");
     console.trace();
     debouncedFetchDebug();
 }
-
-const updateConfigValue = async (key, value) => {
+const debouncedUpdateConfigValue = debounce(updateConfigValue, 333);
+const updateConfigValue = async(key, value) => {
     if (refreshingBufferSize) return;
-    if (refreshingtoughtloopInterval) return;
+    if (refreshingToughloopInterval) return;
+    debouncedUpdateConfigValue(key, value);
+}
+const _updateConfigValue = async (key, value) => {
+    if (refreshingBufferSize) return;
+    if (refreshingToughloopInterval) return;
     try {
         await fetch(`${baseUrlDebug}/config/${key}`, {
             method: 'PUT',

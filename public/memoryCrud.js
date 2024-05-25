@@ -1,5 +1,3 @@
-import { show } from "js-snackbar";
-
 const baseUrl = location.origin;
 
 

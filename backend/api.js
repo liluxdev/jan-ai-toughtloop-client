@@ -315,7 +315,7 @@ export const invokeApi = async (
         ? parseFloat(conf.presence_penalty)
         : 0;
 
-    console.error("API configuration:", apiCallBody);
+    console.log("API configuration:", apiCallBody);
 
     if (isEmojiOnly) {
       sendingEmoji = true;

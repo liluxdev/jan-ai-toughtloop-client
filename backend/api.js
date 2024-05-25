@@ -198,15 +198,18 @@ export const setRecentMessages = async (content, role) => {
   );
   const limit = await getBufferMessagesLimit();
   const conf = await getConfiguration();
-  if (conf.sendAllThreads) {
+  if (conf?.sendAllThreads === "1") {
     apiCallBody.messages = system_messages.concat(other_messages);
   } else {
     apiCallBody.messages = system_messages.concat(
       other_messages.slice(-(await getBufferMessagesLimit()))
     );
   }
-  if (conf.onlyUser){
+  if (conf?.onlyUser === "1" ){
+    console.error("Only user messages enabled");
+    console.error("Messages before filter", apiCallBody.messages.length);
     apiCallBody.messages = apiCallBody.messages.filter((m) => m.role === "user" || m.role === "system");
+    console.error("Messages after filter", apiCallBody.messages.length);
   }
 };
 
@@ -346,7 +349,7 @@ export const invokeApi = async (
     }
     const dbConv = await dbPromise();
 
-    if (conf.sendAllThreads) {
+    if (conf?.sendAllThreads === "1") {
       const allMessages = await queryAllMessagesOfAllThreads();
       console.log("All messages:", allMessages);
       for (const thread of allMessages) {
@@ -381,7 +384,7 @@ export const invokeApi = async (
 
     let limit = await getBufferMessagesLimit();
 
-    if (conf.sendAllThreads) {
+    if (conf?.sendAllThreads === "1") {
       limit = 9999999;
     }
 

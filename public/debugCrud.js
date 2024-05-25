@@ -136,11 +136,11 @@ const updateConfigValue = async (key, value) => {
             },
             body: JSON.stringify({ value }),
         });
-        showToaster('Config updated', 'success');
+        showToast('Config updated', 'success');
         fetchDebug();
     } catch (error) {
         console.error('Error updating config:', error);
-        showToaster('Config update error', 'error');
+        showToast('Config update error', 'error');
 
     }
 };

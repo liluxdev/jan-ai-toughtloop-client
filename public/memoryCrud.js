@@ -21,7 +21,7 @@ const loadMemories = async () => {
         });
     } catch (error) {
         console.error('Error loading memories:', error);
-        showToaster('Error loading memories', 'error');
+        showToast('Error loading memories', 'error');
     }
 };
 
@@ -38,7 +38,7 @@ const addMemory = async () => {
             body: JSON.stringify({ message: content }),
         });
         const newMemory = await response.json();
-        showToaster('Memory added', 'success');
+        showToast('Memory added', 'success');
         loadMemories();
         input.value = '';
     } catch (error) {
@@ -64,10 +64,10 @@ const updateMemory = async (id, content) => {
             },
             body: JSON.stringify({ message: content }),
         });
-        showToaster('Memory updated', 'success');
+        showToast('Memory updated', 'success');
         loadMemories();
     } catch (error) {
-        showToaster('Error updating memory', 'error');
+        showToast('Error updating memory', 'error');
         console.error('Error updating memory:', error);
     }
 };
@@ -78,10 +78,10 @@ const deleteMemory = async (id) => {
         await fetch(`${baseUrl}/memory/${id}`, {
             method: 'DELETE',
         });
-        showToaster('Memory deleted', 'success');
+        showToast('Memory deleted', 'success');
         loadMemories();
     } catch (error) {
-        showToaster('Error deleting memory', 'error');
+        showToast('Error deleting memory', 'error');
         console.error('Error deleting memory:', error);
     }
 };

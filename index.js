@@ -121,7 +121,7 @@ intervalTimer = setInterval(async () => {
   if (etaIntervalSecs < 0) {
     const rememberedToWriteMessageChance = Math.random();
     if (rememberedToWriteMessageChance < REMEMBER_ABOUT_YOU_PROBABILITY / currentIntervalLengthSecs * 333) {
-      await incrementGenericCounter("remeber_count");
+      await incrementGenericCounter("remember_count");
       console.error("Remembered to write message");
       //clearInterval(intervalTimer);
       setToughtloopInterval();

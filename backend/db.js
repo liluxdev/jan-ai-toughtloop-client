@@ -62,7 +62,15 @@ export const dbPromiseMessageGeneric = async (version) =>
     filename: "./stealth_db/database" + version + ".db",
     driver: sqlite3.Database,
   });
-
+export const doAllThreadsDbMigrations = async () => {
+  return; //DISABLED for performance reasons
+  try {
+    await db2.exec(`ALTER TABLE messages ADD COLUMN model TEXT`);
+    console.log("Column added");
+  } catch (err) {
+    console.log("Column already exists");
+  }
+};
 export const queryAllMessagesOfAllThreads = async () => {
   const db = await dbVersions;
   const threads = await db.all("SELECT key, friendlyName FROM threads ORDER BY timestampLastUpdate ASC,timestamp ASC");
@@ -70,13 +78,7 @@ export const queryAllMessagesOfAllThreads = async () => {
   for (const thread of threads) {
     try{
     const db2 = await dbPromiseMessageGeneric(thread.key);
-    try {
-      await db2.exec(`ALTER TABLE messages ADD COLUMN model TEXT`);
-      console.log("Column added");
-    } catch (err) {
-      console.log("Column already exists");
-    }
-  
+    await doAllThreadsDbMigrations();
     const messages = await db2.all("SELECT * FROM messages ORDER BY timestamp ASC");
     allMessages.push({ thread: thread, messages });
     console.error("Messages queried", messages.length);

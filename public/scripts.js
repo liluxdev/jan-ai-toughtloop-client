@@ -57,6 +57,7 @@ if (window.Worker) {
     if (type === "message") {
       const messageData = JSON.parse(data);
       const { content, role, chunk, timestamp, model} = messageData;
+      console.log({ messageData });
 
       if (role === "user") {
         const lastUserCard = document.querySelector(".card.user.sending");

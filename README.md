@@ -41,7 +41,7 @@ export const MODEL_NAME = 'stealth-v1.2-7b';
 
 Allow notifications to get unsolecited messagess (I call it reverse prompting!)
 
-If you don't want the unsolecited messages you can edit the toughtloop prompts clicking at the 'cog' icon and delete all the tougthloop prompts
+If you don't want the unsolecited messages you can edit the toughtloop prompts clicking at the 'list' icon and delete all the tougthloop prompts
 
 
 ## Brought to you by Lilux.dev

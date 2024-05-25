@@ -68,9 +68,14 @@ export const queryAllMessagesOfAllThreads = async () => {
   const threads = await db.all("SELECT key, friendlyName FROM threads ORDER BY timestampLastUpdate ASC,timestamp ASC");
   const allMessages = [];
   for (const thread of threads) {
-    const db = await dbPromiseMessageGeneric(thread.key);
-    const messages = await db.all("SELECT * FROM messages ORDER BY timestamp ASC");
+    try{
+    const db2 = await dbPromiseMessageGeneric(thread.key);
+    const messages = await db2.all("SELECT * FROM messages ORDER BY timestamp ASC");
     allMessages.push({ thread: thread, messages });
+    console.error("Messages queried", messages.length);
+    }catch(err){
+      console.error("Error querying messages", err);
+    }
   }
   return allMessages;
 };

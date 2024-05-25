@@ -325,7 +325,7 @@ export const invokeApi = async (instructions, isInteractive = true, isEmojiOnly 
 
     if (conf.sendAllThreads) {
       const allMessages = await queryAllMessagesOfAllThreads();
-      console.error("All messages:", allMessages);
+      console.log("All messages:", allMessages);
       for (const thread of allMessages) {
         if (thread.key===getMessagesVersion()){
           continue;

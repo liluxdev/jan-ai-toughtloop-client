@@ -67,3 +67,8 @@ None, it is simply open source, you can do anything with this public domain code
    -  Mechanism to let the model be able to generate and save new toughloop prompt (auto creating the self prompts to be randomly send periodically)
       - E.g. make another inverval to ask if she wants to add a prompt to the pool, instructing to respond with a safeword:addprompt to be matched (contained) in the response (then replaced) and if it matches it adds and save the prompt to prompts.db
    - Fine tuning [needs JAN support]: when JAN.ai fine-tuning APIs will be available use them to do a live fine tuning of the model with all the system, user and assistant conversation history 
+   -  UX Message(s) Selection (long press)
+      - Copy Selected to clipboard
+      - Start a new Thread with Selected
+      - Temporary ignore selected on conversation
+      - Temporary focus the conversation son selected

@@ -1,0 +1,37 @@
+{
+  "name": "js-snackbar",
+  "version": "1.1.2",
+  "description": "Custom Material Design inspired SnackBar notifications",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run build-src-css && cp ./index.js src/snackbar.js && react-scripts start",
+    "build-css": "node-sass snackbar.scss -o ./",
+    "build-src-css": "node-sass snackbar.scss -o src/",
+    "prepublishOnly": "npm run build-css"
+  },
+  "devDependencies": {
+    "eslint": "5.3.0",
+    "eslint-config-airbnb": "17.0.0",
+    "eslint-plugin-import": "2.13.0",
+    "eslint-plugin-jsx-a11y": "6.1.1",
+    "eslint-plugin-react": "7.10.0",
+    "node-sass": "4.9.3",
+    "react": "16.4.2",
+    "react-dom": "16.4.2",
+    "react-scripts": "1.1.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/johnrhampton/js-snackbar"
+  },
+  "bugs": {
+    "url": "https://github.com/johnrhampton/js-snackbar/issues"
+  },
+  "keywords": [
+    "snackbar",
+    "matieral-design"
+  ],
+  "author": "JRH",
+  "license": "MIT",
+  "homepage": "https://github.com/johnrhampton/js-snackbar"
+}

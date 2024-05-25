@@ -188,8 +188,7 @@ const axiosInstance = axios.create({
   timeout: 12 * 60 * 1000, // 12 minutes
 });
 
-export const setRecentMessages = async (content, role) => {
-  apiCallBody.messages.push({ content, role });
+export const cleanRecentMessages = async () => {
   const system_messages = apiCallBody.messages.filter(
     (m) => m.role === "system"
   );
@@ -211,6 +210,11 @@ export const setRecentMessages = async (content, role) => {
     apiCallBody.messages = apiCallBody.messages.filter((m) => m.role === "user" || m.role === "system");
     console.error("Messages after filter", apiCallBody.messages.length);
   }
+  console.error("Messages cleaned", apiCallBody.messages.length);
+};
+
+export const pushRecentMessageInAPIBody = async (content, role) => {
+  apiCallBody.messages.push({ content, role });
 };
 
 export const clearRecentMessages = () => {
@@ -323,7 +327,7 @@ export const invokeApi = async (
 
     clearRecentMessages();
 
-    await setRecentMessages(
+    await pushRecentMessageInAPIBody(
       "NOTICE: this conversation thread was named by the user: " +
         (await getConversationFriendlyName()),
       "system"
@@ -340,7 +344,7 @@ export const invokeApi = async (
             ")..";
         }
 
-        await setRecentMessages(content, "system");
+        await pushRecentMessageInAPIBody(content, "system");
         // sendJsonMessage(ctx.websocket, content, "system_memory");
         console.log("Pushing memory message..");
       } else {
@@ -356,7 +360,7 @@ export const invokeApi = async (
         if (thread.key === getMessagesVersion()) {
           continue;
         }
-        await setRecentMessages(
+        await pushRecentMessageInAPIBody(
           "Following messages are from Thread named:" + thread.friendlyName,
           "system"
         );
@@ -371,7 +375,7 @@ export const invokeApi = async (
                   OMISSIS_LIMIT +
                   ")..";
               }
-              await setRecentMessages(content, message.role);
+              await pushRecentMessageInAPIBody(content, message.role);
               // sendJsonMessage(ctx.websocket, content, message.role);
               console.log("Pushing all messages..");
             } else {
@@ -397,7 +401,7 @@ export const invokeApi = async (
       messageConvHistory
     );
     for (const message of messageConvHistory.reverse()) {
-      await setRecentMessages(message.content, message.role);
+      await pushRecentMessageInAPIBody(message.content, message.role);
     }
     apiCallBody.messages.concat(messageConvHistory);
 
@@ -430,7 +434,7 @@ export const invokeApi = async (
             ": '" +
             content +
             "'";
-          await setRecentMessages(quotePromptString, "system");
+          await pushRecentMessageInAPIBody(quotePromptString, "system");
           sendJsonMessage(
             quotePromptString,
             "system",
@@ -447,6 +451,7 @@ export const invokeApi = async (
       }
     }
     apiCallBody.messages.push({ content: instructions, role: "user" });
+    await cleanRecentMessages();
 
     const db = await dbPromise();
     const timestamp = new Date().toISOString();

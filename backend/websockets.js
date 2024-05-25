@@ -1,6 +1,6 @@
 import Router from "koa-router";
 import { dbPromise, dbPromiseMemory, dbPromisePrompts } from "./db.js";
-import { getBufferMessagesLimit, invokeApi, setRecentMessages } from "./api.js";
+import { getBufferMessagesLimit, invokeApi, pushRecentMessageInAPIBody } from "./api.js";
 import { formatMessage, sendJsonMessage } from "./utils.js";
 import { clearToughtloopInterval, setToughtloopInterval } from "../index.js";
 import { NUMBER_OF_MESSAGES_IN_BUFFER } from "./constants.js";
@@ -56,7 +56,7 @@ export const pushRecentMessages = async (clientId, onlyRam = false) => {
           ")..";
       }
 
-      await setRecentMessages(content, message.role);
+      await pushRecentMessageInAPIBody(content, message.role);
       recentMessagesToPush.push({
         content,
         role: message.role,

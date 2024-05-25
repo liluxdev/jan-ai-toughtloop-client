@@ -11,9 +11,9 @@ body {
         height: calc(100vh - 200px);
     }
 }
-@media screen and (min-height: 844px) {
+@media screen and (min-height: 600px) {
     #messages {
-        height: calc(100vh - 200px);
+        height: calc(100vh - 237px);
     }
 }
 #messageInput {

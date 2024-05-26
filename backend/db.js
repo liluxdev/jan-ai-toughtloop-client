@@ -197,6 +197,27 @@ const doDbMigrations = async () => {
     console.log("Column already exists");
   }
 
+  try {
+    await dbMsg.exec('INSER INTO OR IGNORE threads (key, friendlyName, timestamp, timestampLastUpdate) VALUES ("legacy", "Legacy thread", "2021-01-01T00:00:00.000Z", "2021-01-01T00:00:00.000Z")');
+    await dbMsg.exec(`UPDATE messages SET threadId = 'legacy' WHERE trheadId IS NULL`);
+    const selectLegacyMessages = await dbMsg.all("SELECT * FROM messages WHERE threadId = 'legacy'");
+    console.log("SELECT legacy messages", selectLegacyMessages);
+    if (selectLegacyMessages.length === 0){
+      await dbMsg.exec("DELETE FROM threads WHERE key = 'legacy'");
+      const selectAllThreads = await dbMsg.all("SELECT * FROM threads");
+    }else{
+      console.log("SELECT threads", selectAllThreads);
+      for (const thread of selectAllThreads){
+        const selectMessages = await dbMsg.all("SELECT * FROM messages WHERE threadId = ?", thread.key);
+        console.log("SELECT messages", selectMessages);
+        if (selectMessages.length === 0){
+          await dbMsg.exec("DELETE FROM threads WHERE key = ?", thread.key);
+        }
+      }
+    }
+  }catch(err){
+    console.error("Error migrating legacy messages", err);
+  }
   /*
   const dbVer = await dbVersions;
   console.log("Checking for database migrations");

@@ -35,10 +35,14 @@ export const wsRouter = new Router();
 export const pushRecentMessages = async (clientId, onlyRam = false) => {
   console.log("Pushing recent messages..");
   const db = await dbPromise();
+  let limit = await getBufferMessagesLimit();
+  if (!limit){
+    limit = 999999;
+  }
   const recentMessages = await db.all(`
   SELECT content, role, timestamp, model FROM messages WHERE   role != 'assistant_safeword' AND threadId = '${getCurrentThread()}' AND role != 'system_memory' AND role != 'toughtloop'  AND role != 'system_session_start' AND role != 'system'
   ORDER BY timestamp DESC
-  LIMIT ${parseInt( await getBufferMessagesLimit())}
+  LIMIT ${parseInt(limit)}
 `);
 
   console.log("Retrived recent messages: " + recentMessages.length);

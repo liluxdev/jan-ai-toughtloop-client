@@ -410,6 +410,10 @@ export const invokeApi = async (
 
     let limit = await getBufferMessagesLimit();
 
+    if (limit===0){
+      limit = 9999999;
+    }
+
     if (conf?.sendAllThreads === "1") {
       limit = 9999999;
     }

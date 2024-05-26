@@ -17,12 +17,6 @@ export const setMessageThread = (version) => {
 
 export const getCurrentThread = () => {
   console.error("Version is", VERSION_DB_MGS);
-  const debug = async () => {
-    const db = await dbPromise();
-    const messages = await db.all("SELECT * FROM messages");
-    console.error("Messages", messages);
-  };
-  debug();
   return VERSION_DB_MGS;
 };
 

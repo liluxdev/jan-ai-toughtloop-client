@@ -1,3 +1,5 @@
+const { show } = require("js-snackbar");
+
 const baseUrlVersions = location.origin;
 
 const editFriendlyName = async (newName = currentThreadTitle) => {
@@ -94,13 +96,17 @@ const startNewThread = async (name = "") => {
   name = prompt("Enter the name of the new thread:", new Date().toISOString());
   if (name) {
     try {
-      await fetch(`${baseUrlVersions}/threads/new`, {
+      const resp = await fetch(`${baseUrlVersions}/threads/new`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ name }),
       });
+      if (!resp.ok) {
+        showToast("Error in creating thread ", "error");
+        return
+      }
       loadThreads();
       showToast("Thread started successfully", "success");
       location.reload(true);
@@ -121,6 +127,10 @@ const updateVersion = async (key, version) => {
       },
       body: JSON.stringify({ version }),
     });
+    if (!resp.ok) {
+      showToast("Error in switching thread ", "error");
+      return
+    }
     loadThreads();
     showToast("Thread started successfully", "success");
     location.reload(true);

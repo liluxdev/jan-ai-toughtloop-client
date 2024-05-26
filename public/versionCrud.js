@@ -118,7 +118,7 @@ const startNewThread = async (name = "") => {
 
 const updateVersion = async (key, version) => {
   try {
-    await fetch(`${baseUrlVersions}/version/${key}`, {
+    const resp = await fetch(`${baseUrlVersions}/version/${key}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

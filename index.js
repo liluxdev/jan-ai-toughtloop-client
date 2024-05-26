@@ -10,7 +10,7 @@ import {
   dbPromisePrompts,
   dbVersions,
   initDb,
-  setMessageVersion,
+  setMessageThread,
 } from "./backend/db.js";
 import { startCpuWebSocket } from "./backend/cpu.js";
 import { EMOJII_REQUEST_PROMPT, FROGOT_ABOUT_YOU_PROBABILITY, PREFORMANCE_MODE_NO_CONSOLE_LOG, REMEMBER_ABOUT_YOU_PROBABILITY, RESCHEDULE_PROBABILITY, SEND_EMOJI_PROBABILITY, getRandomPrompt } from "./backend/constants.js";

@@ -1,5 +1,5 @@
 import Router from "koa-router";
-import { dbPromise, dbPromiseMemory, dbPromisePrompts } from "./db.js";
+import { dbPromise, dbPromiseMemory, dbPromisePrompts, getCurrentThread } from "./db.js";
 import { getBufferMessagesLimit, getConfiguration, invokeApi, pushRecentMessageInAPIBody } from "./api.js";
 import { formatMessage, sendJsonMessage } from "./utils.js";
 import { clearToughtloopInterval, setToughtloopInterval } from "../index.js";
@@ -36,7 +36,7 @@ export const pushRecentMessages = async (clientId, onlyRam = false) => {
   console.log("Pushing recent messages..");
   const db = await dbPromise();
   const recentMessages = await db.all(`
-  SELECT content, role, timestamp, model FROM messages WHERE  role != 'assistant_safeword' AND role != 'system_memory' AND role != 'toughtloop'  AND role != 'system_session_start' AND role != 'system'
+  SELECT content, role, timestamp, model FROM messages WHERE   role != 'assistant_safeword' AND threadId = '${getCurrentThread()}' AND role != 'system_memory' AND role != 'toughtloop'  AND role != 'system_session_start' AND role != 'system'
   ORDER BY timestamp DESC
   LIMIT ${parseInt( await getBufferMessagesLimit())}
 `);
@@ -136,10 +136,11 @@ const startSession = async () => {
   const timestamp = new Date().toISOString();
   const confMap = await getConfiguration();
   await db.run(
-    "INSERT INTO messages (content, role, timestamp) VALUES (?, ?, ?)",
+    "INSERT INTO messages (content, role, timestamp, threadId) VALUES (?, ?, ?, ?)",
     "Session started: " + timestamp,
     "system_session_start",
-    timestamp
+    timestamp,
+    getCurrentThread()
 
   );
 

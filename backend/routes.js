@@ -1,17 +1,21 @@
 import { clearToughtloopInterval, setToughtloopInterval } from "../index.js";
-import { clearRecentMessages, getApiContextDebug, setBufferMessagesLimit, getModels } from "./api.js";
 import {
+  clearRecentMessages,
+  getApiContextDebug,
+  setBufferMessagesLimit,
+  getModels,
+} from "./api.js";
+import {
+  dbPromise,
   dbPromiseMemory,
   dbPromisePrompts,
   dbVersions,
   getMessagesVersion,
   initDb,
-  setMessageVersion,
+  setMessageThread,
 } from "./db.js";
 
 export const setupRoutes = (router) => {
-
-  
   router.get("/models", async (ctx) => {
     const models = await getModels();
     ctx.body = models.data;
@@ -103,8 +107,10 @@ export const setupRoutes = (router) => {
     ctx.body = versions;
   });
   router.get("/threads", async (ctx) => {
-    const db = await dbVersions;
-    const threads = await db.all("SELECT key, friendlyName, timestamp, timestampLastUpdate FROM threads ORDER BY timestampLastUpdate DESC,timestamp DESC");
+    const db = await dbPromise();
+    const threads = await db.all(
+      "SELECT key, friendlyName, timestamp, timestampLastUpdate FROM threads ORDER BY timestampLastUpdate DESC,timestamp DESC"
+    );
     const currentThreadKey = await getMessagesVersion();
     for (const thread of threads) {
       if (thread.key === currentThreadKey) {
@@ -114,12 +120,12 @@ export const setupRoutes = (router) => {
     ctx.body = threads;
   });
 
-  router.post('/threads/new', async (ctx) => {
+  router.post("/threads/new", async (ctx) => {
     const db = await dbVersions;
     const name = ctx.request.body.name;
     const timestamp = new Date().toISOString();
-    const version = timestamp.replace(/:/g, "-"); 
-    if ((await getApiContextDebug()).invokingApi){
+    const version = timestamp.replace(/:/g, "-");
+    if ((await getApiContextDebug()).invokingApi) {
       ctx.status = 403;
       ctx.body = { error: "Cannot switch Thread while invoking API" };
       return;
@@ -131,10 +137,20 @@ export const setupRoutes = (router) => {
       timestamp,
       timestamp
     );
-    const key = 'messages';
+
+    const dbMsg = await dbPromise();
+    await dbMsg.run(
+      `INSERT INTO threads (key, friendlyName, timestamp, timestampLastUpdate) VALUES (?, ?, ?, ?)`,
+      version,
+      name,
+      timestamp,
+      timestamp
+    );
+
+    const key = "messages";
     await db.run("UPDATE versions SET version = ? WHERE key = ?", version, key);
     ctx.body = { version };
-    setMessageVersion(version);
+    setMessageThread(version);
     clearRecentMessages();
     initDb();
   });
@@ -150,6 +166,13 @@ export const setupRoutes = (router) => {
       timestamp,
       currentThreadKey
     );
+    const dbMsg = await dbPromise();
+    await dbMsg.run(
+      "UPDATE threads SET friendlyName = ?, timestampLastUpdate = ? WHERE key = ?",
+      name,
+      timestamp,
+      currentThreadKey
+    );
     ctx.body = { name };
   });
 
@@ -157,14 +180,14 @@ export const setupRoutes = (router) => {
     const { version } = ctx.request.body;
     const db = await dbVersions;
     const key = ctx.params.key;
-    if ((await getApiContextDebug()).invokingApi){
+    if ((await getApiContextDebug()).invokingApi) {
       ctx.status = 403;
       ctx.body = { error: "Cannot switch Thread while invoking API" };
       return;
     }
     await db.run("UPDATE versions SET version = ? WHERE key = ?", version, key);
     ctx.body = { version };
-    setMessageVersion(version);
+    setMessageThread(version);
     clearRecentMessages();
     initDb();
   });
@@ -179,13 +202,13 @@ export const setupRoutes = (router) => {
       value,
       value
     );
-    if (key === 'buffer'){
+    if (key === "buffer") {
       setBufferMessagesLimit(value);
     }
-    if (key === 'toughtloopIntervalRandomMaxSecs'){
+    if (key === "toughtloopIntervalRandomMaxSecs") {
       clearToughtloopInterval();
       setToughtloopInterval();
     }
-    ctx.body = { key:value };
+    ctx.body = { key: value };
   });
 };

@@ -11,12 +11,8 @@ export const dbVersions = open({
   driver: sqlite3.Database,
 });
 
-export const setMessageThread = (version) => {
-  VERSION_DB_MGS = version;
-};
-
-export const getCurrentThread = () => {
-  return VERSION_DB_MGS;
+export const setMessageVersion = async (version) => {
+  VERSION_DB_MGS = version.replace(":", "-");
 };
 
 const dbVersionsInit = async () => {
@@ -52,12 +48,12 @@ export const getMessagesVersion = () => {
   return VERSION_DB_MGS;
 };
 
-export const getConversationFriendlyName = async (threadId = undefined) => {
+export const getConversationFriendlyName = async () => {
   const db = await dbVersions;
-  const currentThreadKey = await getCurrentThread();
+  const currentThreadKey = await getMessagesVersion();
   const threads = await db.all(
     "SELECT friendlyName FROM threads WHERE key = ?",
-    threadId ? threadId : currentThreadKey
+    currentThreadKey
   );
   return threads[0].friendlyName;
 };
@@ -79,16 +75,17 @@ export const doAllThreadsDbMigrations = async () => {
 };
 
 export const queryAllMessagesOfAllThreads = async () => {
-  const db = await dbPromise();
+  const db = await dbVersions;
   const threads = await db.all(
     "SELECT key, friendlyName FROM threads ORDER BY timestampLastUpdate ASC, timestamp ASC"
   );
   const allMessages = [];
   for (const thread of threads) {
     try {
-      const messages = await db.all(
-        "SELECT * FROM messages WHERE threadId = ? ORDER BY timestamp ASC",
-        thread.key
+      const db2 = await dbPromiseMessageGeneric(thread.key);
+      await doAllThreadsDbMigrations();
+      const messages = await db2.all(
+        "SELECT * FROM messages ORDER BY timestamp ASC"
       );
       allMessages.push({ thread: thread, messages });
       console.error("Messages queried", messages.length);
@@ -96,13 +93,12 @@ export const queryAllMessagesOfAllThreads = async () => {
       console.error("Error querying messages", err);
     }
   }
-  console.error("Total Messages queried", allMessages.length);
   return allMessages;
 };
 
 export const dbPromise = async () =>
   open({
-    filename: "./stealth_db/db.db",
+    filename: "./stealth_db/database" + getMessagesVersion() + ".db",
     driver: sqlite3.Database,
   });
 
@@ -124,7 +120,14 @@ export const dbPromiseMemory = open({
 
 export const initDb = async () => {
   const db = await dbPromise();
-
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      content LONGTEXT,
+      role TEXT,
+      timestamp TEXT
+    )
+  `);
   await db.exec(`
     CREATE TABLE IF NOT EXISTS threads (
       friendlyName TEXT,
@@ -133,22 +136,6 @@ export const initDb = async () => {
       timestampLastUpdate TEXT
     )
   `);
-
-  await db.exec(`
-  CREATE TABLE IF NOT EXISTS messages (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    content LONGTEXT,
-    role TEXT,
-    timestamp TEXT,
-    threadId TEXT,
-    FOREIGN KEY (threadId) REFERENCES threads(key)
-    )
-  `);
-
-  await db.exec(`
-  CREATE INDEX IF NOT EXISTS idx_messages_threadId ON messages (threadId);
-`);
-
   const dbMem = await dbPromiseMemory;
   await dbMem.exec(`
     CREATE TABLE IF NOT EXISTS messages (
@@ -197,7 +184,6 @@ const doDbMigrations = async () => {
     console.log("Column already exists");
   }
 
-  /*
   const dbVer = await dbVersions;
   console.log("Checking for database migrations");
   console.log("Migrating db files to threads...");
@@ -205,7 +191,6 @@ const doDbMigrations = async () => {
     .readdirSync("./stealth_db/")
     .filter((file) => file.startsWith("database") && file.endsWith(".db"));
   console.log("Files found", files);
-  let idFix = 0;
   for (const file of files) {
     const version = file
       .replace("database-", "")
@@ -234,7 +219,13 @@ const doDbMigrations = async () => {
       FOREIGN KEY (threadId) REFERENCES threads(key)
     )`);
 
-
+    // Migrate the messages table to have a threadId foreign key
+    try {
+      await dbMsg.exec(`ALTER TABLE messages ADD COLUMN threadId TEXT`);
+      console.log("threadId column added to messages");
+    } catch (err) {
+      console.log("threadId column already exists in messages");
+    }
 
     try {
       const threads = await dbVer.all("SELECT * FROM threads");
@@ -256,8 +247,23 @@ const doDbMigrations = async () => {
     }
 
 
-
- 
+    try {
+      await dbMsgNew.exec(`
+      CREATE TABLE IF NOT EXISTS new_messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        content LONGTEXT,
+        role TEXT,
+        timestamp TEXT,
+        threadId TEXT,
+        FOREIGN KEY (threadId) REFERENCES threads(key)
+      )
+    `);
+      await dbMsgNew.run(`
+      INSERT INTO new_messages (id, content, role, timestamp, threadId)
+      SELECT id, content, role, timestamp, threadId FROM messages
+    `);
+      await dbMsgNew.exec(`DROP TABLE messages`);
+      await dbMsgNew.exec(`ALTER TABLE new_messages RENAME TO messages`);
 
       console.log("messages table migrated to include threadId as FK");
 
@@ -287,17 +293,8 @@ const doDbMigrations = async () => {
     }
 
 
-    const messages = await dbMsg.all("SELECT * FROM messages");
-    for (const message of messages) {
-      idFix++;
-      await dbMsgNew.run(
-        `INSERT INTO messages (id, content, role, timestamp, threadId) VALUES (?, ?, ?, ?, ?)`,
-        idFix,
-        message.content,
-        message.role,
-        message.timestamp,
-        message.threadId
-      );
+    } catch (err) {
+      console.error("Error migrating messages table", err);
     }
 
     const fileStats = fs.statSync("./stealth_db/" + file);
@@ -327,7 +324,6 @@ const doDbMigrations = async () => {
   } catch (err) {
     console.log("Column already exists");
   }
-  */
 };
 
 await initDb();

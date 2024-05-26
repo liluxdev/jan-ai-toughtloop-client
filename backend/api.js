@@ -5,6 +5,7 @@ import {
   dbPromiseMemory,
   dbVersions,
   getConversationFriendlyName,
+  getCurrentThread,
   getMessagesVersion,
   queryAllMessagesOfAllThreads,
 } from "./db.js";
@@ -24,6 +25,7 @@ import {
 } from "../index.js";
 import fs from "fs";
 import { OMISSIS_LIMIT } from "./websockets.js";
+import { get } from "http";
 
 let invokingApi = false;
 
@@ -69,11 +71,12 @@ const incrementSafewordCounter = async (msgMatchingSafeword) => {
   const timestamp = new Date().toISOString();
   const confMap = await getConfiguration();
   await db2.run(
-    "INSERT INTO messages (content, role, timestamp, model) VALUES (?, ?, ?, ?)",
+    "INSERT INTO messages (content, role, timestamp, model, threadId) VALUES (?, ?, ?, ?, ?)",
     msgMatchingSafeword,
     "assistant_safeword",
     timestamp,
-    confMap.model || MODEL_NAME
+    confMap.model || MODEL_NAME,
+    getCurrentThread()
   );
   console.log("Saved safeword message:", msgMatchingSafeword);
 };
@@ -200,7 +203,7 @@ export const cleanRecentMessages = async () => {
   const limit = await getBufferMessagesLimit();
   const conf = await getConfiguration();
   if (conf?.sendAllThreads === "1") {
-    apiCallBody.messages = system_messages.concat(other_messages);
+    //apiCallBody.messages = system_messages.concat(other_messages);
   } else {
     apiCallBody.messages = system_messages.concat(
       other_messages.slice(-(await getBufferMessagesLimit()))
@@ -209,6 +212,7 @@ export const cleanRecentMessages = async () => {
   if (conf?.onlyUser === "1" ){
     console.error("Only user messages enabled");
     console.error("Messages before filter", apiCallBody.messages.length);
+    apiCallBody.messages.push({ content: "NOTICE: Only user messages are sent in this conversation history, please focus on my all previous requests and respond adeguately", role: "system" });
     apiCallBody.messages = apiCallBody.messages.filter((m) => m.role === "user" || m.role === "system");
     console.error("Messages after filter", apiCallBody.messages.length);
   }
@@ -233,11 +237,12 @@ export const getRandomAvatar = async () => {
   const timestamp = new Date().toISOString();
   const confMap = await getConfiguration();
   await db.run(
-    "INSERT INTO messages (content, role, timestamp, model) VALUES (?, ?, ?, ?)",
+    "INSERT INTO messages (content, role, timestamp, model, threadId) VALUES (?, ?, ?, ?, ?)",
     "/avatars/" + randomFile,
     "avatar",
     timestamp,
-    confMap.model || MODEL_NAME
+    confMap.model || MODEL_NAME,
+    getCurrentThread()
   );
   console.log("Saved avatar:", randomFile);
   return "/avatars/" + randomFile;
@@ -340,8 +345,8 @@ export const invokeApi = async (
     clearRecentMessages();
 
     await pushRecentMessageInAPIBody(
-      "NOTICE: this conversation thread was named by the user: " +
-        (await getConversationFriendlyName()),
+      "NOTICE: this conversation thread was named by the user: \"" +
+        (await getConversationFriendlyName())+"\"",
       "system"
     );
 
@@ -366,17 +371,20 @@ export const invokeApi = async (
     const dbConv = await dbPromise();
 
     if (conf?.sendAllThreads === "1") {
+      let currentThreadName = "";
       const allMessages = await queryAllMessagesOfAllThreads();
       console.log("All messages:", allMessages);
-      for (const thread of allMessages) {
-        if (thread.key === getMessagesVersion()) {
+      for (const t of allMessages) {
+        console.log("Thread:", t);
+        if (t.thread.key === getCurrentThread()) {
+          currentThreadName = t.thread.friendlyName;
           continue;
         }
         await pushRecentMessageInAPIBody(
-          "Following messages are from Thread named:" + thread.friendlyName,
+          "NOTICE: Following messages are loaded from a previous Thread we saved for your usage in this conversation, the previous thread in question is named: \"" + t.thread.friendlyName+"\"",
           "system"
         );
-        for (const message of thread.messages) {
+        for (const message of t.messages) {
           if ((message.role === "user" || message.role === "assistant")) {
             let content = message.content;
             if (content) {
@@ -397,6 +405,7 @@ export const invokeApi = async (
         }
       }
       console.error("All threads messages prepared for API", apiCallBody.messages.length);
+      pushRecentMessageInAPIBody("NOTICE: Following messages are from the current Thread named: \"" + currentThreadName+"\"", "system");
     }
 
     let limit = await getBufferMessagesLimit();
@@ -406,7 +415,7 @@ export const invokeApi = async (
     }
 
     const messageConvHistory = await dbConv.all(
-      `SELECT content, role,timestamp FROM messages WHERE role = 'user' OR  role = 'assistant' ORDER BY timestamp DESC LIMIT ${limit}`
+      `SELECT content, role,timestamp FROM messages WHERE role = 'user' OR  role = 'assistant' AND threadId = '${getCurrentThread()}' ORDER BY timestamp DESC LIMIT ${limit}`
     );
 
     console.log(
@@ -420,7 +429,7 @@ export const invokeApi = async (
 
     if (Math.random() < RANDOM_MEMORY_PROBABILITY) {
       const convHistoryRandomMemory = await dbConv.all(`
-    SELECT content, role,timestamp FROM messages WHERE role != 'assistant_safeword' AND role != 'system_memory' AND role != 'avatar' AND role != 'system_session_start' AND role != 'system'
+    SELECT content, role,timestamp FROM messages WHERE role != 'assistant_safeword' AND threadId = '${getCurrentThread()}' AND role != 'system_memory' AND role != 'avatar' AND role != 'system_session_start' AND role != 'system'
     ORDER BY RANDOM() LIMIT 3`);
       console.log(
         "Retrived conversation history messages: " +
@@ -470,11 +479,12 @@ export const invokeApi = async (
     const timestamp = new Date().toISOString();
     const confMap = await getConfiguration();
     await db.run(
-      "INSERT INTO messages (content, role, timestamp, model) VALUES (?, ?, ?, ?)",
+      "INSERT INTO messages (content, role, timestamp, model, threadId) VALUES (?, ?, ?, ?, ?)",
       instructions,
       isInteractive ? "user" : "toughtloop",
       timestamp,
-      conf.model || MODEL_NAME
+      conf.model || MODEL_NAME,
+      getCurrentThread()
     );
     console.log("Savend API prompt:", instructions);
 
@@ -597,11 +607,12 @@ export const invokeApi = async (
         if (!lastMessage.startsWith("safeword:notoughts")) {
           const confMap = await getConfiguration();
           await db.run(
-            "INSERT INTO messages (content, role, timestamp, model) VALUES (?, ?, ?, ?)",
+            "INSERT INTO messages (content, role, timestamp, model, threadId) VALUES (?, ?, ?, ?, ?)",
             lastMessage,
             "assistant",
             new Date().toISOString(),
-            confMap.model || MODEL_NAME
+            confMap.model || MODEL_NAME,
+            getCurrentThread()
           );
           apiCallBody.messages.push({
             content: lastMessage,

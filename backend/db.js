@@ -198,7 +198,7 @@ const doDbMigrations = async () => {
   }
 
   try {
-    await dbMsg.exec('INSER INTO OR IGNORE threads (key, friendlyName, timestamp, timestampLastUpdate) VALUES ("legacy", "Legacy thread", "2021-01-01T00:00:00.000Z", "2021-01-01T00:00:00.000Z")');
+    await dbMsg.exec('INSERT OR IGNORE INTO threads (key, friendlyName, timestamp, timestampLastUpdate) VALUES ("legacy", "Legacy thread", "2021-01-01T00:00:00.000Z", "2021-01-01T00:00:00.000Z")');
     await dbMsg.exec(`UPDATE messages SET threadId = 'legacy' WHERE trheadId IS NULL`);
     const selectLegacyMessages = await dbMsg.all("SELECT * FROM messages WHERE threadId = 'legacy'");
     console.log("SELECT legacy messages", selectLegacyMessages);

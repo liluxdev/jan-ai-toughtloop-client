@@ -16,6 +16,13 @@ export const setMessageThread = (version) => {
 };
 
 export const getCurrentThread = () => {
+  console.error("Version is", VERSION_DB_MGS);
+  const debug = async () => {
+    const db = await dbPromise();
+    const messages = await db.all("SELECT * FROM messages");
+    console.error("Messages", messages);
+  };
+  debug();
   return VERSION_DB_MGS;
 };
 
@@ -187,6 +194,21 @@ export const initDb = async () => {
   await doDbMigrations();
 };
 
+const updateThreadMessageCount = async () => {
+  let dbMsg = await dbPromise();
+  const selectAllThreads = await dbMsg.all("SELECT * FROM threads");
+  //console.log("SELECT threads", selectAllThreads);
+  for (const thread of selectAllThreads) {
+    const countMessages = await dbMsg.all('SELECT COUNT(*) AS count FROM messages WHERE threadId =?', thread.key);
+    console.log("Count messages", countMessages);
+    await dbMsg.run('UPDATE threads SET messageCount =? WHERE key =?', countMessages[0].count, thread.key);
+    console.log("Updated thread", thread.key);
+  }
+};
+
+setInterval(updateThreadMessageCount, 1000 * 60);
+setTimeout(updateThreadMessageCount, 300);
+
 const doDbMigrations = async () => {
   let dbMsg = await dbPromise();
 
@@ -198,26 +220,47 @@ const doDbMigrations = async () => {
   }
 
   try {
-    await dbMsg.exec('INSERT OR IGNORE INTO threads (key, friendlyName, timestamp, timestampLastUpdate) VALUES ("legacy", "Legacy thread", "2021-01-01T00:00:00.000Z", "2021-01-01T00:00:00.000Z")');
-    await dbMsg.exec(`UPDATE messages SET threadId = 'legacy' WHERE trheadId IS NULL`);
-    const selectLegacyMessages = await dbMsg.all("SELECT * FROM messages WHERE threadId = 'legacy'");
+    await dbMsg.exec(`ALTER TABLE threads ADD COLUMN messageCount INTEGER`);
+    console.log("Column added");
+  } catch (err) {
+    console.log("Column already exists");
+  }
+  /*
+  try {
+    await dbMsg.exec(
+      'INSERT OR IGNORE INTO threads (key, friendlyName, timestamp, timestampLastUpdate) VALUES ("legacy", "Legacy thread", "2021-01-01T00:00:00.000Z", "2021-01-01T00:00:00.000Z")'
+    );
+    await dbMsg.exec(
+      `UPDATE messages SET threadId = 'legacy' WHERE threadId IS NULL`
+    );
+    const selectLegacyMessages = await dbMsg.all(
+      "SELECT * FROM messages WHERE threadId = 'legacy'"
+    );
     console.log("SELECT legacy messages", selectLegacyMessages);
-    if (selectLegacyMessages.length === 0){
+    if (selectLegacyMessages.length === 0) {
       await dbMsg.exec("DELETE FROM threads WHERE key = 'legacy'");
+    } else {
       const selectAllThreads = await dbMsg.all("SELECT * FROM threads");
-    }else{
       console.log("SELECT threads", selectAllThreads);
-      for (const thread of selectAllThreads){
-        const selectMessages = await dbMsg.all("SELECT * FROM messages WHERE threadId = ?", thread.key);
+      for (const thread of selectAllThreads) {
+        const selectMessages = await dbMsg.all(
+          "SELECT * FROM messages WHERE threadId = ?",
+          thread.key
+        );
         console.log("SELECT messages", selectMessages);
-        if (selectMessages.length === 0){
-          await dbMsg.exec("DELETE FROM threads WHERE key = ?", thread.key);
+        if (selectMessages.length === 0) {
+          console.error("Deleting thread", thread.key);
+          try{
+          await dbMsg.run("DELETE FROM threads WHERE key = ?", thread.key);
+          }catch(err){
+            console.error("Error deleting thread", thread.key, err);
+          }
         }
       }
     }
-  }catch(err){
+  } catch (err) {
     console.error("Error migrating legacy messages", err);
-  }
+  }*/
   /*
   const dbVer = await dbVersions;
   console.log("Checking for database migrations");

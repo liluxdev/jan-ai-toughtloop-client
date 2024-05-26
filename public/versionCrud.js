@@ -134,7 +134,7 @@ const updateVersion = async (key, version) => {
     location.reload(true);
   } catch (error) {
     console.error("Error updating version:", error);
-    showToast("Error in creating thread ", "error");
+    showToast("Error in switching thread ", "error");
 
   }
 };

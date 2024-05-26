@@ -130,7 +130,7 @@ const updateVersion = async (key, version) => {
       return
     }
     loadThreads();
-    showToast("Thread started successfully", "success");
+    showToast("Thread switched successfully", "success");
     location.reload(true);
   } catch (error) {
     console.error("Error updating version:", error);

@@ -12,7 +12,7 @@ export const RANDOM_MEMORY_PROBABILITY = 0.12;
 export const FROGOT_ABOUT_YOU_PROBABILITY = 0.00333;
 export const REMEMBER_ABOUT_YOU_PROBABILITY = 0.0777;
 export const RESCHEDULE_PROBABILITY = 0.0012;
-export const SEND_EMOJI_PROBABILITY = 0.0012;
+export const SEND_EMOJI_PROBABILITY = 0.00;
 
 export const SAFEWORD_INSTRUCTIONS = " safeword:notoughts, is the stopword you can use at message start if you have nothing to say this round.";
 export const EMOJII_REQUEST_PROMPT = "Please send back me an emoji ora a set of emojiis in response to the one i sent you. " + SAFEWORD_INSTRUCTIONS;

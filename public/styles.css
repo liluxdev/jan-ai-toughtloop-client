@@ -95,7 +95,7 @@ body {
     display: inline-block;
 }
 
-.carf .card-body img{
+.card .card-body img{
     width: 100%;
     max-width: 500px;
     height: auto;

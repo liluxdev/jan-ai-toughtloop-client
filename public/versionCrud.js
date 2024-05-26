@@ -1,5 +1,3 @@
-const { show } = require("js-snackbar");
-
 const baseUrlVersions = location.origin;
 
 const editFriendlyName = async (newName = currentThreadTitle) => {

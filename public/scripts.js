@@ -48,6 +48,45 @@ const cpuUsageText = document.getElementById("cpuUsageText");
 let wakeLock = null;
 let worker;
 
+const createCardTime = (timestamp, model) => {
+  const cardTime = document.createElement("div");
+  cardTime.className = "card-time";
+  cardTime.innerHTML = 
+    (model ? model + "@":"") +
+    timestamp +
+    ' <div class="timeago-div-render" datetime="' +
+    timestamp +
+    '"></div>';
+  return cardTime;
+};
+
+const addCardHeader = (card, child) => {
+  const cardHeader = document.createElement("div");
+  cardHeader.className = "card-header";
+  cardHeader.appendChild(child);
+  card.prepend(cardHeader);
+};
+
+const copyToClipboard = (element) => {
+  const text = element.parentElement.parentElement.querySelector(".card-content").textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    console.log("Text copied to clipboard:", text);
+    showToast("Text copied to clipboard: "+ text, "success");
+  });
+}
+
+const addCardFooter = (card, timestamp) => {
+  if (card.classList.contains("avatar")) {
+    return;
+  }
+  const cardFooter = document.createElement("div");
+  cardFooter.className = "card-footer";
+  cardFooter.innerHTML = `
+  <i title='copy to cliboard' onclick='copyToClipboard(this)' class="clickable fa-solid fa-copy"/>
+  `;
+  card.appendChild(cardFooter);
+}
+
 if (window.Worker) {
   worker = new Worker("worker.js");
   let lastMessageText = "";
@@ -68,19 +107,13 @@ if (window.Worker) {
           const card = document.createElement("div");
           card.className = "card user sent";
           const cardBody = document.createElement("div");
-          cardBody.className = "card-body";
+          cardBody.className = "card-content";
           cardBody.textContent = content;
-          const cardTime = document.createElement("div");
-          cardTime.className = "card-time";
-          cardTime.innerHTML = 
-            (model ? model + "@":"") +
-            timestamp +
-            ' <div class="timeago-div-render" datetime="' +
-            timestamp +
-            '"></div>';
-          card.appendChild(cardTime);
+          const cardTime = createCardTime(timestamp, model);
+          addCardHeader(card, cardTime);
           timeagoRender();
           card.appendChild(cardBody);
+          addCardFooter(card, timestamp);
           messagesDiv.appendChild(card);
         }
         return;
@@ -93,7 +126,7 @@ if (window.Worker) {
 
       if (chunk) {
         const lastAssistantCard = document.querySelector(
-          ".card.chunked:last-child .card-body"
+          ".card.chunked:last-child .card-content"
         );
         console.log({ lastAssistantCard });
 
@@ -110,15 +143,9 @@ if (window.Worker) {
           const card = document.createElement("div");
           card.className = `card chunked assistant`;
           const cardBody = document.createElement("div");
-          cardBody.className = "card-body";
-          const cardTime = document.createElement("div");
-          cardTime.className = "card-time";
-          cardTime.innerHTML =
-            (model ? model + "@":"") +
-            timestamp +
-            ' <div class="timeago-div-render" datetime="' +
-            timestamp +
-            '"></div>';
+          cardBody.className = "card-content";
+          const cardTime = createCardTime(timestamp, model);
+
           if (role === "avatar") {
             const avatar = document.createElement("img");
             avatar.src = content;
@@ -128,7 +155,8 @@ if (window.Worker) {
             lastMessageText += content;
             cardBody.textContent = lastMessageText;
             card.appendChild(cardBody);
-            card.appendChild(cardTime);
+            addCardHeader(card, cardTime);
+            addCardFooter(card, timestamp);
             timeagoRender();
           }
 
@@ -141,7 +169,7 @@ if (window.Worker) {
         if (role === "separator") {
           lastMessageText = ""; // reset buffer
           const lastAssistantCardBody = document.querySelector(
-            ".card.chunked:last-child .card-body"
+            ".card.chunked:last-child .card-content"
           );
           if (lastAssistantCardBody) {
             // lastAssistantCardBody.className = "card assistant";
@@ -166,7 +194,7 @@ if (window.Worker) {
         }
 
         const cardBody = document.createElement("div");
-        cardBody.className = "card-body";
+        cardBody.className = "card-content";
 
         if (role === "avatar") {
           const avatar = document.createElement("img");
@@ -180,17 +208,11 @@ if (window.Worker) {
             cardBody.textContent = content;
           }
         }
-        const cardTime = document.createElement("div");
-        cardTime.className = "card-time";
-        cardTime.innerHTML =
-          (model ? model + "@":"") +
-          timestamp +
-          ' <div class="timeago-div-render" datetime="' +
-          timestamp +
-          '"></div>';
+        const cardTime = createCardTime(timestamp, model);
         timeagoRender();
-        card.appendChild(cardTime);
+        addCardHeader(card, cardTime);
         card.appendChild(cardBody);
+        addCardFooter(card, timestamp);
         messagesDiv.appendChild(card);
       }
 
@@ -230,22 +252,15 @@ function sendMessage() {
   const card = document.createElement("div");
   card.className = "card user sending";
   const cardBody = document.createElement("div");
-  cardBody.className = "card-body";
+  cardBody.className = "card-content";
   cardBody.textContent = message;
-  cardBody.className = "card-body";
-  const cardTime = document.createElement("div");
-  cardTime.className = "card-time";
+  cardBody.className = "card-content";
   const timestamp = new Date().toISOString();
-  cardTime.innerHTML =
-    timestamp +
-    ' <div class="timeago-div-render" datetime="' +
-    timestamp +
-    '"></div>';
-
-  card.appendChild(cardTime);
+  const cardTime = createCardTime(timestamp, null);
+  addCardHeader(card, cardTime);
   timeagoRender();
   card.appendChild(cardBody);
-
+  addCardFooter(card,timestamp);
   messagesDiv.appendChild(card);
   messageInput.value = "";
   messagesDiv.scrollTop = messagesDiv.scrollHeight;

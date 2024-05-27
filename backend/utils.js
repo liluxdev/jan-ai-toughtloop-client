@@ -1,5 +1,5 @@
 import { MODEL_NAME } from "./constants.js";
-import { dbVersions, getMessagesVersion } from "./db.js";
+import { dbPromise, dbVersions, getMessagesVersion } from "./db.js";
 import { broadcast } from "./websockets.js";
 
 export const formatMessage = (content, role, chunk = false, timestamp = new Date().toISOString, model=undefined) => {
@@ -21,15 +21,15 @@ export const formatMessage = (content, role, chunk = false, timestamp = new Date
 
   export const updateThread = async (content) => {
     try{
-    const dbVer = await dbVersions;
+    const dbMsg = await dbPromise();
     const timestampLastUpdate = new Date().toISOString();
     const version = getMessagesVersion();
     if (content.recentMessages){
       return;
     }
-    // SQLite insert or update
-    await dbVer.run(
-      `UPDATE threads SET timestampLastUpdate = ? WHERE key = ?`,
+    // SQLite update
+    await dbMsg.run(
+      `UPDATE threads SET  messageCount = messageCount + 1, timestampLastUpdate = ? WHERE key = ?`,
       timestampLastUpdate,
       version
     );

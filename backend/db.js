@@ -200,8 +200,8 @@ const updateThreadMessageCount = async () => {
   }
 };
 
-setInterval(updateThreadMessageCount, 1000 * 60);
-setTimeout(updateThreadMessageCount, 300);
+//setInterval(updateThreadMessageCount, 1000 * 60);
+//setTimeout(updateThreadMessageCount, 300);
 
 const doDbMigrations = async () => {
   let dbMsg = await dbPromise();

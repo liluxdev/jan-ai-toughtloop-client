@@ -76,11 +76,19 @@ const copyToClipboard = (element) => {
 }
 
 const addCardFooter = (card, timestamp) => {
-  if (card.classList.contains("avatar")) {
-    return;
-  }
   const cardFooter = document.createElement("div");
   cardFooter.className = "card-footer";
+  if (card.classList.contains("avatar")) {
+    cardFooter.innerHTML = `
+    <i class="fa-solid fa-thumbs-up"></i> 
+    <i class="fa-solid fa-thumbs-down"></i>
+    `;
+    card.appendChild(cardFooter);
+    return;
+  }
+  if (card.classList.contains("system")) {
+    return;
+  }
   cardFooter.innerHTML = `
   <i title='copy to cliboard' onclick='copyToClipboard(this)' class="clickable fa-solid fa-copy"/>
   `;

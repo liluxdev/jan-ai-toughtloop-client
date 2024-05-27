@@ -91,6 +91,8 @@ const addCardFooter = (card, timestamp) => {
   }
   cardFooter.innerHTML = `
   <i title='copy to cliboard' onclick='copyToClipboard(this)' class="clickable fa-solid fa-copy"/>
+  <i class="fa-solid fa-thumbs-up"></i> 
+  <i class="fa-solid fa-thumbs-down"></i>
   `;
   card.appendChild(cardFooter);
 }

@@ -1,13 +1,13 @@
 {
     "name": "jan-ai-toughtloop-client",
     "version": "0.0.1",
-    "description": "JAN.ai API mobile-first client, with an experimental unsolecited message and memory system called toughtloop",
+    "description": "JAN.ai API mobile-first client, with an experimental unsolecited message and memory feature called toughtloop",
     "main": "index.js",
     "scripts": {
         "start": "node index.js"
     },
     "dependencies": {
-        "axios": "^0.21.1",
+        "axios": "^1.7.2",
         "eventsource-parser": "^1.1.2",
         "framework7": "^8.3.3",
         "http": "^0.0.1-security",

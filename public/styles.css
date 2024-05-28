@@ -104,7 +104,7 @@ body {
     display: none;
 }
 
-@media screen and (min-width: 845px) {
+@media screen and (max-width: 845px) {
     #installMessage {
         display: block;
     }

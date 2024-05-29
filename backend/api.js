@@ -194,20 +194,26 @@ const axiosInstance = axios.create({
 });
 
 export const cleanRecentMessages = async () => {
-  const system_messages = apiCallBody.messages.filter(
-    (m) => m.role === "system"
-  );
-  const other_messages = apiCallBody.messages.filter(
-    (m) => m.role !== "system" && m.role !== "avatar"
-  );
+  console.error("Messages cleaned (BEFORE)", apiCallBody.messages.length);
   const limit = await getBufferMessagesLimit();
   const conf = await getConfiguration();
   if (conf?.sendAllThreads === "1") {
-    //apiCallBody.messages = system_messages.concat(other_messages);
+    //apiCallBody.messages = system_messages.concat(oter_messages);
   } else {
-    apiCallBody.messages = system_messages.concat(
-      other_messages.slice(-(await getBufferMessagesLimit()))
-    );
+    const LIMIT = await getBufferMessagesLimit();
+    if (LIMIT === 0) {
+    }else{
+      let i = 0;
+      while (apiCallBody.messages.length > LIMIT) {
+        const msg = apiCallBody.messages[i];
+        if (msg.role === "system") {
+          i++;
+          continue;
+        }else{
+          apiCallBody.messages.splice(i, 1);
+        }
+      }
+    }
   }
   if (conf?.onlyUser === "1" ){
     console.error("Only user messages enabled");
@@ -419,12 +425,12 @@ export const invokeApi = async (
     }
 
     const messageConvHistory = await dbConv.all(
-      `SELECT content, role,timestamp FROM messages WHERE role = 'user' OR  role = 'assistant' AND threadId = '${getCurrentThread()}' ORDER BY timestamp DESC LIMIT ${limit}`
+      `SELECT content, role,timestamp FROM messages WHERE (role = 'user' OR  role = 'assistant') AND threadId = '${getCurrentThread()}' ORDER BY timestamp DESC LIMIT ${limit}`
     );
 
-    console.log(
+    console.error(
       "Retrived conversation history messages: " + messageConvHistory.length,
-      messageConvHistory
+//messageConvHistory
     );
     for (const message of messageConvHistory.reverse()) {
       await pushRecentMessageInAPIBody(message.content, message.role);

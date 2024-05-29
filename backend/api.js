@@ -197,9 +197,7 @@ export const cleanRecentMessages = async () => {
   console.error("Messages cleaned (BEFORE)", apiCallBody.messages.length);
   const limit = await getBufferMessagesLimit();
   const conf = await getConfiguration();
-  if (conf?.sendAllThreads === "1") {
-    //apiCallBody.messages = system_messages.concat(oter_messages);
-  } else {
+ 
     const LIMIT = await getBufferMessagesLimit();
     if (LIMIT === 0) {
     }else{
@@ -214,7 +212,7 @@ export const cleanRecentMessages = async () => {
         }
       }
     }
-  }
+  
   if (conf?.onlyUser === "1" ){
     console.error("Only user messages enabled");
     console.error("Messages before filter", apiCallBody.messages.length);

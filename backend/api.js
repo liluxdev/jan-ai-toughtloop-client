@@ -160,7 +160,7 @@ export const getApiContextDebug = async () => {
     conversationMessageLimit: await getBufferMessagesLimit(),
     queue: messageQueue,
     ...apiCallBody,
-    messages: ["<messages hidden>"],
+    messages: ["messages hidden"],
   };
 };
 

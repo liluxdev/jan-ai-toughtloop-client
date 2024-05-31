@@ -203,9 +203,11 @@ export const cleanRecentMessages = async () => {
     if (LIMIT === 0) {
     }else{
       let i = 0;
-      while (apiCallBody.messages.length > LIMIT) {
+      const systemMessages = apiCallBody.messages.filter((m) => m.role === "system");
+      while (apiCallBody.messages.length > (LIMIT + systemMessages.length) && i < apiCallBody.messages.length){
+        console.error("Messages limit reached, cleaning oldest messages", apiCallBody.messages.length, LIMIT);
         const msg = apiCallBody.messages[i];
-        if (msg.role === "system") {
+        if (msg?.role === "system") {
           i++;
           continue;
         }else{

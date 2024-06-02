@@ -11,6 +11,7 @@ function NOOP() {
 
 const messagesDiv = document.getElementById("messages");
 let manualScroll = false;
+let isRenderingRecent = false;
 
 messagesDiv.addEventListener("scroll", () => {
   manualScroll = true;
@@ -20,7 +21,7 @@ messagesDiv.addEventListener("scroll", () => {
 });
 
 const scrollToBottom = () => {
-  if (!manualScroll) {
+  if (!manualScroll || isRenderingRecent) {
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   }
 }
@@ -122,8 +123,16 @@ if (window.Worker) {
 
     if (type === "message") {
       const messageData = JSON.parse(data);
-      const { content, role, chunk, timestamp, model} = messageData;
+      const { content, role, chunk, timestamp, model, recent} = messageData;
       console.log({ messageData });
+
+      if (recent) {
+        isRenderingRecent = true;
+      }else{
+        setTimeout(() => {
+          isRenderingRecent = false;
+        }, 3000);
+      }
 
       if (role === "user") {
         const lastUserCard = document.querySelector(".card.user.sending");

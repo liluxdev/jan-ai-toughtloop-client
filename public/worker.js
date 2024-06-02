@@ -166,10 +166,11 @@ const sendJsonMessage = (
   role,
   chunk = false,
   timestamp = new Date().toISOString(),
-  model = undefined
+  model = undefined,
+  recent = false
 ) => {
-  console.trace("Sending message: ", content, role, chunk);
-  const message = JSON.stringify({ content, role, chunk, timestamp, model});
+  console.trace("Sending message: ", content, role, chunk, recent);
+  const message = JSON.stringify({ content, role, chunk, timestamp, model, recent});
   postMessage({ type: "message", data: message });
 };
 
@@ -188,7 +189,7 @@ ws.setOnMessage((event) => {
     console.log("Event data is hr or br: ", event);
     postMessage({
       type: "notify",
-      data: "Toughtloop AI - wrote a new message...",
+      data: "SEHKMET RA (SYRIA, The Supreme Goddess) - wrote a new message...",
     });
     sendJsonMessage(event.data, "separator");
   } else {
@@ -203,7 +204,8 @@ ws.setOnMessage((event) => {
               message.role,
               false,
               message.timestamp,
-              message.model
+              message.model,
+              "recent"
             );
             needsRecentNewMessage = false;
             return;

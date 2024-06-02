@@ -8,6 +8,24 @@ function NOOP() {
   });
   toggleToughtloops();
 }
+
+const messagesDiv = document.getElementById("messages");
+let manualScroll = false;
+
+messagesDiv.addEventListener("scroll", () => {
+  manualScroll = true;
+  setTimeout(() => {
+    manualScroll = false;
+  }, 10000);
+});
+
+const scrollToBottom = () => {
+  if (!manualScroll) {
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+}
+
+
 function timeagoRender() {
   setTimeout(() => {
     const nodes = document.querySelectorAll(".timeago-div-render");
@@ -41,7 +59,6 @@ function isValidHTML(html) {
   );
 }
 
-const messagesDiv = document.getElementById("messages");
 const messageInput = document.getElementById("messageInput");
 const cpuUsageBar = document.getElementById("cpuUsage");
 const cpuUsageText = document.getElementById("cpuUsageText");
@@ -225,8 +242,7 @@ if (window.Worker) {
         addCardFooter(card, timestamp);
         messagesDiv.appendChild(card);
       }
-
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      scrollToBottom();
     } else if (type === "cpu") {
       const cpuUsage = parseFloat(data);
       //cpuUsageBar.style.width = cpuUsage + "%";
@@ -273,7 +289,7 @@ function sendMessage() {
   addCardFooter(card,timestamp);
   messagesDiv.appendChild(card);
   messageInput.value = "";
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  scrollToBottom();
 }
 
 async function requestWakeLock() {

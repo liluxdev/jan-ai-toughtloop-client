@@ -25,6 +25,9 @@ body {
     padding: 12px;
     width: calc(100% - 0px);
     height: calc(13vh - 0px);
+    position: absolute;
+    bottom: 0px;
+    margin-bottom: 56px;
 }
 .chunk {
     color: orangered;

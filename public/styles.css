@@ -28,6 +28,7 @@ body {
     position: absolute;
     bottom: 0px;
     margin-bottom: 56px;
+    max-height: 100px;
 }
 .chunk {
     color: orangered;

@@ -14,18 +14,19 @@ let manualScroll = false;
 let isRenderingRecent = false;
 
 messagesDiv.addEventListener("scroll", () => {
-  manualScroll = true;
   setTimeout(() => {
-    manualScroll = false;
-  }, 10000);
+    manualScroll = true;
+    setTimeout(() => {
+      manualScroll = false;
+    }, 10000);
+  }, 1200);
 });
 
 const scrollToBottom = () => {
   if (!manualScroll || isRenderingRecent) {
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   }
-}
-
+};
 
 function timeagoRender() {
   setTimeout(() => {
@@ -69,8 +70,8 @@ let worker;
 const createCardTime = (timestamp, model) => {
   const cardTime = document.createElement("div");
   cardTime.className = "card-time";
-  cardTime.innerHTML = 
-    (model ? model + "@":"") +
+  cardTime.innerHTML =
+    (model ? model + "@" : "") +
     timestamp +
     ' <div class="timeago-div-render" datetime="' +
     timestamp +
@@ -86,12 +87,15 @@ const addCardHeader = (card, child) => {
 };
 
 const copyToClipboard = (element) => {
-  const text = element.parentElement.parentElement.querySelector(".card-content").textContent;
+  const text =
+    element.parentElement.parentElement.querySelector(
+      ".card-content"
+    ).textContent;
   navigator.clipboard.writeText(text).then(() => {
     console.log("Text copied to clipboard:", text);
-    showToast("Text copied to clipboard: "+ text, "success");
+    showToast("Text copied to clipboard: " + text, "success");
   });
-}
+};
 
 const addCardFooter = (card, timestamp) => {
   const cardFooter = document.createElement("div");
@@ -113,7 +117,7 @@ const addCardFooter = (card, timestamp) => {
   <i class="fa-solid fa-thumbs-down"></i>
   `;
   card.appendChild(cardFooter);
-}
+};
 
 if (window.Worker) {
   worker = new Worker("worker.js");
@@ -123,12 +127,12 @@ if (window.Worker) {
 
     if (type === "message") {
       const messageData = JSON.parse(data);
-      const { content, role, chunk, timestamp, model, recent} = messageData;
+      const { content, role, chunk, timestamp, model, recent } = messageData;
       console.log({ messageData });
 
       if (recent) {
         isRenderingRecent = true;
-      }else{
+      } else {
         setTimeout(() => {
           isRenderingRecent = false;
         }, 3000);
@@ -165,7 +169,6 @@ if (window.Worker) {
           ".card.chunked:last-child .card-content"
         );
         console.log({ lastAssistantCard });
-
 
         if (lastAssistantCard) {
           if (role !== "avatar") {
@@ -219,7 +222,7 @@ if (window.Worker) {
           );
           if (lastAssistantCardTime) {
             lastAssistantCardTime.innerHTML =
-              (model ? model + "@":"") +
+              (model ? model + "@" : "") +
               timestamp +
               ' <div class="timeago-div-render" datetime="' +
               timestamp +
@@ -257,7 +260,7 @@ if (window.Worker) {
       //cpuUsageBar.style.width = cpuUsage + "%";
       //cpuUsageBar.setAttribute("aria-valuenow", cpuUsage);
       updateCpuUsage(cpuUsage);
-    //  cpuUsageText.textContent = cpuUsage + "%";
+      //  cpuUsageText.textContent = cpuUsage + "%";
     } else if (type === "notify") {
       if (Notification.permission === "granted") {
         navigator.serviceWorker.ready.then((registration) => {
@@ -295,7 +298,7 @@ function sendMessage() {
   addCardHeader(card, cardTime);
   timeagoRender();
   card.appendChild(cardBody);
-  addCardFooter(card,timestamp);
+  addCardFooter(card, timestamp);
   messagesDiv.appendChild(card);
   messageInput.value = "";
   scrollToBottom();
@@ -394,10 +397,10 @@ if ("serviceWorker" in navigator) {
 }
 
 function setCogRunning(state) {
-  const cog = document.getElementById('runningCog');
+  const cog = document.getElementById("runningCog");
   if (state) {
-    cog.classList.add('running');
+    cog.classList.add("running");
   } else {
-    cog.classList.remove('running');
+    cog.classList.remove("running");
   }
 }

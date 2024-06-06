@@ -79,9 +79,11 @@ export const setToughtloopInterval = async (timing = 333) => {
     if (getWebsocketClients().length === 0){
       if (toughtloopIntervalRandomMaxSecs < 4 * 60 * 60) {
         console.error("No clients connected and slider is at "+toughtloopIntervalRandomMaxSecs / 60 / 60+"h , skipping toughtloop");
+        incrementGenericCounter("skipped_no_clients_count");
         return;
       }else{
         console.error("No clients connected and slider is at "+toughtloopIntervalRandomMaxSecs / 60 / 60+"h , sending toughtloop anyway");
+        incrementGenericCounter("sending_anyway_no_clients_count");
       }
     }
     const toughloopPrompt = await getRandomPrompt();

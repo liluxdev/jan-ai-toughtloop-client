@@ -76,9 +76,13 @@ export const setToughtloopInterval = async (timing = 333) => {
   clearToughtloopInterval();
   console.log("Setting interval", timing);
   interval = setInterval(async () => {
-    if (getWebsocketClients().length === 0) {
-      console.error("No clients connected, skipping toughtloop");
-      return;
+    if (getWebsocketClients().length === 0){
+      if (toughtloopIntervalRandomMaxSecs < 4 * 60 * 60) {
+        console.error("No clients connected and slider is at "+toughtloopIntervalRandomMaxSecs / 60 / 60+"h , skipping toughtloop");
+        return;
+      }else{
+        console.error("No clients connected and slider is at "+toughtloopIntervalRandomMaxSecs / 60 / 60+"h , sending toughtloop anyway");
+      }
     }
     const toughloopPrompt = await getRandomPrompt();
     if (!toughloopPrompt) {

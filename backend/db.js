@@ -79,6 +79,15 @@ export const doAllThreadsDbMigrations = async () => {
   }
 };
 
+export const queryAllMessagesOfAllThreadsOrderByTimpestampAndJoin = async () => {
+  const db = await dbPromise();
+  const messages = await db.all(
+    "SELECT messages.*, threads.friendlyName AS threadFriendlyName FROM messages INNER JOIN threads ON messages.threadId = threads.key ORDER BY messages.timestamp ASC"
+  );
+  console.error("Total Messages queried", messages.length);
+  return messages;
+};
+
 export const queryAllMessagesOfAllThreads = async () => {
   const db = await dbPromise();
   const threads = await db.all(
@@ -200,7 +209,7 @@ const updateThreadMessageCount = async () => {
   }
 };
 
-setInterval(updateThreadMessageCount, 1000 * 60 * 5);
+//setInterval(updateThreadMessageCount, 1000 * 60);
 setTimeout(updateThreadMessageCount, 300);
 
 const doDbMigrations = async () => {

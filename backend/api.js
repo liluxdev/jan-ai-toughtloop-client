@@ -8,6 +8,7 @@ import {
   getCurrentThread,
   getMessagesVersion,
   queryAllMessagesOfAllThreads,
+  queryAllMessagesOfAllThreadsOrderByTimpestampAndJoin,
 } from "./db.js";
 import { formatMessage, sendJsonMessage } from "./utils.js";
 import {
@@ -17,6 +18,7 @@ import {
   HR_SEPARATOR,
   NUMBER_OF_MESSAGES_IN_BUFFER,
   RANDOM_MEMORY_PROBABILITY,
+  REMBEMBER_ALL_THREADS_IN_MESSAGES_ORDER,
 } from "./constants.js";
 import {
   clearToughtloopInterval,
@@ -198,30 +200,45 @@ export const cleanRecentMessages = async () => {
   console.error("Messages cleaned (BEFORE)", apiCallBody.messages.length);
   const limit = await getBufferMessagesLimit();
   const conf = await getConfiguration();
- 
-    const LIMIT = await getBufferMessagesLimit();
-    if (LIMIT === 0) {
-    }else{
-      let i = 0;
-      const systemMessages = apiCallBody.messages.filter((m) => m.role === "system");
-      while (apiCallBody.messages.length > (LIMIT + systemMessages.length) && i < apiCallBody.messages.length){
-        console.log("Messages limit reached, cleaning oldest messages", apiCallBody.messages.length, LIMIT);
-        const msg = apiCallBody.messages[i];
-        if (msg?.role === "system") {
-          i++;
-          console.error("Skipping system message");
-          continue;
-        }else{
-          apiCallBody.messages.splice(i, 1);
-        }
+
+  const LIMIT = await getBufferMessagesLimit();
+  if (LIMIT === 0) {
+  } else {
+    let i = 0;
+    const systemMessages = apiCallBody.messages.filter(
+      (m) => m.role === "system"
+    );
+    while (
+      apiCallBody.messages.length > LIMIT + systemMessages.length &&
+      i < apiCallBody.messages.length
+    ) {
+      console.log(
+        "Messages limit reached, cleaning oldest messages",
+        apiCallBody.messages.length,
+        LIMIT
+      );
+      const msg = apiCallBody.messages[i];
+      if (msg?.role === "system") {
+        i++;
+        console.error("Skipping system message");
+        continue;
+      } else {
+        apiCallBody.messages.splice(i, 1);
       }
     }
-  
-  if (conf?.onlyUser === "1" ){
+  }
+
+  if (conf?.onlyUser === "1") {
     console.error("Only user messages enabled");
     console.error("Messages before filter", apiCallBody.messages.length);
-    apiCallBody.messages.push({ content: "NOTICE: Only user messages are sent in this conversation history, please focus on my all previous requests and respond adeguately", role: "system" });
-    apiCallBody.messages = apiCallBody.messages.filter((m) => m.role === "user" || m.role === "system");
+    apiCallBody.messages.push({
+      content:
+        "NOTICE: Only user messages are sent in this conversation history, please focus on my all previous requests and respond adeguately",
+      role: "system",
+    });
+    apiCallBody.messages = apiCallBody.messages.filter(
+      (m) => m.role === "user" || m.role === "system"
+    );
     console.error("Messages after filter", apiCallBody.messages.length);
   }
   console.error("Messages cleaned", apiCallBody.messages.length);
@@ -352,8 +369,9 @@ export const invokeApi = async (
     clearRecentMessages();
 
     await pushRecentMessageInAPIBody(
-      "NOTICE: this conversation thread was named by the user: \"" +
-        (await getConversationFriendlyName())+"\"",
+      'NOTICE: this conversation thread was named by the user: "' +
+        (await getConversationFriendlyName()) +
+        '"',
       "system"
     );
 
@@ -379,21 +397,29 @@ export const invokeApi = async (
 
     if (conf?.sendAllThreads === "1") {
       let currentThreadName = "";
-      const allMessages = await queryAllMessagesOfAllThreads();
-      console.log("All messages:", allMessages);
-      for (const t of allMessages) {
-        console.log("Thread:", t);
-        if (t.thread.key === getCurrentThread()) {
-          currentThreadName = t.thread.friendlyName;
-          continue;
-        }
-        await pushRecentMessageInAPIBody(
-          "NOTICE: Following messages are loaded from a previous Thread we saved for your usage in this conversation, the previous thread in question is named: \"" + t.thread.friendlyName+"\"",
-          "system"
-        );
-        for (const message of t.messages) {
-          if ((message.role === "user" || message.role === "assistant")) {
-            let content = message.content;
+
+      if (REMBEMBER_ALL_THREADS_IN_MESSAGES_ORDER) {
+        const allMsgs =
+          await queryAllMessagesOfAllThreadsOrderByTimpestampAndJoin();
+        console.log("All messages:", allMsgs);
+        for (const m of allMsgs) {
+          if (m.threadId === getCurrentThread()) {
+            currentThreadName = m.threadFriendlyName;
+            continue;
+          }
+
+          if (m.threadFriendlyName !== currentThreadName) {
+            await pushRecentMessageInAPIBody(
+              'NOTICE: Following messages are loaded from a previous Thread we saved for your usage in this conversation, the previous thread in question is named: "' +
+                m.threadFriendlyName +
+                '"',
+              "system"
+            );
+          }
+          currentThreadName = m.threadFriendlyName;
+
+          if (m.role === "user" || m.role === "assistant") {
+            let content = m.content;
             if (content) {
               if (content.length > OMISSIS_LIMIT) {
                 content =
@@ -402,22 +428,64 @@ export const invokeApi = async (
                   OMISSIS_LIMIT +
                   ")..";
               }
-              await pushRecentMessageInAPIBody(content, message.role);
+              await pushRecentMessageInAPIBody(content, m.role);
               // sendJsonMessage(ctx.websocket, content, message.role);
-            
             } else {
               console.log("Content is null");
             }
           }
         }
+      } else {
+        const allMessages = await queryAllMessagesOfAllThreads();
+        console.log("All messages:", allMessages);
+        for (const t of allMessages) {
+          console.log("Thread:", t);
+          if (t.thread.key === getCurrentThread()) {
+            currentThreadName = t.thread.friendlyName;
+            continue;
+          }
+          await pushRecentMessageInAPIBody(
+            'NOTICE: Following messages are loaded from a previous Thread we saved for your usage in this conversation, the previous thread in question is named: "' +
+              t.thread.friendlyName +
+              '"',
+            "system"
+          );
+          for (const message of t.messages) {
+            if (message.role === "user" || message.role === "assistant") {
+              let content = message.content;
+              if (content) {
+                if (content.length > OMISSIS_LIMIT) {
+                  content =
+                    content.slice(0, OMISSIS_LIMIT) +
+                    "...omissis at (" +
+                    OMISSIS_LIMIT +
+                    ")..";
+                }
+                await pushRecentMessageInAPIBody(content, message.role);
+                // sendJsonMessage(ctx.websocket, content, message.role);
+              } else {
+                console.log("Content is null");
+              }
+            }
+          }
+        }
       }
-      console.error("All threads messages prepared for API", apiCallBody.messages.length);
-      pushRecentMessageInAPIBody("NOTICE: Following messages are from the current Thread named: \"" + currentThreadName+"\"", "system");
+
+      console.error(
+        "All threads messages prepared for API",
+        apiCallBody.messages.length
+      );
+      pushRecentMessageInAPIBody(
+        'NOTICE: Following messages are from the current Thread named: "' +
+          currentThreadName +
+          '"',
+        "system"
+      );
     }
 
     let limit = await getBufferMessagesLimit();
 
-    if (limit===0){
+    if (limit === 0) {
       limit = 9999999;
     }
 
@@ -430,8 +498,8 @@ export const invokeApi = async (
     );
 
     console.error(
-      "Retrived conversation history messages: " + messageConvHistory.length,
-//messageConvHistory
+      "Retrived conversation history messages: " + messageConvHistory.length
+      //messageConvHistory
     );
     for (const message of messageConvHistory.reverse()) {
       await pushRecentMessageInAPIBody(message.content, message.role);
@@ -519,7 +587,7 @@ export const invokeApi = async (
       console.log("API call body:", apiCallBody);
       const response = await axiosInstance({
         method: "post",
-        url: apiUrl + 'chat/completions',
+        url: apiUrl + "chat/completions",
         data: apiCallBody,
         responseType: "stream",
         cancelToken: source.token,
@@ -672,8 +740,7 @@ export const invokeApi = async (
   }
 };
 
-
 export const getModels = async () => {
   const response = await axiosInstance.get(apiUrl + "models");
   return response.data;
-}
+};

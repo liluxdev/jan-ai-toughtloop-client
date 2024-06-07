@@ -209,6 +209,7 @@ export const cleanRecentMessages = async () => {
         const msg = apiCallBody.messages[i];
         if (msg?.role === "system") {
           i++;
+          console.error("Skipping system message");
           continue;
         }else{
           apiCallBody.messages.splice(i, 1);
@@ -342,7 +343,6 @@ export const invokeApi = async (
     const memory = await dbMem.all(`
     SELECT content, role FROM messages WHERE role = 'system_memory'
     ORDER BY timestamp DESC
-    LIMIT 27
   `);
 
     console.log("Retrived memory messages: " + memory.length);

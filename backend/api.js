@@ -725,7 +725,8 @@ export const invokeApi = async (
       if (axios.isCancel(error)) {
         console.log("Request canceled", error.message);
       } else {
-        console.error("Error invoking API:", error);
+        console.error("Error invoking API:", error.message);
+        console.log("Error invoking API:", error);
       }
 
       invokingApi = false;

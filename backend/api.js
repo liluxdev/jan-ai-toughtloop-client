@@ -28,6 +28,7 @@ import {
 import fs from "fs";
 import { OMISSIS_LIMIT } from "./websockets.js";
 import { get } from "http";
+import { send } from "process";
 
 let invokingApi = false;
 
@@ -727,6 +728,13 @@ export const invokeApi = async (
       } else {
         console.error("Error invoking API:", error.message);
         console.log("Error invoking API:", error);
+        sendJsonMessage(
+          "Error invoking API: " + error.message,
+          "system",
+          false,
+          undefined,
+          timestamp
+        );
       }
 
       invokingApi = false;

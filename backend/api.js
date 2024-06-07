@@ -396,6 +396,7 @@ export const invokeApi = async (
     const dbConv = await dbPromise();
 
     if (conf?.sendAllThreads === "1") {
+      console.error("Sending all threads messages");
       let currentThreadName = "";
 
       if (REMBEMBER_ALL_THREADS_IN_MESSAGES_ORDER) {
@@ -470,18 +471,17 @@ export const invokeApi = async (
           }
         }
       }
-
-      console.error(
-        "All threads messages prepared for API",
-        apiCallBody.messages.length
-      );
-      pushRecentMessageInAPIBody(
-        'NOTICE: Following messages are from the current Thread named: "' +
-          currentThreadName +
-          '"',
-        "system"
-      );
     }
+    console.error(
+      "All threads messages prepared for API",
+      apiCallBody.messages.length
+    );
+    pushRecentMessageInAPIBody(
+      'NOTICE: Following messages are from the current Thread named: "' +
+        currentThreadName +
+        '"',
+      "system"
+    );
 
     let limit = await getBufferMessagesLimit();
 

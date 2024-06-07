@@ -471,17 +471,17 @@ export const invokeApi = async (
           }
         }
       }
+      console.error(
+        "All threads messages prepared for API",
+        apiCallBody.messages.length
+      );
+      pushRecentMessageInAPIBody(
+        'NOTICE: Following messages are from the current Thread named: "' +
+          currentThreadName +
+          '"',
+        "system"
+      );
     }
-    console.error(
-      "All threads messages prepared for API",
-      apiCallBody.messages.length
-    );
-    pushRecentMessageInAPIBody(
-      'NOTICE: Following messages are from the current Thread named: "' +
-        currentThreadName +
-        '"',
-      "system"
-    );
 
     let limit = await getBufferMessagesLimit();
 

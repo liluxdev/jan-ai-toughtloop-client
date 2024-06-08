@@ -19,6 +19,7 @@ import {
   NUMBER_OF_MESSAGES_IN_BUFFER,
   RANDOM_MEMORY_PROBABILITY,
   REMBEMBER_ALL_THREADS_IN_MESSAGES_ORDER,
+  API_BASE_URI,
 } from "./constants.js";
 import {
   clearToughtloopInterval,
@@ -31,7 +32,7 @@ import { OMISSIS_LIMIT } from "./websockets.js";
 
 let invokingApi = false;
 
-const apiUrl = "http://localhost:1337/v1/";
+const apiUrl = API_BASE_URI+"/v1/";
 const apiCallBody = {
   messages: [],
   model: MODEL_NAME,

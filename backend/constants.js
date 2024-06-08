@@ -4,6 +4,8 @@ export const ASSISTANT_NAME = "Toughtloop AI (Her)";
 
 export const MODEL_NAME = 'stealth-v1.2-7b';
 
+export const API_BASE_URI = process.env.API_BASE_URI || 'http://localhost:1337';
+
 export const PREFORMANCE_MODE_NO_CONSOLE_LOG = true;
 
 export const REMBEMBER_ALL_THREADS_IN_MESSAGES_ORDER = true;

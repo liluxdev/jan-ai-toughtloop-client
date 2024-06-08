@@ -757,7 +757,7 @@ export const getModels = async () => {
 export const ensureModelDownloaded = async (modelId) => {
   console.error("Downloading model:", modelId);
   const response = await axiosInstance.get(apiUrl + "models/download/"+modelId);
-  console.error("Model download:", response.message);
-  return response.message;
+  console.error("Model download:", response.data.message);
+  return response.data.message;
 };
 

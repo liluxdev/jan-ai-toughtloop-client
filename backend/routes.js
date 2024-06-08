@@ -4,6 +4,7 @@ import {
   getApiContextDebug,
   setBufferMessagesLimit,
   getModels,
+  ensureModelDownloaded,
 } from "./api.js";
 import {
   dbPromise,
@@ -202,6 +203,12 @@ export const setupRoutes = (router) => {
       value,
       value
     );
+    if (key === "model") {
+      setTimeout(()=>{
+        console.error("Model changed, ensuring download of model...");
+        ensureModelDownloaded(value);
+      }, 1000);
+    }
     if (key === "buffer") {
       setBufferMessagesLimit(value);
     }

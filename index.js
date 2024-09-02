@@ -76,6 +76,14 @@ export const setToughtloopInterval = async (timing = 333) => {
   clearToughtloopInterval();
   console.log("Setting interval", timing);
   interval = setInterval(async () => {
+
+    const conf = await getConfiguration();
+    if (conf.toughtloopEnabled !== "1" || false){
+      console.error("Toughloop is disabled, skipping...");
+      incrementGenericCounter("skipped_toughtloop_disabled_count");
+      return;
+    }
+
     if (getWebsocketClients().length === 0){
       if (toughtloopIntervalRandomMaxSecs < 4 * 60 * 60) {
         console.error("No clients connected and slider is at "+toughtloopIntervalRandomMaxSecs / 60 / 60+"h , skipping toughtloop");
@@ -161,3 +169,37 @@ export const clearToughtloopInterval = () => {
     console.log("Error clearing interval", e);
   }
 };
+
+
+/* process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  incrementGenericCounter("uncaught_exception_count");
+  // Perform any necessary cleanup or error handling here
+  process.exit(1); // Exit the process with a non-zero exit code
+});
+*/
+/*  
+process.on('SIGQUIT', () => {
+  console.error('SIGQUIT signal received');
+  // Add your code here to handle the SIGQUIT signal
+});
+
+process.on('SIGINT', () => {
+  console.error('SIGINT signal received');
+  // Add your code here to handle the SIGINT signal
+  process.exit(0); // Exit the process with a zero exit code
+});
+
+process.on('SIGTERM', () => {
+  console.error('SIGTERM signal received');
+  // Add your code here to handle the SIGTERM signal
+  process.exit(0); // Exit the process with a zero exit code
+});
+
+process.on('SIGINT', () => {
+  console.error('SIGINT signal received');
+  // Add your code here to handle the SIGINT signal
+  process.exit(0); // Exit the process with a zero exit code
+});
+
+ */

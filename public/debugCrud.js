@@ -89,6 +89,22 @@ const _fetchDebug = async () => {
     }
     refreshingBufferSize = false;
 
+    const toughtloopEnabled = app.toggle.get(".toughtloopEnabled");
+    const toughtloopEnabledValue =
+    debug?.configuration?.toughtloopEnabled === "1"  || false;
+      if (toughtloopEnabled.checked!== toughtloopEnabledValue) {
+        toughtloopEnabled.toggle();
+      }
+
+      const manualChannelingMode = app.toggle.get(".manualChannelingMode");
+      const manualChannelingModeVal =
+      debug?.configuration?.manualChannelingMode === "1"  || false;
+        if (manualChannelingMode.checked!== manualChannelingModeVal) {
+          manualChannelingMode.toggle();
+        }
+
+      
+
     refreshingBufferSize = true;
     const onlyUser = app.toggle.get(".onlyUser");
     const onlyUserValue = debug?.configuration?.onlyUser === "1" || false;
@@ -134,7 +150,47 @@ const _fetchDebug = async () => {
           "warning"
         );
       }
-    }
+
+      const profile = debug?.configuration?.profile || "default";
+      const profileSelect = document.querySelector("#profilePicker");
+      const profileSelectSmartSelect = app.smartSelect.get("#profilePicker");
+      if (!profileSelectSmartSelect) {
+        const resp = await fetch(`${baseUrlDebug}/profiles`);
+        try {
+          const profiles = await resp.json();
+          const profileOptions = profiles.map((profile) => ({
+            value: profile,
+            text: profile,
+          }));
+          const profileOptionsHtml = profileOptions
+           .map(
+              (option) =>
+                `<option ${profile === option.value? "selected" : ""} value="${
+                  option.value
+                }">${option.text}</option>`
+            )
+           .join("");
+          profileSelect.innerHTML = profileOptionsHtml;
+          console.warn("Creating smart select", profileSelect.outerHTML);
+          /*app.smartSelect.create({
+                el: '#profilePicker',
+                onChange: async (value) => {
+                    updateConfigValue('profile', value);
+                },
+            });*/
+          profileSelect.addEventListener("change", async (event) => {
+            updateConfigValue("profile", event.target.value);
+            setTimeout(() => {location.reload()}, 2000);
+          });
+          } catch (error) {
+            console.error("Error fetching profiles", error);
+            showToast(
+              "Error fetching profiles, is JAN.ai Server API Started?",
+              "warning"
+            );
+          }
+        }
+      }
 
     const memories = [];
     for (const key in debug) {
@@ -155,6 +211,25 @@ const _fetchDebug = async () => {
     });
   } catch (error) {
     console.error("Error loading debug:", error);
+  }
+};
+
+const addProfile = async () => {
+  const name = prompt("Enter profile name:");
+  if (!name) return;
+  try {
+    await fetch(`${baseUrlDebug}/profiles`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name }),
+    });
+    showToast("Profile created", "success");
+    fetchDebug();
+  } catch (error) {
+    console.error("Error creating profile:", error);
+    showToast("Profile creation error", "error");
   }
 };
 

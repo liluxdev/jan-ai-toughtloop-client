@@ -98,7 +98,7 @@ body {
     clear: both;
 }
 .card .card-content {
-    user-select: auto;
+    user-select: all;
     display: inline-block;
     padding: 12px;
 }

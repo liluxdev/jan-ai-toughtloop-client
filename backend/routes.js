@@ -4,6 +4,8 @@ import {
   getApiContextDebug,
   setBufferMessagesLimit,
   getModels,
+  ensureModelDownloaded,
+  getConfiguration,
 } from "./api.js";
 import {
   dbPromise,
@@ -19,6 +21,26 @@ export const setupRoutes = (router) => {
   router.get("/models", async (ctx) => {
     const models = await getModels();
     ctx.body = models.data;
+  });
+
+  router.get("/profiles", async (ctx) => {
+    const dbMem = await dbPromiseMemory;
+    const profiles = (await dbMem.all("SELECT distinct(profile) FROM messages")).map(profile =>profile.profile);
+    ctx.body = profiles;
+  });
+
+  router.post("/profiles", async (ctx) => {
+    const { name } = ctx.request.body;
+    const db = await dbPromiseMemory;
+    const timestamp = new Date().toISOString();
+    await db.run(
+      "INSERT INTO messages (content, role, timestamp, profile) VALUES (?, ?, ?, ?)",
+      "Profile "+name+" created at "+timestamp,
+      'system_memory',
+      timestamp,
+      name
+    );
+    ctx.body = { name };
   });
 
   router.get("/toughtloop", async (ctx) => {
@@ -63,7 +85,8 @@ export const setupRoutes = (router) => {
   router.get("/memory", async (ctx) => {
     const db = await dbPromiseMemory;
     const messages = await db.all(
-      "SELECT * FROM messages WHERE role = 'system_memory' ORDER BY timestamp DESC"
+      "SELECT * FROM messages WHERE role = 'system_memory' AND profile = ? ORDER BY timestamp DESC",
+      (await getConfiguration()).profile || "default"
     );
     ctx.body = messages;
   });
@@ -72,10 +95,12 @@ export const setupRoutes = (router) => {
     const db = await dbPromiseMemory;
     const timestamp = new Date().toISOString();
     await db.run(
-      "INSERT INTO messages (content, role, timestamp) VALUES (?, ?, ?)",
+      "INSERT INTO messages (content, role, timestamp, profile) VALUES (?, ?, ?, ?)",
       message,
       "system_memory",
-      timestamp
+      timestamp,
+      (await getConfiguration()).profile || "default"
+
     );
     ctx.body = { message };
   });
@@ -202,6 +227,12 @@ export const setupRoutes = (router) => {
       value,
       value
     );
+    if (key === "model") {
+      setTimeout(()=>{
+        console.error("Model changed, ensuring download of model...");
+        ensureModelDownloaded(value);
+      }, 1000);
+    }
     if (key === "buffer") {
       setBufferMessagesLimit(value);
     }

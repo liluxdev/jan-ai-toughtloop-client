@@ -424,6 +424,33 @@
                 </ul>
               </div>
 
+              <div
+              class="list list-strong-ios list-outline-ios list-dividers-ios"
+            >
+              <ul>
+                <li>
+                  <a class="item-link smart-select-noinit">
+                    <div class="item-content">
+                      <div class="item-inner">
+                        <div class="item-title">Profile</div>
+                      </div>
+                    </div>
+                    <select
+                      style="margin-left: 47px"
+                      name="profile"
+                      id="profilePicker"
+                    ></select>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="input-group-append">
+              <button class="button button-outline" type="button" onclick="addProfile()">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+
               <div class="centered">
                 <div
                   class="gauge gauge-init cpuUsage"
@@ -437,6 +464,35 @@
               </div>
               <div class="range-slider">
                 <div class="list">
+
+                  <ul>
+                    <li class="item-content">
+                      <div class="item-inner">
+                        <div class="item-title">Toughtloop enabled</div>
+                        <div class="item-after">
+                          <label class="toggle toughtloopEnabled">
+                            <input type="checkbox" />
+                            <span class="toggle-icon"></span>
+                          </label>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                  
+                  <ul>
+                    <li class="item-content">
+                      <div class="item-inner">
+                        <div class="item-title">Manual channeling mode</div>
+                        <div class="item-after">
+                          <label class="toggle manualChannelingMode">
+                            <input type="checkbox" />
+                            <span class="toggle-icon"></span>
+                          </label>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+
                   <ul>
                     <li class="item-content">
                       <div class="item-inner">
@@ -731,6 +787,29 @@
               },
             },
           });
+
+          var toughtloopEnabled = app.toggle.create({
+            el: ".toughtloopEnabled",
+            on: {
+              change: function (event) {
+                console.log("Toggle changed");
+                const toggle = app.toggle.get(".toughtloopEnabled");
+                updateConfigValue("toughtloopEnabled", toggle.checked);
+              },
+            },
+          });
+
+          var manualChannelingMode = app.toggle.create({
+            el: ".manualChannelingMode",
+            on: {
+              change: function (event) {
+                console.log("Toggle changed");
+                const toggle = app.toggle.get(".manualChannelingMode");
+                updateConfigValue("manualChannelingMode", toggle.checked);
+              },
+            },
+          });
+          
 
           var onlyUser = app.toggle.create({
             el: ".onlyUser",

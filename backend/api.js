@@ -19,6 +19,8 @@ import {
   NUMBER_OF_MESSAGES_IN_BUFFER,
   RANDOM_MEMORY_PROBABILITY,
   REMBEMBER_ALL_THREADS_IN_MESSAGES_ORDER,
+  API_BASE_URI,
+  SAFEWORD_STOPWORD,
 } from "./constants.js";
 import {
   clearToughtloopInterval,
@@ -27,11 +29,11 @@ import {
 } from "../index.js";
 import fs from "fs";
 import { OMISSIS_LIMIT } from "./websockets.js";
-
+import say from "say";
 
 let invokingApi = false;
 
-const apiUrl = "http://localhost:1337/v1/";
+const apiUrl = API_BASE_URI + "/v1/";
 const apiCallBody = {
   messages: [],
   model: MODEL_NAME,
@@ -163,6 +165,7 @@ export const getApiContextDebug = async () => {
     queue: messageQueue,
     ...apiCallBody,
     messages: ["messages hidden"],
+    system: apiCallBody.messages.filter((m) => m.role === "system"),
   };
 };
 
@@ -193,7 +196,7 @@ export const setBufferMessagesLimit = async (limit) => {
 let pendingChunks = [];
 
 const axiosInstance = axios.create({
-  timeout: 12 * 60 * 1000, // 12 minutes
+  timeout: 666 * 60 * 1000, // 666 minutes
 });
 
 export const cleanRecentMessages = async () => {
@@ -296,13 +299,59 @@ export const dequeueMessage = async () => {
 let thinkingTime = 0;
 let completionTime = 0;
 let isSendingEmoji = false;
+let assistantManualTurn = false;
 export const invokeApi = async (
   instructions,
   isInteractive = true,
   isEmojiOnly = false
 ) => {
   console.log("invokeApi", invokingApi, instructions);
+  const db = await dbPromise();
+
   try {
+    const conf = await getConfiguration();
+    if (conf.manualChannelingMode == "1") {
+      const timestampManual = new Date().toISOString();
+      await db.run(
+        "INSERT INTO messages (content, role, timestamp, model, threadId) VALUES (?, ?, ?, ?, ?)",
+        isInteractive
+          ? instructions
+          : "<i>toughtloop prompt:</i> " + instructions,
+        assistantManualTurn ? "assistant" : "user", //"toughtloop",
+        timestampManual,
+        "manual-channelling-chat",
+        getCurrentThread()
+      );
+
+      sendJsonMessage(
+        instructions,
+        assistantManualTurn ? "assistant" : "user",
+        false,
+        undefined,
+        timestampManual
+      );
+
+      if (!assistantManualTurn) {
+        sendJsonMessage(
+          "Turn to channeling response...",
+          "system",
+          false,
+          undefined,
+          timestampManual
+        );
+
+        sendJsonMessage(
+          await getRandomAvatar(),
+          "avatar",
+          true,
+          undefined,
+          timestampManual,
+          "math.random"
+        );
+      }
+      assistantManualTurn = !assistantManualTurn;
+      return;
+    }
     if (invokingApi) {
       console.log("API is already being invoked, request ignored.");
       if (isInteractive || isSendingEmoji) {
@@ -314,7 +363,6 @@ export const invokeApi = async (
       return;
     }
 
-    const conf = await getConfiguration();
 
     const model = conf.model || MODEL_NAME;
     apiCallBody.model = model;
@@ -358,9 +406,9 @@ export const invokeApi = async (
     const dbMem = await dbPromiseMemory;
 
     const memory = await dbMem.all(`
-    SELECT content, role FROM messages WHERE role = 'system_memory'
+    SELECT content, role FROM messages WHERE role = 'system_memory' AND profile = ?
     ORDER BY timestamp DESC
-  `);
+  `, conf.profile || "default");
 
     console.log("Retrived memory messages: " + memory.length);
 
@@ -554,13 +602,14 @@ export const invokeApi = async (
     apiCallBody.messages.push({ content: instructions, role: "user" });
     await cleanRecentMessages();
 
-    const db = await dbPromise();
     const timestamp = new Date().toISOString();
     const confMap = await getConfiguration();
     await db.run(
       "INSERT INTO messages (content, role, timestamp, model, threadId) VALUES (?, ?, ?, ?, ?)",
-      instructions,
-      isInteractive ? "user" : "toughtloop",
+      isInteractive
+        ? instructions
+        : "<i>toughtloop prompt:</i> " + instructions,
+      isInteractive ? "user" : "user", //"toughtloop",
       timestamp,
       conf.model || MODEL_NAME,
       getCurrentThread()
@@ -623,8 +672,8 @@ export const invokeApi = async (
             const messageContent = data.choices[0].delta.content;
 
             if (
-              messageContent.startsWith("safeword:notoughts") ||
-              messageBuffer.startsWith("safeword:notoughts")
+              messageContent.startsWith(SAFEWORD_STOPWORD) ||
+              messageBuffer.startsWith(SAFEWORD_STOPWORD)
             ) {
               await incrementSafewordCounter(messageBuffer);
               setToughtloopInterval();
@@ -662,6 +711,7 @@ export const invokeApi = async (
 
       response.data.on("end", async () => {
         console.error("API call ended");
+        assistantManualTurn = false;
         const end = new Date().getTime();
         completionTime = end - start;
         console.error("Completion time:", completionTime / 1000 / 60);
@@ -683,7 +733,7 @@ export const invokeApi = async (
           .map((chunk) => chunk.content)
           .join("");
 
-        if (!lastMessage.startsWith("safeword:notoughts")) {
+        if (!lastMessage.startsWith(SAFEWORD_STOPWORD)) {
           const confMap = await getConfiguration();
           await db.run(
             "INSERT INTO messages (content, role, timestamp, model, threadId) VALUES (?, ?, ?, ?, ?)",
@@ -697,6 +747,7 @@ export const invokeApi = async (
             content: lastMessage,
             role: "assistant",
           });
+          // doSpeak(lastMessage);
           sendJsonMessage(HR_SEPARATOR, "system", false, undefined, timestamp);
           if (!isInteractive) {
             console.error(
@@ -748,7 +799,49 @@ export const invokeApi = async (
   }
 };
 
+export const doSpeak = async (textToSpeach) => {
+  const conf = await getConfiguration();
+  const db = await dbPromise();
+  const timestamp = new Date().toISOString();
+  let message = textToSpeach;
+  say.speak(textToSpeach, "it", 1.0, (err) => {
+    if (err) {
+      console.error("Error:", err);
+      ctx.status = 500;
+      ctx.body = "Error in text-to-speech conversion";
+    } else {
+      const responseAudioPath = path.join(
+        __dirname,
+        "public/responses",
+        "response.ogg"
+      );
+      // Aggiungi il codice per salvare l'audio generato se necessario
+      //ctx.body = { transcript: result, responseAudio: responseAudioPath };
+    }
+  });
+  db.run(
+    "INSERT INTO messages (content, role, timestamp, model, threadId) VALUES (?, ?, ?, ?, ?)",
+    message,
+    "assistant_speak",
+    timestamp,
+    conf.model || MODEL_NAME,
+    getCurrentThread()
+  );
+  //if (conf.speak === "1") {
+  sendJsonMessage(message, "assistant_speak");
+};
+
 export const getModels = async () => {
+  console.error("Fetching" + apiUrl+"models");
   const response = await axiosInstance.get(apiUrl + "models");
   return response.data;
+};
+
+export const ensureModelDownloaded = async (modelId) => {
+  console.error("Downloading model:", modelId);
+  const response = await axiosInstance.get(
+    apiUrl + "models/download/" + modelId
+  );
+  console.error("Model download:", response.data.message);
+  return response.data.message;
 };

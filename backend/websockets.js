@@ -48,9 +48,12 @@ export const pushRecentMessages = async (clientId, onlyRam = false) => {
   console.log("Retrived recent messages: " + recentMessages.length);
 
   const recentMessagesToPush = [];
+  let i = 0;
+  let max = recentMessages.length;
 
   for (const message of recentMessages.reverse()) {
     let content = message.content;
+    i++;
     if (typeof content === "string") {
       if (content.length > OMISSIS_LIMIT) {
         content =
@@ -67,6 +70,12 @@ export const pushRecentMessages = async (clientId, onlyRam = false) => {
         timestamp: message.timestamp,
         model: message.model,
       });
+
+      if (i >= max){
+        if (message.role !=='user'){ 
+          recentMessagesToPush.push('Channeling turn', 'system', message.timestamp, message.model);
+        }
+      }
       console.log("Pushing recent message..");
     } else {
       console.log("Content is null");

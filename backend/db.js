@@ -116,7 +116,7 @@ export const dbPromise = async () =>
     driver: sqlite3.Database,
   });
 
-export const dbPromiseNww = async (name) =>
+export const dbPromiseOld = async (name) =>
   open({
     filename: "./stealth_db/" + name + ".db",
     driver: sqlite3.Database,
@@ -168,6 +168,8 @@ export const initDb = async () => {
       timestamp TEXT
     )
   `);
+  
+
   const dbPrompt = await dbPromisePrompts;
   await dbPrompt.exec(`
     CREATE TABLE IF NOT EXISTS prompts (
@@ -186,6 +188,7 @@ export const initDb = async () => {
       timestampLastUpdate TEXT
     )
   `);
+  
 
   await dbVer.exec(`
     CREATE TABLE IF NOT EXISTS config (
@@ -200,13 +203,16 @@ export const initDb = async () => {
 const updateThreadMessageCount = async () => {
   let dbMsg = await dbPromise();
   const selectAllThreads = await dbMsg.all("SELECT * FROM threads");
+  let totalCount = 0;
   //console.log("SELECT threads", selectAllThreads);
   for (const thread of selectAllThreads) {
     const countMessages = await dbMsg.all('SELECT COUNT(*) AS count FROM messages WHERE threadId =?', thread.key);
+    totalCount += countMessages[0].count;
     console.log("Count messages", countMessages);
     await dbMsg.run('UPDATE threads SET messageCount =? WHERE key =?', countMessages[0].count, thread.key);
     console.log("Updated thread", thread.key);
   }
+  console.log("Total messages counted", totalCount);
 };
 
 //setInterval(updateThreadMessageCount, 1000 * 60);
@@ -214,7 +220,21 @@ setTimeout(updateThreadMessageCount, 300);
 
 const doDbMigrations = async () => {
   let dbMsg = await dbPromise();
+  let dbMem = await dbPromiseMemory;
+  try {
+    await dbMem.exec(`ALTER TABLE messages ADD COLUMN profile TEXT`);
+    console.log("Column added");
+  } catch (err) {
+    console.log("Column already exists");
+  }
 
+  try {
+    await dbMem.run('UPDATE messages SET profile = "default" WHERE profile IS NULL');
+    console.log("Column added");
+  } catch (err) {
+    console.log("Column already exists");
+  }
+   
   try {
     await dbMsg.exec(`ALTER TABLE messages ADD COLUMN model TEXT`);
     console.log("Column added");

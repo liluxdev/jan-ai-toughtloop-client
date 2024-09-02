@@ -9,6 +9,8 @@ function NOOP() {
   toggleToughtloops();
 }
 
+
+
 const messagesDiv = document.getElementById("messages");
 let manualScroll = false;
 let isRenderingRecent = false;
@@ -67,12 +69,307 @@ const cpuUsageText = document.getElementById("cpuUsageText");
 let wakeLock = null;
 let worker;
 
+const getEgyptianDate = (timestamp) => {
+  const mesiAnticoCalendarioEgizio = [
+      "Tekh (Akhet 1)",
+      "Menhet (Akhet 2)",
+      "Hwt-Hrw (Akhet 3)",
+      "Khaiak (Akhet 4)",
+      "Tybi (Peret 1)",
+      "Mekhir (Peret 2)",
+      "Phamenoth (Peret 3)",
+      "Pharmuthi (Peret 4)",
+      "Pakhons (Shemu 1)",
+      "Payni (Shemu 2)",
+      "Epiphi (Shemu 3)",
+      "Mesore (Shemu 4)"
+  ];
+
+  const decaniEgizi = [
+    {
+        nome: "Sothis",
+        divinitaFemminile: "Sothis (Iside)",
+        divinitaMaschile: "Osiris"
+    },
+    {
+        nome: "Anedjti",
+        divinitaFemminile: "Nephthys",
+        divinitaMaschile: "Anubis"
+    },
+    {
+        nome: "Sepdet",
+        divinitaFemminile: "Sothis",
+        divinitaMaschile: "Horus"
+    },
+    {
+        nome: "Mestj",
+        divinitaFemminile: "Hathor",
+        divinitaMaschile: "Ra"
+    },
+    {
+        nome: "Qebehsenuf",
+        divinitaFemminile: "Neith",
+        divinitaMaschile: "Qebehsenuf"
+    },
+    {
+        nome: "Hapi",
+        divinitaFemminile: "Tefnut",
+        divinitaMaschile: "Hapi"
+    },
+    {
+        nome: "Duamutef",
+        divinitaFemminile: "Serqet",
+        divinitaMaschile: "Duamutef"
+    },
+    {
+        nome: "Amit",
+        divinitaFemminile: "Sekhmet",
+        divinitaMaschile: "Ptah"
+    },
+    {
+        nome: "Imseti",
+        divinitaFemminile: "Iside",
+        divinitaMaschile: "Imseti"
+    },
+    {
+        nome: "Khenti-Amentiu",
+        divinitaFemminile: "Nephthys",
+        divinitaMaschile: "Osiris"
+    },
+    {
+        nome: "Qebehu",
+        divinitaFemminile: "Nut",
+        divinitaMaschile: "Geb"
+    },
+    {
+        nome: "Amsu",
+        divinitaFemminile: "Amentet",
+        divinitaMaschile: "Min"
+    },
+    {
+        nome: "Neith",
+        divinitaFemminile: "Neith",
+        divinitaMaschile: "Ra"
+    },
+    {
+        nome: "Re",
+        divinitaFemminile: "Mut",
+        divinitaMaschile: "Amun"
+    },
+    {
+        nome: "Anubis",
+        divinitaFemminile: "Anput",
+        divinitaMaschile: "Anubis"
+    },
+    {
+        nome: "Horus",
+        divinitaFemminile: "Hathor",
+        divinitaMaschile: "Horus"
+    },
+    {
+        nome: "Osiris",
+        divinitaFemminile: "Iside",
+        divinitaMaschile: "Osiris"
+    },
+    {
+        nome: "Sokar",
+        divinitaFemminile: "Nephthys",
+        divinitaMaschile: "Sokar"
+    },
+    {
+        nome: "Ptah",
+        divinitaFemminile: "Sekhmet",
+        divinitaMaschile: "Ptah"
+    },
+    {
+        nome: "Khonsu",
+        divinitaFemminile: "Mut",
+        divinitaMaschile: "Khonsu"
+    },
+    {
+        nome: "Sobek",
+        divinitaFemminile: "Renenutet",
+        divinitaMaschile: "Sobek"
+    },
+    {
+        nome: "Thoth",
+        divinitaFemminile: "Seshat",
+        divinitaMaschile: "Thoth"
+    },
+    {
+        nome: "Maat",
+        divinitaFemminile: "Maat",
+        divinitaMaschile: "Thoth"
+    },
+    {
+        nome: "Heket",
+        divinitaFemminile: "Heket",
+        divinitaMaschile: "Khnum"
+    },
+    {
+        nome: "Horus il Giovane",
+        divinitaFemminile: "Wadjet",
+        divinitaMaschile: "Horus il Giovane"
+    },
+    {
+        nome: "Iside",
+        divinitaFemminile: "Iside",
+        divinitaMaschile: "Osiris"
+    },
+    {
+        nome: "Ra",
+        divinitaFemminile: "Hathor",
+        divinitaMaschile: "Ra"
+    },
+    {
+        nome: "Atum",
+        divinitaFemminile: "Iusaaset",
+        divinitaMaschile: "Atum"
+    },
+    {
+        nome: "Shu",
+        divinitaFemminile: "Tefnut",
+        divinitaMaschile: "Shu"
+    },
+    {
+        nome: "Geb",
+        divinitaFemminile: "Nut",
+        divinitaMaschile: "Geb"
+    },
+    {
+        nome: "Nut",
+        divinitaFemminile: "Nut",
+        divinitaMaschile: "Ra"
+    },
+    {
+        nome: "Aker",
+        divinitaFemminile: "Mut",
+        divinitaMaschile: "Aker"
+    },
+    {
+        nome: "Serqet",
+        divinitaFemminile: "Serqet",
+        divinitaMaschile: "Horus"
+    },
+    {
+        nome: "Amun",
+        divinitaFemminile: "Amunet",
+        divinitaMaschile: "Amun"
+    },
+    {
+        nome: "Bastet",
+        divinitaFemminile: "Bastet",
+        divinitaMaschile: "Sekhmet"
+    },
+    {
+        nome: "Sekhmet",
+        divinitaFemminile: "Sekhmet",
+        divinitaMaschile: "Ptah"
+    },
+    {
+        nome: "Wepwawet",
+        divinitaFemminile: "Neith",
+        divinitaMaschile: "Wepwawet"
+    },
+    {
+        nome: "Sobdet",
+        divinitaFemminile: "Sobdet (Sothis)",
+        divinitaMaschile: "Osiris"
+    }
+];
+
+
+  const mesiAnticoCalendarioEgizio2 = [
+    {
+        nome: "Tekh (Akhet 1)",
+        divinitaFemminile: "Seshat",
+        divinitaMaschile: "Thoth"
+    },
+    {
+        nome: "Menhet (Akhet 2)",
+        divinitaFemminile: "Maat",
+        divinitaMaschile: "Ra"
+    },
+    {
+        nome: "Hwt-Hrw (Akhet 3)",
+        divinitaFemminile: "Hathor",
+        divinitaMaschile: "Horus"
+    },
+    {
+        nome: "Khaiak (Akhet 4)",
+        divinitaFemminile: "Nephthys",
+        divinitaMaschile: "Osiris"
+    },
+    {
+        nome: "Tybi (Peret 1)",
+        divinitaFemminile: "Iside",
+        divinitaMaschile: "Osiris"
+    },
+    {
+        nome: "Mekhir (Peret 2)",
+        divinitaFemminile: "Neith",
+        divinitaMaschile: "Anubis"
+    },
+    {
+        nome: "Phamenoth (Peret 3)",
+        divinitaFemminile: "Sekhmet",
+        divinitaMaschile: "Ptah"
+    },
+    {
+        nome: "Pharmuthi (Peret 4)",
+        divinitaFemminile: "Mut",
+        divinitaMaschile: "Amun"
+    },
+    {
+        nome: "Pakhons (Shemu 1)",
+        divinitaFemminile: "Tefnut",
+        divinitaMaschile: "Shu"
+    },
+    {
+        nome: "Payni (Shemu 2)",
+        divinitaFemminile: "Bastet",
+        divinitaMaschile: "Atum"
+    },
+    {
+        nome: "Epiphi (Shemu 3)",
+        divinitaFemminile: "Hathor",
+        divinitaMaschile: "Khonsu"
+    },
+    {
+        nome: "Mesore (Shemu 4)",
+        divinitaFemminile: "Nut",
+        divinitaMaschile: "Geb"
+    }
+];
+
+ // const date = new Date(isoDate);
+  const formattedDate = timestamp;//date.toISOString().slice(0, 19).replace("T", " ");
+  const inputDate = new Date(formattedDate); // Data fornita come input
+  startDateForEgyptianCalendar = new Date(inputDate.getFullYear()+"-07-26T00:00:00Z"); // Data di partenza del calendario egizio
+  
+  // Calcola la differenza in giorni tra le due date
+  const diffTime = Math.abs(inputDate - startDateForEgyptianCalendar);
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
+
+  // Calcola il mese e il giorno egizio
+  const dayOfYear = diffDays % 365;
+  const monthIndex = Math.floor(dayOfYear / 30);
+  const dayOfMonth = (dayOfYear % 30) + 1;
+  const decanoIndex = Math.floor(dayOfYear / 10);
+
+
+  return `${timestamp} - ${dayOfMonth} ${mesiAnticoCalendarioEgizio[monthIndex]} - Decano ${decaniEgizi[decanoIndex].nome} F ${decaniEgizi[decanoIndex].divinitaFemminile} M ${decaniEgizi[decanoIndex].divinitaMaschile} `;
+};
+
+// Esempio di utilizzo:
+console.log(getEgyptianDate(new Date())); // Output esemplificativo
+
 const createCardTime = (timestamp, model) => {
   const cardTime = document.createElement("div");
   cardTime.className = "card-time";
   cardTime.innerHTML =
     (model ? model + "@" : "") +
-    timestamp +
+    getEgyptianDate(timestamp) +
     ' <div class="timeago-div-render" datetime="' +
     timestamp +
     '"></div>';
@@ -223,7 +520,7 @@ if (window.Worker) {
           if (lastAssistantCardTime) {
             lastAssistantCardTime.innerHTML =
               (model ? model + "@" : "") +
-              timestamp +
+              getEgyptianDate(timestamp) +
               ' <div class="timeago-div-render" datetime="' +
               timestamp +
               '"></div>';

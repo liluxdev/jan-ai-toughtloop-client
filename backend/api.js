@@ -29,7 +29,6 @@ import {
 } from "../index.js";
 import fs from "fs";
 import { OMISSIS_LIMIT } from "./websockets.js";
-import say from "say";
 
 let invokingApi = false;
 
